@@ -1,4 +1,4 @@
-# MDpy
+# MDbrew
   
 MDpy is a tool for postprocessing of LAMMPS data or lammpstrj  
   
