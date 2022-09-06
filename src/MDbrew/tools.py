@@ -1,53 +1,7 @@
 import time
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-
-# Do iteration with progress bar
-def do_progress_bar(
-    iterable,
-    prefix="",
-    suffix="",
-    decimals=1,
-    length=100,
-    fill="█",
-    print_end="\r",
-    final_words="Done !!",
-):
-    """Progress Bar
-
-    Function for print the progress bar about iteration
-
-    Args:
-        iteration   (int)   :   current progress state
-        total       (int)   :   total number of progress state
-
-    Kwargs:
-        prefix      (str)   :   Word on left side of progress bar
-        suffix      (str)   :   Word on right side of progress bar
-        decimals    (int)   :   Progress percent decimal position
-        lengths     (int)   :   Max length of print
-        fill        (str)   :   Letter about filling the progress bar
-        print_end   (str)   :   Set the end of the print
-
-    """
-    total = len(iterable)
-    # Print the progress bar
-    def print_progress_bar(iteration):
-        percent = ("{0:." + str(decimals) + "f}").format(
-            100 * (iteration / float(total))
-        )
-        filledLength = int(length * iteration // total)
-        bar = fill * filledLength + "-" * (length - filledLength)
-        print(f"\r{prefix} |{bar}| {percent}% {suffix}", end=print_end)
-
-    # Do iteration
-    print_progress_bar(iteration=0)
-    for i, item in enumerate(iterable):
-        yield item
-        print_progress_bar(i + 1)
-    # Print Final Words
-    print("\n" + final_words)
-
 
 # Wrapper of count the function execution time
 def timeCount(func):
@@ -55,13 +9,13 @@ def timeCount(func):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        print(f"{func.__name__} : {end - start :5.2f} s")
+        print(f"\t{func.__name__} : {end - start :5.2f} s")
         return result
 
     return wrapper
 
 
-# Function of Cal Linear Regression
+# Linear Regression
 class LinearRegression:
     def __init__(self, eta=0.01, n_iter=10000, random_state=1) -> None:
         self.eta = eta
@@ -127,3 +81,22 @@ class LinearRegression:
         axs[1].scatter(self.X, self.y, color="red", alpha=0.10)
         axs[1].set_xlabel("X")
         axs[1].set_ylabel("Y")
+
+
+# Extract the data
+class Extractor(object):
+    def __init__(self, data) -> None:
+        self.database = data.get_database()
+        self.column = data.get_columns()
+        self.lag_number = len(self.database)
+
+    @timeCount
+    def get_position_db(self, type_: int, pos_: list[str] = ["x", "y", "z"]):
+        db_position = []
+        for idx in range(self.lag_number):
+            df_data = pd.DataFrame(data=self.database[idx], columns=self.column)
+            df_one = df_data[df_data["type"] == type_]
+            unit_position = df_one[pos_]
+            db_position.append(unit_position)
+        print(f"\n\t {type_} data is generated \n")
+        return np.array(db_position)

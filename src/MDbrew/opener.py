@@ -207,31 +207,6 @@ class DumpOpener(Opener):
             word=self.target_line
         )
 
-    # Fine the system num
-    def __get_system_num(self) -> int:
-        for idx, line in enumerate(self.lines):
-            if self.target_word in line:
-                system_num = self.lines[idx + 1]
-                system_num = int(system_num)
-                return system_num
-        return 0
-
-    # Find the columns data in lines
-    def get_columns(self) -> list[str]:
-        for line in self.lines:
-            if self.target_line in line:
-                columns = line.split(" ")
-                columns = self.__remove_other(columns)
-                return columns
-        return []
-
-    # Remove the word, ITEM:
-    def __remove_other(self, line: list[str]) -> list[str]:
-        if "ITEM:" in line:
-            return line[2:]
-        else:
-            return line
-
     # Get the database from a, b
     def get_database(self) -> list:
         database: list = []
@@ -242,6 +217,35 @@ class DumpOpener(Opener):
             lines = super().seperate_data_in_lines(lines=lines)
             database.append(lines)
         return database
+
+    # Find the columns data in lines
+    def get_columns(self) -> list[str]:
+        for line in self.lines:
+            if self.target_line in line:
+                columns = line.split(" ")
+                columns = self.__remove_other(columns)
+                return columns
+        return []
+
+    # find the system size
+    def get_system_size(self, dim=3, word="BOX") -> list[float]:
+        size_idx = self.__find_word_idx(word=word) + 1
+        system_size = self.lines[size_idx : size_idx + dim]
+        system_size = super().seperate_data_in_lines(lines=system_size)
+        return system_size
+
+    # find the time step
+    def get_time_step(self) -> list[float]:
+        time_step_idx_list = self.__find_word_idx_list(word="TIMESTEP")
+        time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idx_list]
+        return time_step_list
+
+    # Remove the word, ITEM:
+    def __remove_other(self, line: list[str]) -> list[str]:
+        if "ITEM:" in line:
+            return line[2:]
+        else:
+            return line
 
     # find the idx list of start point
     def __find_word_idx_list(self, word: str) -> list[int]:
@@ -257,15 +261,11 @@ class DumpOpener(Opener):
             if word in line:
                 return idx
 
-    # find the system size
-    def get_system_size(self, dim=3, word="BOX") -> list[float]:
-        size_idx = self.__find_word_idx(word=word) + 1
-        system_size = self.lines[size_idx : size_idx + dim]
-        system_size = super().seperate_data_in_lines(lines=system_size)
-        return system_size
-
-    # find the time step
-    def get_time_step(self) -> list[float]:
-        time_step_idx_list = self.__find_word_idx_list(word="TIMESTEP")
-        time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idx_list]
-        return time_step_list
+    # Fine the system num
+    def __get_system_num(self) -> int:
+        for idx, line in enumerate(self.lines):
+            if self.target_word in line:
+                system_num = self.lines[idx + 1]
+                system_num = int(system_num)
+                return system_num
+        return 0

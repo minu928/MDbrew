@@ -1,9 +1,6 @@
 import numpy as np
-import pandas as pd
 from tqdm import trange
 import matplotlib.pyplot as plt
-from .tools import timeCount
-
 
 # Calculate and Plot the RDF
 class RDF:
@@ -144,27 +141,3 @@ class RDF:
     def set_BAR_LENGTH(self, width=70):
         self.BAR_LENGTH = width
         print(f"Progress bar length is changed into {width}")
-
-
-@timeCount
-def make_rdf_data(data, type_: list[int] = [1, 2], pos_: list[str] = ["x", "y", "z"]):
-    num_type_ = len(type_)
-    if num_type_ > 2:
-        raise Exception(f"RDF only control the two particle, Not {num_type_}")
-    else:
-        database = data.get_database()
-        column = data.get_columns()
-        lag_number = len(database)
-        database_one = []
-        database_two = []
-        for idx in range(lag_number):
-            df_data = pd.DataFrame(data=database[idx], columns=column)
-            df_one = df_data[df_data["type"] == type_[0]]
-            df_two = df_data[df_data["type"] == type_[-1]]
-            pos_one = df_one[pos_]
-            pos_two = df_two[pos_]
-            database_one.append(pos_one)
-            database_two.append(pos_two)
-        database_one = np.array(database_one)
-        database_two = np.array(database_two)
-        return database_one, database_two
