@@ -127,7 +127,7 @@ class MSD(object):
     def plot_msd(self, time_step=1, **kwargs):
         lagtime = len(self.position)
         if self.msd_data:
-            x = np.range(lagtime)
+            x = np.arange(lagtime*time_step)
             y = self.msd_data
             plt.plot(x, y, **kwargs)
             plt.show()
