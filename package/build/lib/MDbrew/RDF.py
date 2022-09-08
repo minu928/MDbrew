@@ -64,7 +64,7 @@ class RDF:
     def __get_hist_single(self):
         # for idx, a_position in enumerate(tqdm(self.unit_a[:-1], ncols=self.BAR_LENGTH)):
         for idx, a_position in enumerate(self.unit_a[:-1]):
-            for b_position in self.unit_b[idx:]:
+            for b_position in self.unit_b[idx+1:]:
                 self.__update_hist_data(a_position, b_position)
 
     # Get histogram data in binary case
