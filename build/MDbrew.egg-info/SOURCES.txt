@@ -1,0 +1,14 @@
+MANIFEST.in
+requirement.txt
+setup.cfg
+setup.py
+MDbrew/MSD.py
+MDbrew/RDF.py
+MDbrew/__init__.py
+MDbrew/opener.py
+MDbrew/tools.py
+MDbrew.egg-info/PKG-INFO
+MDbrew.egg-info/SOURCES.txt
+MDbrew.egg-info/dependency_links.txt
+MDbrew.egg-info/not-zip-safe
+MDbrew.egg-info/top_level.txt
