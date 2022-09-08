@@ -1,15 +1,14 @@
 # MDbrew
   
-MDpy is a tool for postprocessing of LAMMPS data or lammpstrj  
-  
-##MDpy  
+MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj  
+    
 ### Opener  
       => DumpOpener : for dump file (ex. dump.lammpstrj)  
       => DataOpener : for data file (ex. data.lammps)  
-###tools  
-      => do_progress_bar : make a local progress bar with iteration  
+### tools  
       => timeCount : decorator for get execute time  
       => LinearRegression : Class for linear regression  
+      => Extractor : class for extract the data form of Opener
 ### MSD  
       => Class for get MSD data with position data [ lagtime, Number of Particle, pos ]  
 ### RDF  
