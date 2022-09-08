@@ -1,5 +1,6 @@
 # MDbrew
-  
+<img src="https://img.shields.io/badge/Python-383b40?style=round-square&logo=Python&logoColor=#f5f5f5"/> <img src="https://img.shields.io/badge/Jupyter-383b40?style=round-square&logo=Jupyter&logoColor=#f5f5f5"/>
+
 MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 
 ~~~zsh
