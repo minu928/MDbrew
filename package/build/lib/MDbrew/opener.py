@@ -188,6 +188,8 @@ class Impropers(DataOpener, _TargetInfo):
 
 # 2nd Generation -> For "dump.lammpstrj"
 class DumpOpener(Opener):
+    from .tools import timeCount
+
     def __init__(self, file_path, target_info: list[str] = ["id", "NUMBER"]) -> None:
         """Dump Opener
 
@@ -208,17 +210,21 @@ class DumpOpener(Opener):
         )
 
     # Get the database from a, b
+    @timeCount
     def get_database(self) -> list:
         database: list = []
+        # print("STEP : making a database ...", end="")
         for idx in self.start_idx_list:
             start_idx: int = idx + 1
             end_idx: int = start_idx + self.system_num
             lines = self.lines[start_idx:end_idx]
             lines = super().seperate_data_in_lines(lines=lines)
             database.append(lines)
+        # print("\t->\t Done !!", end="")
         return database
 
     # Find the columns data in lines
+    @timeCount
     def get_columns(self) -> list[str]:
         for line in self.lines:
             if self.target_line in line:
@@ -228,6 +234,7 @@ class DumpOpener(Opener):
         return []
 
     # find the system size
+    @timeCount
     def get_system_size(self, dim=3, word="BOX") -> list[float]:
         size_idx = self.__find_word_idx(word=word) + 1
         system_size = self.lines[size_idx : size_idx + dim]
@@ -235,6 +242,7 @@ class DumpOpener(Opener):
         return system_size
 
     # find the time step
+    @timeCount
     def get_time_step(self) -> list[float]:
         time_step_idx_list = self.__find_word_idx_list(word="TIMESTEP")
         time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idx_list]

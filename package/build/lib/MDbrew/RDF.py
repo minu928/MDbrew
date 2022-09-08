@@ -20,18 +20,15 @@ class RDF:
         self.a_number = self.a.shape[1]
         self.b_number = self.b.shape[1]
         self.b_number_density = self.b_number / np.prod(self.box_length)
-        self.BAR_LENGTH = 70
 
     # Main function for Get rdf from a and b, [lag time, N_particle, dim]
-    def get_rdf_all(self, resolution: int = 200):
+    def get_rdf(self, resolution: int = 200):
         self.resolution = resolution
         self.r_max = np.min(self.systme_size)
         self.dr = self.r_max / resolution
         self.histo_method = self.__check_method()
         self.hist_data = np.zeros(self.resolution)
-
-        for lag in trange(self.lag_number, ncols=self.BAR_LENGTH):
-            # print(f" {lag} / {self.lag_number-1}")
+        for lag in trange(self.lag_number, desc=" RDF  (STEP) ", ascii=True):
             self.unit_a = self.a[lag, :, :]
             self.unit_b = self.b[lag, :, :]
             self.histo_method()
@@ -52,11 +49,11 @@ class RDF:
     # Check a == b
     def __check_method(self):
         if self.a is self.b:
-            print("\n\tSingle Case\n")
+            # print("Single Case")
             self.count_num = 2
             return self.__get_hist_single
         else:
-            print("\n\tBinary Case\n")
+            # print("Binary Case\n")
             self.count_num = 1
             return self.__get_hist_binary
 
@@ -64,7 +61,7 @@ class RDF:
     def __get_hist_single(self):
         # for idx, a_position in enumerate(tqdm(self.unit_a[:-1], ncols=self.BAR_LENGTH)):
         for idx, a_position in enumerate(self.unit_a[:-1]):
-            for b_position in self.unit_b[idx+1:]:
+            for b_position in self.unit_b[idx + 1 :]:
                 self.__update_hist_data(a_position, b_position)
 
     # Get histogram data in binary case
@@ -119,7 +116,7 @@ class RDF:
     # Calculate the Density Function
     def __cal_g_r(self):
         g_r = np.zeros(self.resolution)
-        for i in np.arange(1, self.resolution):
+        for i in range(1, self.resolution):
             r_i = i * self.dr
             g_r[i] = self.hist_data[i] / (r_i * r_i)
         self.factor = 4 * np.pi * self.b_number_density * self.dr
@@ -136,8 +133,3 @@ class RDF:
             plt.plot()
         except:
             raise Exception("get_g_r first")
-
-    # Set the BAR_LENGTH
-    def set_BAR_LENGTH(self, width=70):
-        self.BAR_LENGTH = width
-        print(f"Progress bar length is changed into {width}")

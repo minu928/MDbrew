@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from .tools import timeCount
 
 
 class MSD(object):
@@ -8,6 +9,8 @@ class MSD(object):
         self.msd_data = 0
         self.position = np.asarray(position, dtype=float)
 
+    # User function
+    @timeCount
     def get_msd(self, method="window", fft=True) -> np.ndarray:
         """Get MSD
 
@@ -22,7 +25,6 @@ class MSD(object):
             np.ndarray: _description_
         """
         self.msd_data = 0
-
         if method == "direct":
             self.msd_data = self.__get_msd_direct()
         elif method == "window":
@@ -32,7 +34,6 @@ class MSD(object):
                 self.msd_data = self.__get_msd_window()
         else:
             print(f"method can be (direct / window) : your note {method} is wrong")
-
         return self.msd_data
 
     # Direct method
@@ -51,14 +52,11 @@ class MSD(object):
             list[float]: MSD data of each lag time
         """
 
-        def cal_msd(diff_pos):
+        def rms(diff_pos):
             return np.square(diff_pos).sum(axis=self.axis_dict["N_particle"]).mean()
 
-        initial_position = self.position[0]
-        msd = [
-            cal_msd(np.subtract(current_position, initial_position))
-            for current_position in self.position
-        ]
+        init_position = self.position[0]
+        msd = [rms(position - init_position) for position in self.position]
         return msd
 
     # Window method with non-FFT
@@ -80,8 +78,8 @@ class MSD(object):
         msd_list = np.zeros((N, N_particle))
         for lag in np.arange(1, N):
             diff = self.position[lag:] - self.position[:-lag]
-            sqdist = np.square(diff).sum(axis=self.axis_dict["pos"])
-            msd_list[lag, :] = np.mean(sqdist, axis=self.axis_dict["lag"])
+            sqdiff = np.square(diff).sum(axis=self.axis_dict["pos"])
+            msd_list[lag, :] = np.mean(sqdiff, axis=self.axis_dict["lag"])
         return msd_list.mean(axis=self.axis_dict["N_particle"])
 
     # Window method with FFT
@@ -126,7 +124,7 @@ class MSD(object):
     # plot the data
     def plot_msd(self, time_step: float = 1, **kwargs):
         lagtime = len(self.position)
-        x = np.arange(0, lagtime*time_step, time_step)
+        x = np.arange(0, lagtime * time_step, time_step)
         y = self.msd_data
         plt.plot(x, y, **kwargs)
         plt.show()
