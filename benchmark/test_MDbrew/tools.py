@@ -6,13 +6,32 @@ import matplotlib.pyplot as plt
 # Wrapper of count the function execution time
 def timeCount(func):
     def wrapper(*args, **kwargs):
+        print(f" STEP (RUN ) :  {func.__name__}", end="\r")
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        print(f"\t{func.__name__} : {end - start :5.2f} s")
+        print(f" STEP (Done)\t\t\t-> {end - start :5.2f} s \u2713")
         return result
 
     return wrapper
+
+
+# Extract the data
+class Extractor(object):
+    def __init__(self, data) -> None:
+        self.database = data.get_database()
+        self.column = data.get_columns()
+        self.lag_number = len(self.database)
+
+    @timeCount
+    def get_position_db(self, type_: int, pos_: list[str] = ["x", "y", "z"]):
+        db_position = []
+        for idx in range(self.lag_number):
+            df_data = pd.DataFrame(data=self.database[idx], columns=self.column)
+            df_one = df_data[df_data["type"] == type_]
+            unit_position = df_one[pos_]
+            db_position.append(unit_position)
+        return np.array(db_position)
 
 
 # Linear Regression
@@ -81,22 +100,3 @@ class LinearRegression:
         axs[1].scatter(self.X, self.y, color="red", alpha=0.10)
         axs[1].set_xlabel("X")
         axs[1].set_ylabel("Y")
-
-
-# Extract the data
-class Extractor(object):
-    def __init__(self, data) -> None:
-        self.database = data.get_database()
-        self.column = data.get_columns()
-        self.lag_number = len(self.database)
-
-    @timeCount
-    def get_position_db(self, type_: int, pos_: list[str] = ["x", "y", "z"]):
-        db_position = []
-        for idx in range(self.lag_number):
-            df_data = pd.DataFrame(data=self.database[idx], columns=self.column)
-            df_one = df_data[df_data["type"] == type_]
-            unit_position = df_one[pos_]
-            db_position.append(unit_position)
-        print(f"\n\t {type_} data is generated \n")
-        return np.array(db_position)
