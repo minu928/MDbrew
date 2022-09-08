@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 
 
 class MSD(object):
-    def __init__(self) -> None:
+    def __init__(self, position: np.ndarray) -> None:
         self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
         self.msd_data = 0
+        self.position = np.asarray(position, dtype=float)
 
-    def get_msd(self, position: np.ndarray, method="window", fft=True) -> np.ndarray:
+    def get_msd(self, method="window", fft=True) -> np.ndarray:
         """Get MSD
 
         Calculate the msd data and return it with method and fft
@@ -20,7 +21,6 @@ class MSD(object):
         Returns:
             np.ndarray: _description_
         """
-        self.position = np.asarray(position, dtype=float)
         self.msd_data = 0
 
         if method == "direct":
@@ -124,12 +124,9 @@ class MSD(object):
         return x / n[:, np.newaxis]
 
     # plot the data
-    def plot_msd(self, time_step=1, **kwargs):
+    def plot_msd(self, time_step: float = 1, **kwargs):
         lagtime = len(self.position)
-        if self.msd_data:
-            x = np.range(lagtime)
-            y = self.msd_data
-            plt.plot(x, y, **kwargs)
-            plt.show()
-        else:
-            raise ConnectionError("Please do get_msd first")
+        x = np.arange(0, lagtime*time_step, time_step)
+        y = self.msd_data
+        plt.plot(x, y, **kwargs)
+        plt.show()
