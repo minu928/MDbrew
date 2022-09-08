@@ -1,0 +1,12 @@
+MANIFEST.in
+setup.py
+test_MDbrew/MSD.py
+test_MDbrew/RDF.py
+test_MDbrew/__init__.py
+test_MDbrew/opener.py
+test_MDbrew/tools.py
+test_MDbrew.egg-info/PKG-INFO
+test_MDbrew.egg-info/SOURCES.txt
+test_MDbrew.egg-info/dependency_links.txt
+test_MDbrew.egg-info/not-zip-safe
+test_MDbrew.egg-info/top_level.txt

@@ -1,12 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="MDbrew",
+    name="test_MDbrew",
     version="1.1.1",
     author="Knu",
     author_email="k1alty@naver.com",
     url="https://github.com/MyKnu/MDbrew",
-    download_url="https://github.com/MyKnu/install_file/MDbrew-1.1.1.tar.gz",
     install_requies=[],
     description="Postprocessing tools for the MD simulation results (ex. lammps)",
     packages=find_packages(),
