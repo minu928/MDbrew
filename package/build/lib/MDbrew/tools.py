@@ -4,16 +4,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 # Wrapper of count the function execution time
-
-
 def timeCount(func):
     def wrapper(*args, **kwargs):
-        stdout.write(f" STEP (RUN ) :  {func.__name__} \r")
+        stdout.write(f" STEP (RUN ) :  {func.__name__}\r")
         start = time()
         result = func(*args, **kwargs)
         end = time()
-        stdout.write(f" STEP (Done)\t\t\t\t-> {end - start :5.2f} s \u2705 \n")
+        stdout.write(f" STEP (Done) :  {func.__name__}\t")
+        stdout.write(f" \t-> {end - start :5.2f} s \u2705 \n")
         return result
 
     return wrapper

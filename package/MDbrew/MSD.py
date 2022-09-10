@@ -1,30 +1,29 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from .tools import timeCount
+from tqdm import trange, tqdm
 
 
 class MSD(object):
     def __init__(self, position: np.ndarray) -> None:
         self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
         self.msd_data = 0
-        self.position = np.asarray(position, dtype=float)
+        self.position = np.asarray(position, dtype=np.float64)
+        self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
 
     # User function
-    @timeCount
     def get_msd(self, method="window", fft=True) -> np.ndarray:
         """Get MSD
 
         Calculate the msd data and return it with method and fft
 
         Args:
-            position (np.ndarray):  Data of Particle's position in each lag time
-            method (str, optional): default = 'window' (window or direct)
-            fft (bool, optional): default = True
+            position (np.ndarray)   :  Data of Particle's position in each lag time
+            method (str, optional)  :  default = 'window'        (window or direct)
+            fft (bool, optional)    :  default = True
 
         Returns:
             np.ndarray: _description_
         """
-        self.msd_data = 0
         if method == "direct":
             self.msd_data = self.__get_msd_direct()
         elif method == "window":
@@ -56,7 +55,10 @@ class MSD(object):
             return np.square(diff_pos).sum(axis=self.axis_dict["N_particle"]).mean()
 
         init_position = self.position[0]
-        msd = [rms(position - init_position) for position in self.position]
+        msd = [
+            rms(position - init_position)
+            for position in tqdm(self.position, **self.kwrgs_it)
+        ]
         return msd
 
     # Window method with non-FFT
@@ -76,11 +78,11 @@ class MSD(object):
         """
         N, N_particle = self.position.shape[:2]
         msd_list = np.zeros((N, N_particle))
-        for lag in np.arange(1, N):
-            diff = self.position[lag:] - self.position[:-lag]
-            sqdiff = np.square(diff).sum(axis=self.axis_dict["pos"])
-            msd_list[lag, :] = np.mean(sqdiff, axis=self.axis_dict["lag"])
-        return msd_list.mean(axis=self.axis_dict["N_particle"])
+        for lag in trange(1, N, **self.kwrgs_it):
+            diff_position = self.position[lag:] - self.position[:-lag]
+            distance = self.__square_sum_position(diff_position)
+            msd_list[lag, :] = np.mean(distance, axis=self.axis_dict["lag"])
+        return self.__mean_msd_list(msd_list=msd_list)
 
     # Window method with FFT
     def __get_msd_fft(self):
@@ -97,29 +99,38 @@ class MSD(object):
         Returns:
             list[float]: MSD data of each lag time
         """
-        N, N_particle = self.position.shape[:2]
+        self.N, N_particle = self.position.shape[:2]
 
-        D = np.square(self.position).sum(axis=self.axis_dict["pos"])
-        D = np.append(D, np.zeros((N, N_particle)), axis=self.axis_dict["lag"])
+        empty_matrix = np.zeros((self.N, N_particle))
+
+        D = self.__square_sum_position(self.position)
+        D = np.append(D, empty_matrix, axis=self.axis_dict["lag"])
         Q = 2 * np.sum(D, axis=self.axis_dict["lag"])
-        S_1 = np.zeros((N, N_particle))
-        for m in range(N):
-            Q -= D[m - 1, :] + D[N - m, :]
-            S_1[m, :] = Q / (N - m)
-
+        S_1 = empty_matrix
+        for m in trange(self.N, **self.kwrgs_it):
+            Q -= D[m - 1, :] + D[self.N - m, :]
+            S_1[m, :] = Q / (self.N - m)
         S_2 = self.__auto_correlation()
-        return np.subtract(S_1, 2 * S_2).mean(axis=self.axis_dict["N_particle"])
+        msd_list = np.subtract(S_1, 2 * S_2)
+        return self.__mean_msd_list(msd_list=msd_list)
 
     # get S2 for FFT
     def __auto_correlation(self):
-        N = len(self.position)
-        X = np.fft.fft(self.position, n=2 * N, axis=self.axis_dict["lag"])
-        psd = X * X.conjugate()
-        x = np.fft.ifft(psd, axis=self.axis_dict["lag"])
-        x = x[:N].real
+        X = np.fft.fft(self.position, n=2 * self.N, axis=self.axis_dict["lag"])
+        dot_X = X * X.conjugate()
+        x = np.fft.ifft(dot_X, axis=self.axis_dict["lag"])
+        x = x[: self.N].real
         x = x.sum(axis=self.axis_dict["pos"])
-        n = np.arange(N, 0, -1)
+        n = np.arange(self.N, 0, -1)
         return x / n[:, np.newaxis]
+
+    # do square and sum about position
+    def __square_sum_position(self, position_data):
+        return np.square(position_data).sum(axis=self.axis_dict["pos"])
+
+    # do mean about msd list
+    def __mean_msd_list(self, msd_list):
+        return msd_list.mean(axis=self.axis_dict["N_particle"])
 
     # plot the data
     def plot_msd(self, time_step: float = 1, *args, **kwargs):
