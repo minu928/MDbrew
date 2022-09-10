@@ -4,6 +4,7 @@ setup.cfg
 setup.py
 MDbrew/MSD.py
 MDbrew/RDF.py
+MDbrew/RDF2.py
 MDbrew/__init__.py
 MDbrew/opener.py
 MDbrew/tester.py

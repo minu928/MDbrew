@@ -1,7 +1,7 @@
-from test_MDbrew.opener import DumpOpener
-from test_MDbrew.tools import Extractor
-from test_MDbrew.RDF import RDF
-from test_MDbrew.MSD import MSD
+from .opener import DumpOpener
+from .tools import Extractor
+from .RDF import RDF
+from .MSD import MSD
 
 
 def tester(path):
