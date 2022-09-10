@@ -1,16 +1,19 @@
-import time
+from time import time
+from sys import stdout
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 # Wrapper of count the function execution time
+
+
 def timeCount(func):
     def wrapper(*args, **kwargs):
-        print(f" STEP (RUN ) :  {func.__name__}", end="\r")
-        start = time.time()
+        stdout.write(f" STEP (RUN ) :  {func.__name__} \r")
+        start = time()
         result = func(*args, **kwargs)
-        end = time.time()
-        print(f" STEP (Done)\t\t\t-> {end - start :5.2f} s \u2713")
+        end = time()
+        stdout.write(f" STEP (Done)\t\t\t\t-> {end - start :5.2f} s \u2705 \n")
         return result
 
     return wrapper
@@ -64,11 +67,6 @@ class LinearRegression:
             self.costs_.append(self.cost())
             self.update_w_()
             self.steps_.append(step)
-
-            # if self.costs_[-1] <= 1e-6:
-            #     print(1)
-            #     break
-
         self.plot_cost_and_data()
 
     def cost(self):

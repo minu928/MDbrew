@@ -122,9 +122,9 @@ class MSD(object):
         return x / n[:, np.newaxis]
 
     # plot the data
-    def plot_msd(self, time_step: float = 1, **kwargs):
+    def plot_msd(self, time_step: float = 1, *args, **kwargs):
         lagtime = len(self.position)
         x = np.arange(0, lagtime * time_step, time_step)
         y = self.msd_data
-        plt.plot(x, y, **kwargs)
+        plt.plot(x, y, *args, **kwargs)
         plt.show()

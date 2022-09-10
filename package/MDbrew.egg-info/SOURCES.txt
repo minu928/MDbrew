@@ -4,7 +4,6 @@ setup.cfg
 setup.py
 MDbrew/MSD.py
 MDbrew/RDF.py
-MDbrew/RDF2.py
 MDbrew/__init__.py
 MDbrew/opener.py
 MDbrew/tester.py
@@ -14,3 +13,5 @@ MDbrew.egg-info/SOURCES.txt
 MDbrew.egg-info/dependency_links.txt
 MDbrew.egg-info/not-zip-safe
 MDbrew.egg-info/top_level.txt
+MDbrew/old/RDF2.py
+MDbrew/old/__init__.py
