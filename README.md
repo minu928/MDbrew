@@ -6,7 +6,7 @@ MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 ~~~zsh
 pip install MDbrew
 ~~~
-- VERSION :  (1.2.3)
+- VERSION :  (1.3.5)
 
 ## Package
 
@@ -14,8 +14,10 @@ pip install MDbrew
 - DumpOpener : for dump file (ex. dump.lammpstrj)  
 - DataOpener : for data file (ex. data.lammps)  
 ### tools  
-- timeCount : decorator for get execute time  
+- timeCount : decorator for get execute time
+### linalg
 - LinearRegression : Class for linear regression  
+### Extractor
 - Extractor : class for extract the data form of Opener
 ### MSD  
 - MSD : Class for get MSD data with position data [ lagtime, Number of Particle, pos ]  
@@ -34,10 +36,10 @@ column = data.get_column()
 system_size = data.get_system_size()
 ~~~
 
-### Example - MDbrew.tools
+### Example - MDbrew.Extractor
 ~~~python
-from MDbrew.tools import Extractor
-database_position = Extractor(data=data).get_position_db(type_=1)
+from MDbrew.Extractor import Extractor
+database_position = Extractor(data=data).get_position_db(type_=1, pos_=["x", "y", "z"])
 ~~~
 
 ### Example - RDF
@@ -52,5 +54,5 @@ rdf_radii = rdf.get_radii()
 ~~~python
 from MDbrew.MSD import MSD
 msd = MSD(database_position)
-msd.get_msd()
+msd.get_msd(method="window", fft=True)
 ~~~
