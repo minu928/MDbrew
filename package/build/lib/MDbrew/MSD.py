@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange, tqdm
-from .tools import timeCount
 
 
 class MSD(object):

@@ -91,6 +91,7 @@ class RDF:
         except:
             raise Exception("get_g_r first")
 
+    # Plot the cn with radii data
     def plot_cn(self, *args, **kwrgs):
         try:
             plt.plot(self.get_radii(), self.cn, *args, **kwrgs)

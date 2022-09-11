@@ -1,4 +1,4 @@
-from test_MDbrew.testor import tester
+from test_MDbrew.tester import tester
 
 path = "./test.lammpstrj"
 tester(path)

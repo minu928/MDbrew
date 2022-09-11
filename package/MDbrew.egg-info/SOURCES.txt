@@ -2,9 +2,11 @@ MANIFEST.in
 requirement.txt
 setup.cfg
 setup.py
+MDbrew/Extractor.py
 MDbrew/MSD.py
 MDbrew/RDF.py
 MDbrew/__init__.py
+MDbrew/linalg.py
 MDbrew/opener.py
 MDbrew/tester.py
 MDbrew/tools.py

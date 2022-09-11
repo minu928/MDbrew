@@ -1,5 +1,5 @@
 from .opener import DumpOpener
-from .tools import Extractor
+from .Extractor import Extractor
 from .RDF import RDF
 from .MSD import MSD
 
