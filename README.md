@@ -39,7 +39,11 @@ system_size = data.get_system_size()
 ### Example - MDbrew.Extractor
 ~~~python
 from MDbrew.Extractor import Extractor
-database_position = Extractor(data=data).get_position_db(type_=1, pos_=["x", "y", "z"])
+extractor = Extractor(data=data, pos_=["x", "y", "z"])
+wrapped_position = extractor.extract_position(type_=1, wrapped=True)
+unwrapped_position = extractor.extract_position(type_=1, wrapped=False)
+
+system_size = extractor.system_size
 ~~~
 
 ### Example - RDF
@@ -53,6 +57,6 @@ rdf_radii = rdf.get_radii()
 ### Example - MSD
 ~~~python
 from MDbrew.MSD import MSD
-msd = MSD(database_position)
+msd = MSD(unwrapped_position)
 msd.get_msd(method="window", fft=True)
 ~~~
