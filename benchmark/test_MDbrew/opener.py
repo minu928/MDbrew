@@ -213,14 +213,12 @@ class DumpOpener(Opener):
     @timeCount
     def get_database(self) -> list:
         database: list = []
-        # print("STEP : making a database ...", end="")
         for idx in self.start_idx_list:
             start_idx: int = idx + 1
             end_idx: int = start_idx + self.system_num
             lines = self.lines[start_idx:end_idx]
             lines = super().seperate_data_in_lines(lines=lines)
             database.append(lines)
-        # print("\t->\t Done !!", end="")
         return database
 
     # Find the columns data in lines

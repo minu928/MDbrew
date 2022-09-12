@@ -4,34 +4,35 @@ from .tools import timeCount
 
 # Extract the data
 class Extractor(object):
-    def __init__(self, data) -> None:
+    def __init__(self, data, pos_: list[str] = ["x", "y", "z"]) -> None:
+        self.data = data
         self.database = data.get_database()
         self.column = data.get_columns()
+        self.system_size = self.data.get_system_size()
         self.lag_number = len(self.database)
-        self.box_size = np.array(data.get_system_size())[:, 1] * 2.0
+        self.pos_ = pos_
 
     @timeCount
-    def get_position_db(self, type_: int, pos_: list[str] = ["x", "y", "z"]):
+    def extract_position(self, type_: int, wrapped=True):
         db_position = []
+        get_position = self.__check_method(wrapped=wrapped)
         for lag in range(self.lag_number):
             df_data = pd.DataFrame(data=self.database[lag], columns=self.column)
-            df_type = df_data[df_data["type"] == type_]
-            unit_position = df_type[pos_]
-            db_position.append(unit_position)
-        return np.array(db_position)
+            self.df_data = df_data[df_data["type"] == type_]
+            position = get_position()
+            db_position.append(position)
+        return np.asarray(db_position, dtype=np.float64)
 
-    @timeCount
-    def get_unwrapped_position(self, type_: int, pos_: list[str] = ["x", "y", "z"]):
-        if "ix" not in self.column:
-            raise ValueError(f"[ ix iy iz ] is not in your column {self.column}")
+    def __check_method(self, wrapped):
+        if wrapped:
+            return self.__df_wrapped_position
         else:
-            db_idx_position = []
-            db_position = []
-            for lag in range(self.lag_number):
-                df_data = pd.DataFrame(data=self.database[lag], columns=self.column)
-                df_type = df_data[df_data["type"] == type_]
-                unit_position = df_type[pos_]
-                idx_position = df_type[["ix", "iy", "iz"]] * self.box_size
-                db_position.append(unit_position)
-                db_idx_position.append(idx_position)
-            return np.array(db_position) + np.array(db_idx_position)
+            return self.__df_unwrapped_position
+
+    def __df_wrapped_position(self):
+        return self.df_data[self.pos_]
+
+    def __df_unwrapped_position(self):
+        box_size = np.array(self.system_size)[:, 1]
+        idx_position = self.df_data[["ix", "iy", "iz"]] * box_size
+        return np.array(idx_position) + np.array(self.__df_wrapped_position())

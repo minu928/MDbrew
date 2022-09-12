@@ -23,7 +23,6 @@ class LinearRegression:
         self.y = y.reshape(-1, 1)
         rgen = np.random.RandomState(self.random_state)
         self.w_ = rgen.normal(loc=0.0, scale=0.01, size=(2, 1))
-        # self.w_ = np.array([[0.2],[0]])
         self.n = len(X)
         self.costs_ = []
         self.steps_ = []
