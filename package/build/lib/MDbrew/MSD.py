@@ -9,6 +9,7 @@ class MSD(object):
         self.msd_data = 0
         self.position = np.asarray(position, dtype=np.float64)
         self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
+        self.N = self.position.shape[0]
 
     # User function
     def get_msd(self, method="window", fft=True) -> np.ndarray:
@@ -76,9 +77,8 @@ class MSD(object):
         Returns:
             list[float]: MSD data of each lag time
         """
-        N, N_particle = self.position.shape[:2]
-        msd_list = np.zeros((N, N_particle))
-        for lag in trange(1, N, **self.kwrgs_it):
+        msd_list = np.zeros(self.position.shape[:2])
+        for lag in trange(1, self.N, **self.kwrgs_it):
             diff_position = self.position[lag:] - self.position[:-lag]
             distance = self.__square_sum_position(diff_position)
             msd_list[lag, :] = np.mean(distance, axis=self.axis_dict["lag"])
@@ -99,9 +99,13 @@ class MSD(object):
         Returns:
             list[float]: MSD data of each lag time
         """
-        self.N, N_particle = self.position.shape[:2]
+        S_1 = self.__get_S_1()
+        S_2 = self.__auto_correlation()
+        msd_list = np.subtract(S_1, 2 * S_2)
+        return self.__mean_msd_list(msd_list=msd_list)
 
-        empty_matrix = np.zeros((self.N, N_particle))
+    def __get_S_1(self):
+        empty_matrix = np.zeros(self.position.shape[:2])
 
         D = self.__square_sum_position(self.position)
         D = np.append(D, empty_matrix, axis=self.axis_dict["lag"])
@@ -110,9 +114,8 @@ class MSD(object):
         for m in trange(self.N, **self.kwrgs_it):
             Q -= D[m - 1, :] + D[self.N - m, :]
             S_1[m, :] = Q / (self.N - m)
-        S_2 = self.__auto_correlation()
-        msd_list = np.subtract(S_1, 2 * S_2)
-        return self.__mean_msd_list(msd_list=msd_list)
+
+        return S_1
 
     # get S2 for FFT
     def __auto_correlation(self):

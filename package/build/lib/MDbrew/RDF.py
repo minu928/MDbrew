@@ -10,7 +10,7 @@ class RDF:
         Args:
             a (np.array): [lag time, N_particle, dim]
             b (np.array): [lag time, N_particle, dim]
-            box_size (np.array): [[-lx, lx], [-ly, ly], [-lz, lz]]
+            system_size (np.array): [[-lx, lx], [-ly, ly], [-lz, lz]]
         """
         self.a = np.asarray(a, dtype=np.float64)
         self.b = np.asarray(b, dtype=np.float64)
@@ -49,11 +49,11 @@ class RDF:
     def __make_histogram(self):
         for b_line in self.b_unit:
             b_tile = np.tile(b_line, (self.a_number, 1))
-            diff_position = np.abs(np.subtract(self.a_unit, b_tile))
+            diff_position = np.abs(np.subtract(self.a_unit, b_tile, dtype=np.float64))
             diff_position = self.__check_PBC(diff_position=diff_position)
             distance = self.__get_distance(diff_position=diff_position)
             idx_hist = self.__get_idx_histogram(distance=distance)
-            self.hist_data[idx_hist] += 1
+            self.hist_data[idx_hist] += 1.0
 
     # check the diiferent of position
     def __check_PBC(self, diff_position):
@@ -74,16 +74,17 @@ class RDF:
 
     # Calculate the Density Function
     def __cal_g_r(self):
-        r_i = np.arange(1, self.resolution) * self.dr
-        g_r = np.append(0, self.hist_data[1:] / np.square(r_i))
-        factor = 4 * np.pi * self.b_number * self.dr
-        denominator = factor * self.lag_number * self.a_number
-        return g_r * np.prod(self.box_length) / denominator
+        r_i = self.get_radii()[1:]
+        g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
+        factor = np.array(4.0 * np.pi * self.b_number * self.dr, dtype=np.float64)
+        factor *= np.array(self.lag_number * self.a_number, dtype=np.float64)
+        box_volume = np.prod(self.box_length, dtype=np.float64)
+        return g_r * box_volume / factor
 
     # Plot the g(r) with radii data
     def plot_g_r(self, *args, **kwrgs):
         try:
-            plt.plot(self.get_radii(), self.g_r, *args, **kwrgs)
+            plt.plot(self.radii, self.g_r, *args, **kwrgs)
             plt.xlabel("r")
             plt.ylabel("g(r)")
             plt.hlines(1.0, 0, self.r_max, colors="red", linestyles="--")
@@ -94,7 +95,7 @@ class RDF:
     # Plot the cn with radii data
     def plot_cn(self, *args, **kwrgs):
         try:
-            plt.plot(self.get_radii(), self.cn, *args, **kwrgs)
+            plt.plot(self.radii, self.cn, *args, **kwrgs)
             plt.xlabel("r")
             plt.ylabel("cn")
             plt.plot()
