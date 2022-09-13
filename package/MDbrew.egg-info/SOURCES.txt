@@ -2,12 +2,12 @@ MANIFEST.in
 requirement.txt
 setup.cfg
 setup.py
-MDbrew/Extractor.py
-MDbrew/MSD.py
-MDbrew/RDF.py
 MDbrew/__init__.py
+MDbrew/extractor.py
 MDbrew/linalg.py
+MDbrew/msd.py
 MDbrew/opener.py
+MDbrew/rdf.py
 MDbrew/tester.py
 MDbrew/tools.py
 MDbrew.egg-info/PKG-INFO
@@ -15,5 +15,3 @@ MDbrew.egg-info/SOURCES.txt
 MDbrew.egg-info/dependency_links.txt
 MDbrew.egg-info/not-zip-safe
 MDbrew.egg-info/top_level.txt
-MDbrew/old/RDF2.py
-MDbrew/old/__init__.py
