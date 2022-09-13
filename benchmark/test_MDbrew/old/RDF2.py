@@ -3,7 +3,6 @@ from tqdm import trange
 import matplotlib.pyplot as plt
 
 
-@DeprecationWarning
 class RDF:
     def __init__(self, a: np.array, b: np.array, system_size: np.array) -> None:
         """init

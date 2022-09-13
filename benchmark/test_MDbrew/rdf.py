@@ -21,7 +21,7 @@ class RDF:
         self.b_number = self.b.shape[1]
 
     # Main function for Get rdf from a and b, [lag time, N_particle, dim]
-    def get_rdf(self, r_max: float, resolution: int = 10000):
+    def get_rdf(self, r_max: float, resolution: int = 20000):
         self.r_max = r_max
         self.resolution = resolution
         self.dr = float(self.r_max / self.resolution)
@@ -48,24 +48,37 @@ class RDF:
     # make a histogram
     def __make_histogram(self):
         for b_line in self.b_unit:
-            b_tile = np.tile(b_line, (self.a_number, 1))
-            diff_position = self.__get_diff_position(target=b_tile)
+            diff_position = self.__get_diff_position(target=b_line)
             checked_position = self.__check_PBC(diff_position=diff_position)
             distance = self.__get_distance(diff_position=checked_position)
             idx_hist = self.__get_idx_histogram(distance=distance)
             self.hist_data[idx_hist] += 1.0
 
-    # check the diiferent of position
-    def __check_PBC(self, diff_position):
-        return np.where(
-            diff_position > self.system_size,
-            np.abs(self.box_length - diff_position),
-            diff_position,
-        )
+    # make a histogram
+    def __make_histogram(self):
+        # tt = [-1, 0, 1]
+        # for i in tt:
+        #     for j in tt:
+        #         for k in tt:
+        #             inb = self.b_unit + self.box_length + np.array([i, j, k])
+        for b_line in self.b_unit:
+            diff_position = self.__get_diff_position(target=b_line)
+            checked_position = self.__check_PBC(diff_position=diff_position)
+            distance = self.__get_distance(diff_position=checked_position)
+            idx_hist = self.__get_idx_histogram(distance=distance)
+            self.hist_data[idx_hist] += 1.0
 
     # get position difference
     def __get_diff_position(self, target):
         return np.abs(np.subtract(self.a_unit, target, dtype=np.float64))
+
+    # check the diiferent of position
+    def __check_PBC(self, diff_position):
+        return np.where(
+            np.greater(diff_position, self.system_size),
+            self.box_length - diff_position,
+            diff_position,
+        )
 
     # get distance from different of position
     def __get_distance(self, diff_position):
@@ -80,8 +93,10 @@ class RDF:
     def __get_g_r(self):
         r_i = self.get_radii()[1:]
         g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
-        factor = np.array(4.0 * np.pi * self.b_number * self.dr, dtype=np.float64)
-        factor *= np.array(self.lag_number * self.a_number, dtype=np.float64)
+        factor = np.array(
+            4.0 * np.pi * self.dr * self.lag_number * self.a_number * self.b_number,
+            dtype=np.float64,
+        )
         box_volume = np.prod(self.box_length, dtype=np.float64)
         return g_r * box_volume / factor
 
