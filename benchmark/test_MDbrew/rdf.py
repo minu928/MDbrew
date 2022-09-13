@@ -63,7 +63,7 @@ class RDF:
             diff_position,
         )
 
-    # get position differenc
+    # get position difference
     def __get_diff_position(self, target):
         return np.abs(np.subtract(self.a_unit, target, dtype=np.float64))
 
