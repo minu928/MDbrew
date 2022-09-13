@@ -36,7 +36,7 @@ class RDF:
 
     # Function for get radii data
     def get_radii(self) -> np.ndarray:
-        self.radii = np.linspace(0, self.r_max, self.resolution)
+        self.radii = np.linspace(0.0, self.r_max, self.resolution)
         return self.radii
 
     # Function for get coordinate number
@@ -59,7 +59,7 @@ class RDF:
     def __check_PBC(self, diff_position):
         return np.where(
             diff_position > self.system_size,
-            self.box_length - diff_position,
+            np.abs(self.box_length - diff_position),
             diff_position,
         )
 
