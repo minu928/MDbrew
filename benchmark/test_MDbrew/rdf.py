@@ -21,17 +21,17 @@ class RDF:
         self.b_number = self.b.shape[1]
 
     # Main function for Get rdf from a and b, [lag time, N_particle, dim]
-    def get_rdf(self, resolution: int = 10000):
+    def get_rdf(self, r_max: float, resolution: int = 10000):
+        self.r_max = r_max
         self.resolution = resolution
-        self.r_max = np.min(self.system_size).astype(np.float64)
-        self.dr = (self.r_max / self.resolution).astype(np.float64)
+        self.dr = float(self.r_max / self.resolution)
         self.hist_data = np.zeros(self.resolution)
         kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
         for lag in trange(self.lag_number, **kwrgs_trange):
             self.a_unit = self.a[lag, :, :].astype(np.float64)
             self.b_unit = self.b[lag, :, :].astype(np.float64)
             self.__make_histogram()
-        self.g_r = self.__cal_g_r()
+        self.g_r = self.__get_g_r()
         return self.g_r
 
     # Function for get radii data
@@ -49,9 +49,9 @@ class RDF:
     def __make_histogram(self):
         for b_line in self.b_unit:
             b_tile = np.tile(b_line, (self.a_number, 1))
-            diff_position = np.abs(np.subtract(self.a_unit, b_tile, dtype=np.float64))
-            diff_position = self.__check_PBC(diff_position=diff_position)
-            distance = self.__get_distance(diff_position=diff_position)
+            diff_position = self.__get_diff_position(target=b_tile)
+            checked_position = self.__check_PBC(diff_position=diff_position)
+            distance = self.__get_distance(diff_position=checked_position)
             idx_hist = self.__get_idx_histogram(distance=distance)
             self.hist_data[idx_hist] += 1.0
 
@@ -63,6 +63,10 @@ class RDF:
             diff_position,
         )
 
+    # get position differenc
+    def __get_diff_position(self, target):
+        return np.abs(np.subtract(self.a_unit, target, dtype=np.float64))
+
     # get distance from different of position
     def __get_distance(self, diff_position):
         return np.sqrt(np.sum(np.square(diff_position), axis=-1))
@@ -73,7 +77,7 @@ class RDF:
         return idx_hist[np.where((0 < idx_hist) & (idx_hist < self.resolution))]
 
     # Calculate the Density Function
-    def __cal_g_r(self):
+    def __get_g_r(self):
         r_i = self.get_radii()[1:]
         g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
         factor = np.array(4.0 * np.pi * self.b_number * self.dr, dtype=np.float64)
@@ -81,13 +85,15 @@ class RDF:
         box_volume = np.prod(self.box_length, dtype=np.float64)
         return g_r * box_volume / factor
 
-    # Plot the g(r) with radii data
-    def plot_g_r(self, *args, **kwrgs):
+    # Plot the g(r) with radii datas
+    def plot_g_r(self, bins: int = 1, *args, **kwrgs):
         try:
-            plt.plot(self.radii, self.g_r, *args, **kwrgs)
+            x = self.radii[::bins]
+            y = self.g_r[::bins]
+            plt.plot(x, y, *args, **kwrgs)
             plt.xlabel("r")
             plt.ylabel("g(r)")
-            plt.hlines(1.0, 0, self.r_max, colors="red", linestyles="--")
+            plt.hlines(1.0, 0, self.r_max + 1, colors="black", linestyles="--")
             plt.plot()
         except:
             raise Exception("get_g_r first")
