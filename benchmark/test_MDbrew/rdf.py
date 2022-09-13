@@ -21,11 +21,24 @@ class RDF:
         self.b_number = self.b.shape[1]
 
     # Main function for Get rdf from a and b, [lag time, N_particle, dim]
-    def get_rdf(self, r_max: float, resolution: int = 20000):
+    def get_rdf(self, r_max: float, resolution: int = 10000, pbc="single"):
+        """get RDF
+
+        Function for calculate the rdf.
+
+        Args:
+            r_max (float): write down your max radius
+            resolution (int, optional): set the resolution. Defaults to 10000.
+            pbc (str, optional): single -> one system, layer -> 27 system . Defaults to "single".
+
+        Returns:
+            NDArray : data of g_r
+        """
         self.r_max = r_max
         self.resolution = resolution
         self.dr = float(self.r_max / self.resolution)
         self.hist_data = np.zeros(self.resolution)
+        self.__check_pbc = self.__set_pbc_style(pbc=pbc)
         kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
         for lag in trange(self.lag_number, **kwrgs_trange):
             self.a_unit = self.a[lag, :, :].astype(np.float64)
@@ -49,36 +62,50 @@ class RDF:
     def __make_histogram(self):
         for b_line in self.b_unit:
             diff_position = self.__get_diff_position(target=b_line)
-            checked_position = self.__check_PBC(diff_position=diff_position)
-            distance = self.__get_distance(diff_position=checked_position)
+            diff_position = self.__check_pbc(diff_position=diff_position)
+            distance = self.__get_distance(diff_position=diff_position)
             idx_hist = self.__get_idx_histogram(distance=distance)
-            self.hist_data[idx_hist] += 1.0
-
-    # make a histogram
-    def __make_histogram(self):
-        # tt = [-1, 0, 1]
-        # for i in tt:
-        #     for j in tt:
-        #         for k in tt:
-        #             inb = self.b_unit + self.box_length + np.array([i, j, k])
-        for b_line in self.b_unit:
-            diff_position = self.__get_diff_position(target=b_line)
-            checked_position = self.__check_PBC(diff_position=diff_position)
-            distance = self.__get_distance(diff_position=checked_position)
-            idx_hist = self.__get_idx_histogram(distance=distance)
-            self.hist_data[idx_hist] += 1.0
+            value, count = np.unique(idx_hist, return_counts=True)
+            self.hist_data[value] += count
 
     # get position difference
     def __get_diff_position(self, target):
         return np.abs(np.subtract(self.a_unit, target, dtype=np.float64))
 
-    # check the diiferent of position
-    def __check_PBC(self, diff_position):
+    def __set_pbc_style(self, pbc):
+        if pbc == "single":
+            return self.__set_pbc_single
+        elif pbc == "layer":
+            self.layer = self.__make_first_layer()
+            return self.__set_pbc_layer
+        else:
+            raise ValueError(f"pbc <- (single) or (layer) : your Value {pbc} is wrong")
+
+    # set the pbc only consider single system
+    def __set_pbc_single(self, diff_position):
         return np.where(
-            np.greater(diff_position, self.system_size),
+            diff_position > self.system_size,
             self.box_length - diff_position,
             diff_position,
         )
+
+    # set the pbc with 27 system
+    def __set_pbc_layer(self, diff_position):
+        return diff_position[:, np.newaxis, :] + self.layer
+
+    # Make a first layer
+    def __make_first_layer(self):
+        return self.__make_direction_idx() * self.box_length
+
+    # Make a 3D layer_idx
+    def __make_direction_idx(self):
+        list_direction = []
+        idx_direction_ = [-1, 0, 1]
+        for i in idx_direction_:
+            for j in idx_direction_:
+                for k in idx_direction_:
+                    list_direction.append([i, j, k])
+        return np.array(list_direction)
 
     # get distance from different of position
     def __get_distance(self, diff_position):
