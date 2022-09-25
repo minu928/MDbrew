@@ -33,6 +33,9 @@ class Extractor(object):
         return self.df_data[self.pos_]
 
     def __df_unwrapped_position(self):
-        box_size = np.array(self.system_size)[:, 1]
-        idx_position = self.df_data[["ix", "iy", "iz"]] * box_size
-        return np.array(idx_position) + np.array(self.__df_wrapped_position())
+        if self.pos_ == ["xu", "yu", "zu"] or self.pos_ == ["xsu", "ysu", "zsu"]:
+            return np.array(self.__df_wrapped_position())
+        else:
+            box_size = np.array(self.system_size)[:, 1]
+            idx_position = self.df_data[["ix", "iy", "iz"]] * box_size
+            return np.array(idx_position) + np.array(self.__df_wrapped_position())

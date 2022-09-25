@@ -12,7 +12,7 @@ class MSD(object):
         self.N = self.position.shape[0]
 
     # User function
-    def get_msd(self, method="window", fft=True) -> np.ndarray:
+    def get_msd(self, fft: bool = True) -> np.ndarray:
         """Get MSD
 
         Calculate the msd data and return it with method and fft
@@ -25,42 +25,12 @@ class MSD(object):
         Returns:
             np.ndarray: _description_
         """
-        if method == "direct":
-            self.msd_data = self.__get_msd_direct()
-        elif method == "window":
-            if fft:
-                self.msd_data = self.__get_msd_fft()
-            else:
-                self.msd_data = self.__get_msd_window()
+        if fft:
+            self.msd_data = self.__get_msd_fft()
         else:
-            print(f"method can be (direct / window) : your note {method} is wrong")
+            self.msd_data = self.__get_msd_window()
+
         return self.msd_data
-
-    # Direct method
-    def __get_msd_direct(self) -> list[float]:
-        """MSD - Direct Method
-
-        Calculate the MSD list with linear loop with numpy function
-
-        Time complexity : O(N**2)
-
-        Args:
-            position (np.ndarray): Data of Particle's position in each lag time
-                - shape = [Number of lag, Number of particle, Coordinate data]
-
-        Returns:
-            list[float]: MSD data of each lag time
-        """
-
-        def rms(diff_pos):
-            return np.square(diff_pos).sum(axis=self.axis_dict["N_particle"]).mean()
-
-        init_position = self.position[0]
-        msd = [
-            rms(position - init_position)
-            for position in tqdm(self.position, **self.kwrgs_it)
-        ]
-        return msd
 
     # Window method with non-FFT
     def __get_msd_window(self):
