@@ -6,7 +6,7 @@ MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 ~~~zsh
 pip install MDbrew
 ~~~
-- VERSION :  (1.4.0.)
+- VERSION :  (1.4.1.)
 
 ## Package
 
@@ -58,5 +58,5 @@ rdf_radii = rdf.get_radii()
 ~~~python
 from MDbrew.msd import MSD
 msd = MSD(unwrapped_position)
-msd.get_msd(method="window", fft=True)
+msd.get_msd(fft=True)
 ~~~
