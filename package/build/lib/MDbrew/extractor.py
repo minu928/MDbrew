@@ -4,13 +4,13 @@ from .tools import timeCount
 
 # Extract the data
 class Extractor(object):
-    def __init__(self, data, pos_: list[str] = ["x", "y", "z"]) -> None:
+    def __init__(self, data, pos_: list[str] = None) -> None:
         self.data = data
         self.database = data.get_database()
         self.column = data.get_columns()
         self.system_size = self.data.get_system_size()
         self.lag_number = len(self.database)
-        self.pos_ = pos_
+        self.pos_ = self.__check_position(pos_=pos_)
 
     @timeCount
     def extract_position(self, type_: int, wrapped=True):
@@ -39,3 +39,9 @@ class Extractor(object):
             box_size = np.array(self.system_size)[:, 1]
             idx_position = self.df_data[["ix", "iy", "iz"]] * box_size
             return np.array(idx_position) + np.array(self.__df_wrapped_position())
+
+    def __check_position(self, pos_): 
+        if pos_ == None:
+            return ["x", "y", "z"]
+        else:
+            return pos_
