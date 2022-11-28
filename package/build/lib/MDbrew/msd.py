@@ -32,7 +32,7 @@ class MSD(object):
 
         return self.msd_data
 
-    # Window method with non-FFT
+    # window method with non-FFT
     def __get_msd_window(self):
         """MSD - Window Method with non-FFT
 
@@ -54,7 +54,7 @@ class MSD(object):
             msd_list[lag, :] = np.mean(distance, axis=self.axis_dict["lag"])
         return self.__mean_msd_list(msd_list=msd_list)
 
-    # Window method with FFT
+    # window method with FFT
     def __get_msd_fft(self):
         """MSD - Window method wit FFT
 
