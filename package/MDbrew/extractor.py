@@ -4,7 +4,7 @@ from .tools import timeCount
 
 # Extract the data
 class Extractor(object):
-    def __init__(self, data, pos_: list[str] = None) -> None:
+    def __init__(self, data: object, pos_: list[str] = None) -> None:
         self.data = data
         self.database = data.get_database()
         self.column = data.get_columns()
@@ -40,7 +40,7 @@ class Extractor(object):
             idx_position = self.df_data[["ix", "iy", "iz"]] * box_size
             return np.array(idx_position) + np.array(self.__df_wrapped_position())
 
-    def __check_position(self, pos_): 
+    def __check_position(self, pos_):
         if pos_ == None:
             return ["x", "y", "z"]
         else:

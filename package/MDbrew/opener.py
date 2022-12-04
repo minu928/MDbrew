@@ -1,26 +1,24 @@
+from .tools import timeCount
+
 # 1st Generation
 class Opener(object):
-    def __init__(self, file_path) -> None:
+    def __init__(self, file_path: str) -> None:
         self.file_path = file_path
+        self.lines = self._get_lines()
 
     # Open the file and delete all empty line
-    def get_lines(self) -> list[str]:
+    def _get_lines(self) -> list[str]:
         with open(self.file_path) as file:
             lines = file.readlines()
         lines = list(map(lambda line: line.strip(), lines))
-        while "" in lines:
-            lines.remove("")
         return lines
 
-    # Seprate the data in lines
-    def seperate_data_in_lines(self, lines: list[str]) -> list[float]:
-        for idx, line in enumerate(lines):
-            line_data = line.split(" ")
-            lines[idx] = self.__change_str_to_float(line=line_data)
-        return lines
+    # split data in line with overall lines
+    def _split_data_in_lines(self, lines: list[str]) -> list[float]:
+        return [self.__str_to_float(line=line.split(" ")) for line in lines]
 
     # Change data string to float
-    def __change_str_to_float(self, line) -> list[float]:
+    def __str_to_float(self, line) -> list[float]:
         try:
             line = list(map(lambda string: float(string), line))
         except:
@@ -28,30 +26,43 @@ class Opener(object):
             raise Exception("We cannot change string to float in each data")
         return line
 
+    # # find the idx list of start point
+    def _find_idxlist_by_word(self, word: str) -> list[int]:
+        return [idx for idx, line in enumerate(self.lines) if word in line]
+
+    # find the first idx
+    def _find_idx_by_word(self, word: str) -> int:
+        for idx, line in enumerate(self.lines):
+            if word in line:
+                return idx
+
 
 # 2nd Generation -> For "dump.lammpstrj"
 class DumpOpener(Opener):
-    from .tools import timeCount
-
-    def __init__(self, file_path, target_info: list[str] = None) -> None:
+    def __init__(self, file_path: str, target_info: list[str] = None):
         """Dump Opener
 
         Open the file, dump.lammpstrj and Get Database
 
         Args:
             file_path   (str)       :   file path of dump.lammpstrj
-            target_info (list[str]) :   List with string, 0 = target_line, 1 = target_word
+            target_info (list[str]) :   List with string, target_line = "id", target_word = "NUMBER"
 
+        Example:
+            >>> data        = DumpOpener(file_path)
+            >>> database    = data.get_database
+            >>> columns     = data.get_columns
+            >>> system_size = data.get_system_size
+            >>> time_step   = data.get_time_step
         """
         super().__init__(file_path)
-        self.lines: list = super().get_lines()
-        self.target_info = self.set_target_info(target_info=target_info)
-        self.target_line: str = self.target_info[0]
-        self.target_word: str = self.target_info[1]
-        self.system_num: int = self.__get_system_num()
-        self.start_idx_list: list[int] = self.__find_word_idx_list(
-            word=self.target_line
+        target_info = self.__check_target_info(target_info)
+        self.target_line = target_info[0]
+        self.target_word = target_info[1]
+        self.system_num: int = int(
+            self.lines[super()._find_idx_by_word(self.target_word) + 1]
         )
+        self.start_idx_list: list[int] = super()._find_idxlist_by_word(self.target_line)
 
     # Get the database from a, b
     @timeCount
@@ -60,64 +71,34 @@ class DumpOpener(Opener):
         for idx in self.start_idx_list:
             start_idx: int = idx + 1
             end_idx: int = start_idx + self.system_num
-            lines = self.lines[start_idx:end_idx]
-            lines = super().seperate_data_in_lines(lines=lines)
-            database.append(lines)
+            data = self.lines[start_idx:end_idx]
+            data = super()._split_data_in_lines(lines=data)
+            database.append(data)
         return database
 
     # Find the columns data in lines
     @timeCount
-    def get_columns(self) -> list[str]:
-        for line in self.lines:
-            if self.target_line in line:
-                columns = line.split(" ")
-                columns = self.__remove_other(columns)
-                return columns
-        return []
+    def get_columns(self, erase_appendix: int = 2) -> list[str]:
+        column_idx: int = self.start_idx_list[0]
+        return self.lines[column_idx].split(" ")[erase_appendix:]
 
     # find the system size
     @timeCount
-    def get_system_size(self, dim=3, word="BOX") -> list[float]:
-        size_idx = self.__find_word_idx(word=word) + 1
+    def get_system_size(self, dim: int = 3, word: str = "BOX") -> list[float]:
+        size_idx = super()._find_idx_by_word(word=word) + 1
         system_size = self.lines[size_idx : size_idx + dim]
-        system_size = super().seperate_data_in_lines(lines=system_size)
+        system_size = super()._split_data_in_lines(lines=system_size)
         return system_size
 
     # find the time step
     @timeCount
-    def get_time_step(self) -> list[float]:
-        time_step_idx_list = self.__find_word_idx_list(word="TIMESTEP")
-        time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idx_list]
+    def get_time_step(self, word: str = "TIMESTEP") -> list[float]:
+        time_step_idxlist = super()._find_idxlist_by_word(word=word)
+        time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idxlist]
         return time_step_list
 
-    # Remove the word, ITEM:
-    def __remove_other(self, line: list[str]) -> list[str]:
-        if "ITEM:" in line:
-            return line[2:]
-        else:
-            return line
-
-    # # find the idx list of start point
-    def __find_word_idx_list(self, word: str) -> list[int]:
-        return [idx for idx, line in enumerate(self.lines) if word in line]
-
-    # find the first idx
-    def __find_word_idx(self, word: str) -> int:
-        for idx, line in enumerate(self.lines):
-            if word in line:
-                return idx
-
-    # Fine the system num
-    def __get_system_num(self) -> int:
-        for idx, line in enumerate(self.lines):
-            if self.target_word in line:
-                system_num = self.lines[idx + 1]
-                system_num = int(system_num)
-                return system_num
-        return 0
-
-    # Set target_information
-    def set_target_info(self, target_info):
+    # Check target_information
+    def __check_target_info(self, target_info: list[str]) -> list[str]:
         if target_info == None:
             return ["id", "NUMBER"]
         else:
