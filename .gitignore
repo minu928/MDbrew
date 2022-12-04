@@ -1,0 +1,4 @@
+## file ignore
+__pycache__
+## externsion ignore
+*.pyc
