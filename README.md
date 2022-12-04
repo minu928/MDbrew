@@ -6,7 +6,7 @@ MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 ~~~zsh
 pip install MDbrew
 ~~~
-- VERSION :  (1.4.1.)
+- VERSION :  (1.4.4.)
 
 ## Package
 

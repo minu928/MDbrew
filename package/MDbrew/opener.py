@@ -97,13 +97,9 @@ class DumpOpener(Opener):
         else:
             return line
 
-    # find the idx list of start point
+    # # find the idx list of start point
     def __find_word_idx_list(self, word: str) -> list[int]:
-        idx_list = []
-        for idx, line in enumerate(self.lines):
-            if word in line:
-                idx_list.append(idx)
-        return idx_list
+        return [idx for idx, line in enumerate(self.lines) if word in line]
 
     # find the first idx
     def __find_word_idx(self, word: str) -> int:
