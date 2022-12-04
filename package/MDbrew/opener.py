@@ -29,168 +29,11 @@ class Opener(object):
         return line
 
 
-# 2nd Generation -> For "data.lammps"
-class DataOpener(Opener):
-    def __init__(self, file_path, target_info: list) -> None:
-        super().__init__(file_path=file_path)
-        self.lines = super().get_lines()
-        self.target_line = target_info[0]
-        self.target_word = target_info[1]
-        self.target_column = target_info[2]
-
-        self.system_num = self.__get_target_word_num()
-
-    # main function
-    def get_database(self) -> list:
-        """Get Database
-
-        function for get the full data
-
-        Returns:
-            list : full data of Instatance
-        """
-        idx_first_line = self.__find_index() + 1
-        idx_last_line = idx_first_line + self.system_num
-        lines = self.lines[idx_first_line:idx_last_line]
-        lines = super().seperate_data_in_lines(lines=lines)
-        print(f"{self.target_line} data is generated !! ")
-        return lines
-
-    # Find out the # of atoms, bonds, angles, dihedrals, impropes, ...
-    def __get_target_word_num(self):
-        for line in self.lines:
-            if self.target_word in line:
-                num = line.split(" ")
-                return int(num[0])
-        return 0
-
-    # Find the index of target_line for check the starting point of target data in lines
-    def __find_index(self) -> int:
-        for idx, line in enumerate(self.lines):
-            if self.target_line in line:
-                return idx
-        print(f"{self.target_word} is not included in the {self.file_path}")
-        return 0
-
-    # User can attach this data for get the column
-    def get_columns(self) -> list:
-        return self.target_column
-
-
-class _TargetInfo:
-    # Class for send the information about target (atoms, velocity, bonds, angles, ...)
-    def __init__(self, target_line, target_word, target_column) -> None:
-        self.target_line = target_line
-        self.target_word = target_word
-        self.target_column = target_column
-
-    # Send the information about targe
-    def _get_target_info(self):
-        return [self.target_line, self.target_word, self.target_column]
-
-
-# Below Class is for System
-class Atoms(DataOpener, _TargetInfo):
-    def __init__(self, file_path) -> None:
-        _TargetInfo.__init__(
-            self,
-            target_line="Atoms",
-            target_word="atoms",
-            target_column=[
-                "id",
-                "molecule-tag",
-                "atom-type",
-                "q",
-                "x",
-                "y",
-                "z",
-                "nx",
-                "ny",
-                "nz",
-            ],
-        )
-        DataOpener.__init__(
-            self, file_path=file_path, target_info=_TargetInfo._get_target_info(self)
-        )
-
-
-class Velocity(DataOpener, _TargetInfo):
-    def __init__(self, file_path) -> None:
-        _TargetInfo.__init__(
-            self,
-            target_line="Velocities",
-            target_word="atoms",
-            target_column=["id", "vx", "vy", "vz"],
-        )
-        DataOpener.__init__(
-            self, file_path=file_path, target_info=_TargetInfo._get_target_info(self)
-        )
-
-
-class Bonds(DataOpener, _TargetInfo):
-    def __init__(self, file_path) -> None:
-        _TargetInfo.__init__(
-            self,
-            target_line="Bonds",
-            target_word="bonds",
-            target_column=["id", "bond-type", "atom-1", "atom-2"],
-        )
-        DataOpener.__init__(
-            self, file_path=file_path, target_info=_TargetInfo._get_target_info(self)
-        )
-
-
-class Angles(DataOpener, _TargetInfo):
-    def __init__(self, file_path) -> None:
-        _TargetInfo.__init__(
-            self,
-            target_line="Angles",
-            target_word="angles",
-            target_column=["id", "angle-type", "atom-1", "atom-2", "atom-3"],
-        )
-        DataOpener.__init__(
-            self, file_path=file_path, target_info=_TargetInfo._get_target_info(self)
-        )
-
-
-class Dihedrals(DataOpener, _TargetInfo):
-    def __init__(self, file_path) -> None:
-        _TargetInfo.__init__(
-            self,
-            target_line="Dihedrals",
-            target_word="dihedrals",
-            target_column=[
-                "id",
-                "dihedral-type",
-                "atom-1",
-                "atom-2",
-                "atom-3",
-                "atom-4",
-            ],
-        )
-        DataOpener.__init__(
-            self, file_path=file_path, target_info=_TargetInfo._get_target_info(self)
-        )
-
-
-class Impropers(DataOpener, _TargetInfo):
-    def __init__(self, file_path) -> None:
-        _TargetInfo.__init__(
-            self,
-            target_line="Impropers",
-            target_word="impropers",
-            target_column=["id", "angle-type", "atom-1", "atom-2", "atom-3", "atom-4"],
-        )
-        DataOpener.__init__(
-            self, file_path=file_path, target_info=_TargetInfo._get_target_info(self)
-        )
-
-
 # 2nd Generation -> For "dump.lammpstrj"
 class DumpOpener(Opener):
     from .tools import timeCount
 
-    def __init__(self, file_path, target_info: list[str] = ["id", "NUMBER"]) -> None:
+    def __init__(self, file_path, target_info: list[str] = None) -> None:
         """Dump Opener
 
         Open the file, dump.lammpstrj and Get Database
@@ -202,8 +45,9 @@ class DumpOpener(Opener):
         """
         super().__init__(file_path)
         self.lines: list = super().get_lines()
-        self.target_line: str = target_info[0]
-        self.target_word: str = target_info[1]
+        self.target_info = self.set_target_info(target_info=target_info)
+        self.target_line: str = self.target_info[0]
+        self.target_word: str = self.target_info[1]
         self.system_num: int = self.__get_system_num()
         self.start_idx_list: list[int] = self.__find_word_idx_list(
             word=self.target_line
@@ -275,3 +119,11 @@ class DumpOpener(Opener):
                 system_num = int(system_num)
                 return system_num
         return 0
+
+    # Set target_information
+    def set_target_info(self, target_info):
+        if target_info == None:
+            return ["id", "NUMBER"]
+        else:
+            assert len(target_info) != 2
+            return target_info
