@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import trange, tqdm
+from tqdm import trange
 
 
 class MSD(object):
