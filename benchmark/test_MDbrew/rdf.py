@@ -20,15 +20,6 @@ class RDF:
         self.a_number = self.a.shape[1]
         self.b_number = self.b.shape[1]
 
-    @property
-    def result(self) -> list:
-        """result of RDF
-
-        Returns:
-            list: radii, rdf, cn
-        """
-        return [self.radii, self.get_rdf, self.get_CN]
-
     # Main function for Get rdf from a and b, [lag time, N_particle, dim]
     def get_rdf(self, r_max: float, resolution: int = 10000, pbc="single"):
         """get RDF

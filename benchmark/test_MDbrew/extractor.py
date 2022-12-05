@@ -1,14 +1,15 @@
 import numpy as np
 import pandas as pd
 from .tools import timeCount
+from .opener import Opener
 
 # Extract the data
 class Extractor(object):
-    def __init__(self, data: object, pos_: list[str] = None) -> None:
-        self.data = data
-        self.database = data.get_database()
-        self.column = data.get_columns()
-        self.system_size = self.data.get_system_size()
+    def __init__(self, opener: Opener, pos_: list[str] = None) -> None:
+        self.database = opener.get_database()
+        self.column = opener.get_columns()
+        self.system_size = opener.get_system_size()
+        self.time_step = opener.get_time_step()
         self.lag_number = len(self.database)
         self.pos_ = self.__check_position(pos_=pos_)
 

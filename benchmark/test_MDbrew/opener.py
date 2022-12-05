@@ -1,10 +1,31 @@
 from .tools import timeCount
+from abc import ABCMeta, abstractmethod
 
 # 1st Generation
-class Opener(object):
+class Opener(metaclass=ABCMeta):
     def __init__(self, file_path: str) -> None:
         self.file_path = file_path
         self.lines = self._get_lines()
+
+    # return lines
+    @abstractmethod
+    def get_database(self) -> list[str]:
+        return self.lines
+
+    # return ["None"]
+    @abstractmethod
+    def get_columns(self) -> list[str]:
+        return ["None"]
+
+    # return [0]
+    @abstractmethod
+    def get_system_size(self) -> list[float]:
+        return [0]
+
+    # return [0]
+    @abstractmethod
+    def get_time_step(self) -> list[float]:
+        return [0]
 
     # Open the file and delete all empty line
     def _get_lines(self) -> list[str]:
