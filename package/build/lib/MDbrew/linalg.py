@@ -34,15 +34,11 @@ class LinearRegression:
         self.plot_cost_and_data()
 
     def cost(self):
-        cost = np.dot(
-            1 / (2 * self.n), np.sum(np.square(np.subtract(self.hypothesis(), self.y)))
-        )
+        cost = np.dot(1 / (2 * self.n), np.sum(np.square(np.subtract(self.hypothesis(), self.y))))
         return cost
 
     def update_w_(self):
-        w_gradient = (
-            self.eta / self.n * np.dot(np.subtract(self.hypothesis(), self.y).T, self.X)
-        )
+        w_gradient = self.eta / self.n * np.dot(np.subtract(self.hypothesis(), self.y).T, self.X)
         b_gradient = self.eta / self.n * np.sum(np.subtract(self.hypothesis(), self.y))
         self.w_[0] = np.subtract(self.w_[0], w_gradient)
         self.w_[1] = np.subtract(self.w_[1], b_gradient)

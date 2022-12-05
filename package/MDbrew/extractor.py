@@ -1,19 +1,21 @@
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from .tools import timeCount
+from .opener import Opener
 
 # Extract the data
 class Extractor(object):
-    def __init__(self, data: object, pos_: list[str] = None) -> None:
-        self.data = data
-        self.database = data.get_database()
-        self.column = data.get_columns()
-        self.system_size = self.data.get_system_size()
+    def __init__(self, opener: Opener, pos_: list[str] = None) -> None:
+        self.database = opener.get_database()
+        self.column = opener.get_columns()
+        self.system_size = opener.get_system_size()
+        self.time_step = opener.get_time_step()
         self.lag_number = len(self.database)
         self.pos_ = self.__check_position(pos_=pos_)
 
     @timeCount
-    def extract_position(self, type_: int, wrapped=True):
+    def extract_position(self, type_: int, wrapped=True) -> NDArray[np.float64]:
         db_position = []
         get_position = self.__check_method(wrapped=wrapped)
         for lag in range(self.lag_number):
@@ -30,9 +32,9 @@ class Extractor(object):
             return self.__df_unwrapped_position
 
     def __df_wrapped_position(self):
-        return self.df_data[self.pos_]
+        return np.array(self.df_data[self.pos_])
 
-    def __df_unwrapped_position(self):
+    def __df_unwrapped_position(self) -> NDArray[np.float64]:
         if self.pos_ == ["xu", "yu", "zu"] or self.pos_ == ["xsu", "ysu", "zsu"]:
             return np.array(self.__df_wrapped_position())
         else:
@@ -40,7 +42,7 @@ class Extractor(object):
             idx_position = self.df_data[["ix", "iy", "iz"]] * box_size
             return np.array(idx_position) + np.array(self.__df_wrapped_position())
 
-    def __check_position(self, pos_):
+    def __check_position(self, pos_) -> list[str]:
         if pos_ == None:
             return ["x", "y", "z"]
         else:
