@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from .tools import timeCount
 from .opener import Opener
@@ -14,7 +15,7 @@ class Extractor(object):
         self.pos_ = self.__check_position(pos_=pos_)
 
     @timeCount
-    def extract_position(self, type_: int, wrapped=True):
+    def extract_position(self, type_: int, wrapped=True) -> NDArray[np.float64]:
         db_position = []
         get_position = self.__check_method(wrapped=wrapped)
         for lag in range(self.lag_number):
@@ -31,9 +32,9 @@ class Extractor(object):
             return self.__df_unwrapped_position
 
     def __df_wrapped_position(self):
-        return self.df_data[self.pos_]
+        return np.array(self.df_data[self.pos_])
 
-    def __df_unwrapped_position(self):
+    def __df_unwrapped_position(self) -> NDArray[np.float64]:
         if self.pos_ == ["xu", "yu", "zu"] or self.pos_ == ["xsu", "ysu", "zsu"]:
             return np.array(self.__df_wrapped_position())
         else:
@@ -41,7 +42,7 @@ class Extractor(object):
             idx_position = self.df_data[["ix", "iy", "iz"]] * box_size
             return np.array(idx_position) + np.array(self.__df_wrapped_position())
 
-    def __check_position(self, pos_):
+    def __check_position(self, pos_) -> list[str]:
         if pos_ == None:
             return ["x", "y", "z"]
         else:

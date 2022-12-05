@@ -81,10 +81,8 @@ class DumpOpener(Opener):
         target_info = self.__check_target_info(target_info)
         self.target_line = target_info[0]
         self.target_word = target_info[1]
-        self.system_num: int = int(
-            self.lines[super()._find_idx_by_word(self.target_word) + 1]
-        )
-        self.start_idx_list: list[int] = super()._find_idxlist_by_word(self.target_line)
+        self.system_num = int(self.lines[self._find_idx_by_word(self.target_word) + 1])
+        self.start_idx_list: list[int] = self._find_idxlist_by_word(self.target_line)
 
     # Get the database from a, b
     @timeCount
@@ -94,7 +92,7 @@ class DumpOpener(Opener):
             start_idx: int = idx + 1
             end_idx: int = start_idx + self.system_num
             data = self.lines[start_idx:end_idx]
-            data = super()._split_data_in_lines(lines=data)
+            data = self._split_data_in_lines(lines=data)
             database.append(data)
         return database
 
@@ -107,15 +105,15 @@ class DumpOpener(Opener):
     # find the system size
     @timeCount
     def get_system_size(self, dim: int = 3, word: str = "BOX") -> list[float]:
-        size_idx = super()._find_idx_by_word(word=word) + 1
+        size_idx = self._find_idx_by_word(word=word) + 1
         system_size = self.lines[size_idx : size_idx + dim]
-        system_size = super()._split_data_in_lines(lines=system_size)
+        system_size = self._split_data_in_lines(lines=system_size)
         return system_size
 
     # find the time step
     @timeCount
     def get_time_step(self, word: str = "TIMESTEP") -> list[float]:
-        time_step_idxlist = super()._find_idxlist_by_word(word=word)
+        time_step_idxlist = self._find_idxlist_by_word(word=word)
         time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idxlist]
         return time_step_list
 
@@ -124,5 +122,4 @@ class DumpOpener(Opener):
         if target_info == None:
             return ["id", "NUMBER"]
         else:
-            assert len(target_info) != 2
             return target_info
