@@ -76,7 +76,6 @@ class DumpOpener(Opener):
             >>> system_size = data.get_system_size
             >>> time_step   = data.get_time_step
         """
-        print("TEST VERSION")
         super().__init__(file_path)
         target_info = self.__check_target_info(target_info)
         self.target_line = target_info[0]
