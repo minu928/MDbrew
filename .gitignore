@@ -2,3 +2,4 @@
 __pycache__
 ## externsion ignore
 *.pyc
+*.ipynb
