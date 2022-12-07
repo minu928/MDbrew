@@ -16,12 +16,12 @@ class Extractor(object):
         self.pos_ = self.__check_position()
 
     @timeCount
-    def extract_position(self, type: int, wrapped=True) -> NDArray[np.float64]:
+    def extract_position(self, type_: int, wrapped=True) -> NDArray[np.float64]:
         db_position = []
         get_position = self.__check_method(wrapped=wrapped)
         for lag in range(self.lag_number):
             df_data = pd.DataFrame(data=self.database[lag], columns=self.columns)
-            self.df_data = df_data[df_data["type"] == type]
+            self.df_data = df_data[df_data["type"] == type_]
             position = get_position()
             db_position.append(position)
         return np.asarray(db_position, dtype=np.float64)
