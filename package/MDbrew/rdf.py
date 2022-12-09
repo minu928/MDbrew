@@ -1,18 +1,20 @@
-import numpy as np
-from numpy.typing import NDArray
+from .__init__ import *
 from tqdm import trange
-import matplotlib.pyplot as plt
+from .tools import check_dimension
 
 # Calculate and Plot the RDF
 class RDF:
-    def __init__(self, a: np.array, b: np.array, system_size: np.array) -> None:
+    def __init__(self, a: NDArray, b: NDArray, system_size: NDArray) -> None:
         """init
 
         Args:
-            a (np.array): [lag time, N_particle, dim]
-            b (np.array): [lag time, N_particle, dim]
-            system_size (np.array): [[-lx, lx], [-ly, ly], [-lz, lz]]
+            a (NDArray): [lag time, N_particle, dim]
+            b (NDArray): [lag time, N_particle, dim]
+            system_size (NDArray): [[-lx, lx], [-ly, ly], [-lz, lz]]
         """
+        check_dimension(a, 3)
+        check_dimension(b, 3)
+        check_dimension(np.asarray(system_size), 2)
         self.a = np.asarray(a, dtype=np.float64)
         self.b = np.asarray(b, dtype=np.float64)
         self.system_size = np.asarray(system_size, dtype=np.float64)[:, 1]

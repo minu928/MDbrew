@@ -1,4 +1,4 @@
-from .opener import DumpOpener
+from .opener import LAMMPSOpener
 from .extractor import Extractor
 from .rdf import RDF
 from .msd import MSD
@@ -6,8 +6,8 @@ from .msd import MSD
 
 def tester(path):
     print("\n\ttest Init \u2713 \t\n")
-    opener = DumpOpener(path)
-    extractor = Extractor(opener=opener)
+    source = LAMMPSOpener(path)
+    extractor = Extractor(opener=source)
     system_size = extractor.system_size
     position = extractor.extract_position(type_=1, wrapped=True)[-10:]
     uw_position = extractor.extract_position(type_=1, wrapped=False)[-10:]

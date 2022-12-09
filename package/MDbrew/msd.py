@@ -1,18 +1,18 @@
-import numpy as np
-import matplotlib.pyplot as plt
+from .__init__ import *
 from tqdm import trange
+from .tools import check_dimension
 
 
 class MSD(object):
-    def __init__(self, position: np.ndarray) -> None:
+    def __init__(self, position: NDArray):
+        check_dimension(position, 3)
         self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
-        self.msd_data = 0
         self.position = np.asarray(position, dtype=np.float64)
         self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
         self.N = self.position.shape[0]
 
     # User function
-    def get_msd(self, fft: bool = True) -> np.ndarray:
+    def get_msd(self, fft: bool = True) -> NDArray[np.float64]:
         """Get MSD
 
         Calculate the msd data and return it with method and fft
@@ -71,15 +71,14 @@ class MSD(object):
         """
         S_1 = self.__get_S_1()
         S_2 = self.__auto_correlation()
-        msd_list = np.subtract(S_1, 2 * S_2)
+        msd_list = np.subtract(S_1, 2.0 * S_2)
         return self.__mean_msd_list(msd_list=msd_list)
 
     def __get_S_1(self):
         empty_matrix = np.zeros(self.position.shape[:2])
-
         D = self.__square_sum_position(self.position)
         D = np.append(D, empty_matrix, axis=self.axis_dict["lag"])
-        Q = 2 * np.sum(D, axis=self.axis_dict["lag"])
+        Q = 2.0 * np.sum(D, axis=self.axis_dict["lag"])
         S_1 = empty_matrix
         for m in trange(self.N, **self.kwrgs_it):
             Q -= D[m - 1, :] + D[self.N - m, :]

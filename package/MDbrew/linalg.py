@@ -1,6 +1,4 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from .tools import timeCount
+from .__init__ import *
 
 # Linear Regression
 class LinearRegression:
