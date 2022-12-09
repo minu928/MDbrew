@@ -59,7 +59,7 @@ class Opener(metaclass=ABCMeta):
 
 
 # 2nd Generation -> For "dump.lammpstrj"
-class DumpOpener(Opener):
+class LAMMPSOpener(Opener):
     def __init__(self, file_path: str, target_info: list[str] = None):
         """Dump Opener
 
@@ -70,13 +70,12 @@ class DumpOpener(Opener):
             target_info (list[str]) :   List with string, target_line = "id", target_word = "NUMBER"
 
         Example:
-            >>> data        = DumpOpener(file_path)
-            >>> database    = data.get_database
-            >>> columns     = data.get_columns
-            >>> system_size = data.get_system_size
-            >>> time_step   = data.get_time_step
+            >>> opener      = LAMMPSOpener(file_path)
+            >>> database    = opener.get_database
+            >>> columns     = opener.get_columns
+            >>> system_size = opener.get_system_size
+            >>> time_step   = opener.get_time_step
         """
-        print("TEST VERSION")
         super().__init__(file_path)
         target_info = self.__check_target_info(target_info)
         self.target_line = target_info[0]
