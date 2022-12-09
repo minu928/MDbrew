@@ -6,12 +6,12 @@ MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 ~~~zsh
 pip install MDbrew
 ~~~
-- VERSION :  (1.5.0)
+- VERSION :  (1.5.1)
 
 ## Package
 
 ### Opener  
-- DumpOpener : for dump file (ex. dump.lammpstrj)  
+- LAMMPSOpener : for dump file (ex. dump.lammpstrj)  
 ### tools  
 - timeCount : decorator for get execute time
 ### linalg
@@ -27,9 +27,9 @@ pip install MDbrew
 
 ### Example - Open the file
 ~~~python
-from MDbrew.opener import DumpOpener
+from MDbrew.opener import LAMMPSOpener
 path = "file_path"
-data = DumpOpener(path)
+opener = LAMMPSOpener(path)
 database = data.get_database()
 column = data.get_column()
 system_size = data.get_system_size()
@@ -38,17 +38,16 @@ system_size = data.get_system_size()
 ### Example - MDbrew.Extractor
 ~~~python
 from MDbrew.extractor import Extractor
-extractor = Extractor(data=data, pos_=["x", "y", "z"])
+extractor = Extractor(opener=opener)
 wrapped_position = extractor.extract_position(type_=1, wrapped=True)
 unwrapped_position = extractor.extract_position(type_=1, wrapped=False)
-
 system_size = extractor.system_size
 ~~~
 
 ### Example - RDF
 ~~~python
 from MDbrew.rdf import RDF
-rdf = RDF(database_position, database_position, system_size)
+rdf = RDF(wrapped_position, wrapped_position, system_size)
 rdf_data = rdf.get_rdf()
 rdf_radii = rdf.get_radii()
 ~~~
