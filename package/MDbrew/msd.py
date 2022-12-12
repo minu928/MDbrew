@@ -1,39 +1,43 @@
-from .__init__ import *
 from tqdm import trange
-from .tools import check_dimension
+from .tools import *
 
 
 class MSD(object):
-    def __init__(self, position: NDArray):
-        check_dimension(position, 3)
-        self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
-        self.position = np.asarray(position, dtype=np.float64)
-        self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
-        self.N = self.position.shape[0]
-
-    # User function
-    def get_msd(self, fft: bool = True) -> NDArray[np.float64]:
-        """Get MSD
+    def __init__(self, position: NDArray, fft: bool = True):
+        """MSD
 
         Calculate the msd data and return it with method and fft
 
         Args:
             position (np.ndarray)   :  Data of Particle's position in each lag time
-            method (str, optional)  :  default = 'window'        (window or direct)
             fft (bool, optional)    :  default = True
 
-        Returns:
-            np.ndarray: _description_
+        ## Result of 'Mean Square Displacement'
+        >>> my_msd      = MSD(position = position, fft = true)
+        >>> msd_result  = my_msd.result
         """
-        if fft:
-            self.msd_data = self.__get_msd_fft()
-        else:
-            self.msd_data = self.__get_msd_window()
+        self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
+        self.position = check_dimension(position, dim=3)
+        self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
+        self.N = self.position.shape[0]
+        self.fft = fft
+        self.result = self.run()
 
-        return self.msd_data
+    # User
+    def run(self) -> NDArray[np.float64]:
+        """run
+
+        Returns:
+            NDArray[np.float64]: result of MSD
+        """
+        if self.fft:
+            self.result = self.__get_msd_fft()
+        else:
+            self.result = self.__get_msd_window()
+        return self.result
 
     # window method with non-FFT
-    def __get_msd_window(self):
+    def __get_msd_window(self) -> NDArray[np.float64]:
         """MSD - Window Method with non-FFT
 
         Calculate the MSD list with linear loop with numpy function
@@ -55,7 +59,7 @@ class MSD(object):
         return self.__mean_msd_list(msd_list=msd_list)
 
     # window method with FFT
-    def __get_msd_fft(self):
+    def __get_msd_fft(self) -> NDArray[np.float64]:
         """MSD - Window method wit FFT
 
         Calculate the MSD list with linear loop with numpy function
@@ -74,7 +78,7 @@ class MSD(object):
         msd_list = np.subtract(S_1, 2.0 * S_2)
         return self.__mean_msd_list(msd_list=msd_list)
 
-    def __get_S_1(self):
+    def __get_S_1(self) -> NDArray[np.float64]:
         empty_matrix = np.zeros(self.position.shape[:2])
         D = self.__square_sum_position(self.position)
         D = np.append(D, empty_matrix, axis=self.axis_dict["lag"])
@@ -83,11 +87,10 @@ class MSD(object):
         for m in trange(self.N, **self.kwrgs_it):
             Q -= D[m - 1, :] + D[self.N - m, :]
             S_1[m, :] = Q / (self.N - m)
-
         return S_1
 
     # get S2 for FFT
-    def __auto_correlation(self):
+    def __auto_correlation(self) -> NDArray[np.float64]:
         X = np.fft.fft(self.position, n=2 * self.N, axis=self.axis_dict["lag"])
         dot_X = X * X.conjugate()
         x = np.fft.ifft(dot_X, axis=self.axis_dict["lag"])
@@ -97,17 +100,17 @@ class MSD(object):
         return x / n[:, np.newaxis]
 
     # do square and sum about position
-    def __square_sum_position(self, position_data):
+    def __square_sum_position(self, position_data) -> NDArray[np.float64]:
         return np.square(position_data).sum(axis=self.axis_dict["pos"])
 
     # do mean about msd list
-    def __mean_msd_list(self, msd_list):
+    def __mean_msd_list(self, msd_list) -> NDArray[np.float64]:
         return msd_list.mean(axis=self.axis_dict["N_particle"])
 
     # plot the data
-    def plot_msd(self, time_step: float = 1, *args, **kwargs):
+    def plot_result(self, time_step: float = 1, *args, **kwargs):
         lagtime = len(self.position)
         x = np.arange(0, lagtime * time_step, time_step)
-        y = self.msd_data
+        y = self.result
         plt.plot(x, y, *args, **kwargs)
         plt.show()

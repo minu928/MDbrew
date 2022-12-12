@@ -1,4 +1,4 @@
-from .__init__ import *
+from .tools import *
 
 # Linear Regression
 class LinearRegression:
@@ -8,14 +8,14 @@ class LinearRegression:
         self.random_state = random_state
 
     @timeCount
-    def fit(self, X: np.ndarray, y: np.ndarray):
+    def fit(self, X: NDArray, y: NDArray):
         """Do Linear Regression
 
         y = w_[0] * x + w_[1]
 
         Args:
-            X (np.ndarray): x data
-            y (np.ndarray): y data
+            X (NDArray): x data
+            y (NDArray): y data
         """
         self.X = X.reshape(-1, 1)
         self.y = y.reshape(-1, 1)
