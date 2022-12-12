@@ -52,7 +52,7 @@ class RDF:
         """
         self._get_hist()
         self._get_radii()
-        self._get_rdf()
+        self._get_result()
         self._get_cn()
         return [self.radii, self.result, self.cn]
 
@@ -67,7 +67,7 @@ class RDF:
             self.__make_histogram()
 
     # Function for get rdf
-    def _get_rdf(self) -> NDArray[np.float64]:
+    def _get_result(self) -> NDArray[np.float64]:
         self.result = self.__get_g_r()
 
     # Function for get radii data
@@ -168,9 +168,9 @@ class RDF:
                 return box_max_radius * 3.0
 
     # Plot the g(r) with radii datas
-    def plot_g_r(self, bins: int = 1, *args, **kwrgs):
+    def plot_result(self, bins: int = 1, *args, **kwrgs):
         x = self.radii[::bins]
-        y = self.g_r[::bins]
+        y = self.result[::bins]
         plt.plot(x, y, *args, **kwrgs)
         plt.xlabel("r")
         plt.ylabel("g(r)")

@@ -13,6 +13,13 @@ class Extractor(object):
         self.pos_ = self.__check_position()
 
     @timeCount
+    def extract_type(self, key_word: str = "type"):
+        key_word = key_word.lower()
+        df_data = pd.DataFrame(data=self.database[0], columns=self.columns)
+        col_type = df_data[key_word]
+        return set(col_type)
+
+    @timeCount
     def extract_position(self, type_: int, wrapped=True) -> NDArray[np.float64]:
         db_position = []
         get_position = self.__check_method(wrapped=wrapped)

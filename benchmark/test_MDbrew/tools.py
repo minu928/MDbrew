@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from numpy.typing import NDArray
 from time import time
 from sys import stdout
