@@ -12,12 +12,9 @@ class RDF:
             b (NDArray): [lag time, N_particle, dim]
             system_size (NDArray): [[-lx, lx], [-ly, ly], [-lz, lz]]
         """
-        check_dimension(a, 3)
-        check_dimension(b, 3)
-        check_dimension(np.asarray(system_size), 2)
-        self.a = np.asarray(a, dtype=np.float64)
-        self.b = np.asarray(b, dtype=np.float64)
-        self.system_size = np.asarray(system_size, dtype=np.float64)[:, 1]
+        self.a = check_dimension(a, dim=3)
+        self.b = check_dimension(b, dim=3)
+        self.system_size = check_dimension(system_size, dim=2)[:, 1]
         self.box_length = self.system_size * 2.0
         self.lag_number = self.a.shape[0]
         self.a_number = self.a.shape[1]
@@ -44,8 +41,8 @@ class RDF:
         self.__check_pbc = self.__set_pbc_style(pbc=pbc)
         kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
         for lag in trange(self.lag_number, **kwrgs_trange):
-            self.a_unit = self.a[lag, :, :].astype(np.float64)
-            self.b_unit = self.b[lag, :, :].astype(np.float64)
+            self.a_unit = self.a[lag, ...].astype(np.float64)
+            self.b_unit = self.b[lag, ...].astype(np.float64)
             self.__make_histogram()
         self.g_r = self.__get_g_r()
         return self.g_r

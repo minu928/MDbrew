@@ -5,9 +5,8 @@ from .tools import check_dimension
 
 class MSD(object):
     def __init__(self, position: NDArray):
-        check_dimension(position, 3)
         self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
-        self.position = np.asarray(position, dtype=np.float64)
+        self.position = check_dimension(position, dim=3)
         self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
         self.N = self.position.shape[0]
 
@@ -33,7 +32,7 @@ class MSD(object):
         return self.msd_data
 
     # window method with non-FFT
-    def __get_msd_window(self):
+    def __get_msd_window(self) -> NDArray[np.float64]:
         """MSD - Window Method with non-FFT
 
         Calculate the MSD list with linear loop with numpy function
@@ -55,7 +54,7 @@ class MSD(object):
         return self.__mean_msd_list(msd_list=msd_list)
 
     # window method with FFT
-    def __get_msd_fft(self):
+    def __get_msd_fft(self) -> NDArray[np.float64]:
         """MSD - Window method wit FFT
 
         Calculate the MSD list with linear loop with numpy function
@@ -74,7 +73,7 @@ class MSD(object):
         msd_list = np.subtract(S_1, 2.0 * S_2)
         return self.__mean_msd_list(msd_list=msd_list)
 
-    def __get_S_1(self):
+    def __get_S_1(self) -> NDArray[np.float64]:
         empty_matrix = np.zeros(self.position.shape[:2])
         D = self.__square_sum_position(self.position)
         D = np.append(D, empty_matrix, axis=self.axis_dict["lag"])
@@ -83,11 +82,10 @@ class MSD(object):
         for m in trange(self.N, **self.kwrgs_it):
             Q -= D[m - 1, :] + D[self.N - m, :]
             S_1[m, :] = Q / (self.N - m)
-
         return S_1
 
     # get S2 for FFT
-    def __auto_correlation(self):
+    def __auto_correlation(self) -> NDArray[np.float64]:
         X = np.fft.fft(self.position, n=2 * self.N, axis=self.axis_dict["lag"])
         dot_X = X * X.conjugate()
         x = np.fft.ifft(dot_X, axis=self.axis_dict["lag"])
@@ -97,11 +95,11 @@ class MSD(object):
         return x / n[:, np.newaxis]
 
     # do square and sum about position
-    def __square_sum_position(self, position_data):
+    def __square_sum_position(self, position_data) -> NDArray[np.float64]:
         return np.square(position_data).sum(axis=self.axis_dict["pos"])
 
     # do mean about msd list
-    def __mean_msd_list(self, msd_list):
+    def __mean_msd_list(self, msd_list) -> NDArray[np.float64]:
         return msd_list.mean(axis=self.axis_dict["N_particle"])
 
     # plot the data

@@ -1,4 +1,4 @@
-from .__init__ import NDArray
+from .__init__ import *
 from time import time
 from sys import stdout
 
@@ -27,5 +27,7 @@ def timeCount(func):
 
 
 # Dimension checker
-def check_dimension(array: NDArray, dim: int):
-    assert array.ndim == dim, "[DimensionError] Check your dimension "
+def check_dimension(array: list, dim: int) -> NDArray[np.float64]:
+    new_array = np.asarray(array, dtype=np.float64)
+    assert new_array.ndim == dim, "[DimensionError] Check your dimension "
+    return new_array
