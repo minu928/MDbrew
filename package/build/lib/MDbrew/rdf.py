@@ -1,65 +1,83 @@
-from .__init__ import *
 from tqdm import trange
-from .tools import check_dimension
+from .tools import *
 
 # Calculate and Plot the RDF
 class RDF:
-    def __init__(self, a: NDArray, b: NDArray, system_size: NDArray) -> None:
+    def __init__(
+        self,
+        a: NDArray,
+        b: NDArray,
+        system_size: NDArray,
+        r_max: float = None,
+        resolution: int = 1000,
+        pbc: str = "single",
+    ):
         """init
 
         Args:
             a (NDArray): [lag time, N_particle, dim]
             b (NDArray): [lag time, N_particle, dim]
             system_size (NDArray): [[-lx, lx], [-ly, ly], [-lz, lz]]
+
+        Kwargs:
+            r_max (float): you can input the max radius else None means 'calculate max(system_size)'
+            resolution (int): resolution of dr
+            pbc (str) : you can choose "single" or "layer"
+
+        ## Result of Radial Density Function, Coordination Number
+        >>> my_rdf     = RDF(a_position, b_position, system_size)
+        >>> rdf_result = my_rdf.result
+        >>> cn_result  = my_rdf.cn
         """
-        check_dimension(a, 3)
-        check_dimension(b, 3)
-        check_dimension(np.asarray(system_size), 2)
-        self.a = np.asarray(a, dtype=np.float64)
-        self.b = np.asarray(b, dtype=np.float64)
-        self.system_size = np.asarray(system_size, dtype=np.float64)[:, 1]
+        self.a = check_dimension(a, dim=3)
+        self.b = check_dimension(b, dim=3)
+        self.system_size = check_dimension(system_size, dim=2)[:, 1]
         self.box_length = self.system_size * 2.0
         self.lag_number = self.a.shape[0]
-        self.a_number = self.a.shape[1]
-        self.b_number = self.b.shape[1]
-
-    # Main function for Get rdf from a and b, [lag time, N_particle, dim]
-    def get_rdf(self, r_max: float, resolution: int = 1000, pbc="single") -> NDArray[np.float64]:
-        """get RDF
-
-        Function for calculate the rdf.
-
-        Args:
-            r_max (float): write down your max radius
-            resolution (int, optional): set the resolution. Defaults to 10000.
-            pbc (str, optional): single -> one system, layer -> 27 system . Defaults to "single".
-
-        Returns:
-            NDArray : data of g_r
-        """
-        self.r_max = r_max
+        self.a_number, self.b_number = self.a.shape[1], self.b.shape[1]
+        self.r_max = self.__set_r_max(r_max)
         self.resolution = resolution
         self.dr = float(self.r_max / self.resolution)
+        self.pbc = pbc
+        self.run()
+
+    # run the class
+    def run(self):
+        """run
+
+        Function for calculate the rdf, cn.
+
+        Returns:
+            list[NDArray] : [radii, result, cn]
+        """
+        self._get_hist()
+        self._get_radii()
+        self._get_result()
+        self._get_cn()
+        return [self.radii, self.result, self.cn]
+
+    # Function for get hist
+    def _get_hist(self) -> NDArray[np.float64]:
         self.hist_data = np.zeros(self.resolution)
-        self.__check_pbc = self.__set_pbc_style(pbc=pbc)
+        self.__check_pbc = self.__set_pbc_style()
         kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
         for lag in trange(self.lag_number, **kwrgs_trange):
-            self.a_unit = self.a[lag, :, :].astype(np.float64)
-            self.b_unit = self.b[lag, :, :].astype(np.float64)
+            self.a_unit = self.a[lag, ...].astype(np.float64)
+            self.b_unit = self.b[lag, ...].astype(np.float64)
             self.__make_histogram()
-        self.g_r = self.__get_g_r()
-        return self.g_r
+
+    # Function for get rdf
+    def _get_result(self) -> NDArray[np.float64]:
+        self.result = self.__get_g_r()
 
     # Function for get radii data
-    def get_radii(self) -> NDArray[np.float64]:
+    def _get_radii(self) -> NDArray[np.float64]:
         self.radii = np.linspace(0.0, self.r_max, self.resolution)
-        return self.radii
 
     # Function for get coordinate number
-    def get_CN(self) -> NDArray[np.float64]:
+    def _get_cn(self) -> NDArray[np.float64]:
         self.n = self.hist_data / (self.lag_number * self.a_number)
         self.cn = np.cumsum(self.n)
-        return self.cn
 
     # make a histogram
     def __make_histogram(self):
@@ -75,14 +93,23 @@ class RDF:
     def __get_diff_position(self, target) -> NDArray[np.float64]:
         return np.abs(np.subtract(self.a_unit, target, dtype=np.float64))
 
-    def __set_pbc_style(self, pbc) -> object:
-        if pbc == "single":
+    def __is_pbc_single(self) -> bool:
+        pbc_list = ["single", "layer"]
+        if not self.pbc in pbc_list:
+            raise ValueError(f"pbc <- (single) or (layer) : your Value {self.pbc} is wrong")
+        else:
+            if self.pbc == "single":
+                return True
+            else:
+                return False
+
+    def __set_pbc_style(self) -> object:
+        if self.__is_pbc_single:
             return self.__set_pbc_single
-        elif pbc == "layer":
+
+        else:
             self.layer = self.__make_first_layer()
             return self.__set_pbc_layer
-        else:
-            raise ValueError(f"pbc <- (single) or (layer) : your Value {pbc} is wrong")
 
     # set the pbc only consider single system
     def __set_pbc_single(self, diff_position) -> NDArray[np.float64]:
@@ -121,7 +148,7 @@ class RDF:
 
     # Calculate the Density Function
     def __get_g_r(self) -> NDArray[np.float64]:
-        r_i = self.get_radii()[1:]
+        r_i = self.radii[1:]
         g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
         factor = np.array(
             4.0 * np.pi * self.dr * self.lag_number * self.a_number * self.b_number,
@@ -130,25 +157,29 @@ class RDF:
         box_volume = np.prod(self.box_length, dtype=np.float64)
         return g_r * box_volume / factor
 
+    def __set_r_max(self, r_max) -> np.float64:
+        if r_max is not None:
+            return r_max
+        else:
+            box_max_radius = max(self.system_size)
+            if self.__is_pbc_single:
+                return box_max_radius
+            else:
+                return box_max_radius * 3.0
+
     # Plot the g(r) with radii datas
-    def plot_g_r(self, bins: int = 1, *args, **kwrgs):
-        try:
-            x = self.radii[::bins]
-            y = self.g_r[::bins]
-            plt.plot(x, y, *args, **kwrgs)
-            plt.xlabel("r")
-            plt.ylabel("g(r)")
-            plt.hlines(1.0, 0, self.r_max + 1, colors="black", linestyles="--")
-            plt.plot()
-        except:
-            raise Exception("get_g_r first")
+    def plot_result(self, bins: int = 1, *args, **kwrgs):
+        x = self.radii[::bins]
+        y = self.result[::bins]
+        plt.plot(x, y, *args, **kwrgs)
+        plt.xlabel("r")
+        plt.ylabel("g(r)")
+        plt.hlines(1.0, 0, self.r_max + 1, colors="black", linestyles="--")
+        plt.plot()
 
     # Plot the cn with radii data
     def plot_cn(self, *args, **kwrgs):
-        try:
-            plt.plot(self.radii, self.cn, *args, **kwrgs)
-            plt.xlabel("r")
-            plt.ylabel("cn")
-            plt.plot()
-        except:
-            raise Exception("get_cn first")
+        plt.plot(self.radii, self.cn, *args, **kwrgs)
+        plt.xlabel("r")
+        plt.ylabel("cn")
+        plt.plot()

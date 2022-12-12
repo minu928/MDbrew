@@ -1,5 +1,4 @@
-from .__init__ import *
-from .tools import timeCount
+from .tools import *
 from .opener import Opener
 
 # Extract the data
@@ -12,6 +11,13 @@ class Extractor(object):
         self.time_step = opener.get_time_step()
         self.lag_number = len(self.database)
         self.pos_ = self.__check_position()
+
+    @timeCount
+    def extract_type(self, key_word: str = "type"):
+        key_word = key_word.lower()
+        df_data = pd.DataFrame(data=self.database[0], columns=self.columns)
+        col_type = df_data[key_word]
+        return set(col_type)
 
     @timeCount
     def extract_position(self, type_: int, wrapped=True) -> NDArray[np.float64]:
