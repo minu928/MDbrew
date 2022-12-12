@@ -1,8 +1,11 @@
-from .__init__ import *
+import numpy as np
+import pandas as pd
+import matplotlib as plt
+from numpy.typing import NDArray
 from time import time
 from sys import stdout
 
-__all__ = ["timeCount", "check_dimension"]
+__all__ = ["np", "pd", "plt", "NDArray", "timeCount", "check_dimension"]
 
 # determine the tab
 def check_tab(name: str) -> int:

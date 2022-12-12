@@ -1,5 +1,4 @@
-from .__init__ import *
-from .tools import timeCount
+from .tools import *
 
 # Linear Regression
 class LinearRegression:

@@ -1,35 +1,40 @@
-from .__init__ import *
 from tqdm import trange
-from .tools import check_dimension
+from .tools import *
 
 
 class MSD(object):
-    def __init__(self, position: NDArray):
-        self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
-        self.position = check_dimension(position, dim=3)
-        self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
-        self.N = self.position.shape[0]
-
-    # User function
-    def get_msd(self, fft: bool = True) -> NDArray[np.float64]:
-        """Get MSD
+    def __init__(self, position: NDArray, fft: bool = True):
+        """MSD
 
         Calculate the msd data and return it with method and fft
 
         Args:
             position (np.ndarray)   :  Data of Particle's position in each lag time
-            method (str, optional)  :  default = 'window'        (window or direct)
             fft (bool, optional)    :  default = True
 
-        Returns:
-            np.ndarray: _description_
+        ## Result of 'Mean Square Displacement'
+        >>> my_msd      = MSD(position = position, fft = true)
+        >>> msd_result  = my_msd.result
         """
-        if fft:
-            self.msd_data = self.__get_msd_fft()
-        else:
-            self.msd_data = self.__get_msd_window()
+        self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
+        self.position = check_dimension(position, dim=3)
+        self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
+        self.N = self.position.shape[0]
+        self.fft = fft
+        self.result = self.run()
 
-        return self.msd_data
+    # User
+    def run(self) -> NDArray[np.float64]:
+        """run
+
+        Returns:
+            NDArray[np.float64]: result of MSD
+        """
+        if self.fft:
+            self.result = self.__get_msd_fft()
+        else:
+            self.result = self.__get_msd_window()
+        return self.result
 
     # window method with non-FFT
     def __get_msd_window(self) -> NDArray[np.float64]:
@@ -103,9 +108,12 @@ class MSD(object):
         return msd_list.mean(axis=self.axis_dict["N_particle"])
 
     # plot the data
-    def plot_msd(self, time_step: float = 1, *args, **kwargs):
-        lagtime = len(self.position)
-        x = np.arange(0, lagtime * time_step, time_step)
-        y = self.msd_data
-        plt.plot(x, y, *args, **kwargs)
-        plt.show()
+    def plot(self, time_step: float = 1, *args, **kwargs):
+        try:
+            lagtime = len(self.position)
+            x = np.arange(0, lagtime * time_step, time_step)
+            y = self.msd_data
+            plt.plot(x, y, *args, **kwargs)
+            plt.show()
+        except:
+            raise ConnectionError("Something is wrong")
