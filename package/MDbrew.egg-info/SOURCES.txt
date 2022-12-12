@@ -8,6 +8,7 @@ MDbrew/linalg.py
 MDbrew/msd.py
 MDbrew/opener.py
 MDbrew/rdf.py
+MDbrew/tester.py
 MDbrew/tools.py
 MDbrew.egg-info/PKG-INFO
 MDbrew.egg-info/SOURCES.txt
