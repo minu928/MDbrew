@@ -10,7 +10,7 @@ class RDF:
         system_size: NDArray,
         r_max: float = None,
         resolution: int = 1000,
-        pbc: str = "single",
+        layer_depth : int = 0,
     ):
         """init
 
@@ -22,7 +22,7 @@ class RDF:
         Kwargs:
             r_max (float): you can input the max radius else None means 'calculate max(system_size)'
             resolution (int): resolution of dr
-            pbc (str) : you can choose "single" or "layer"
+            layer_depth (int) : how many layer do you set, 0 means with PBC (one box) other layered
 
         ## Result of Radial Density Function, Coordination Number
         >>> my_rdf     = RDF(a_position, b_position, system_size)
@@ -31,14 +31,21 @@ class RDF:
         """
         self.a = check_dimension(a, dim=3)
         self.b = check_dimension(b, dim=3)
-        self.system_size = check_dimension(system_size, dim=2)[:, 1]
+
+        self.system_size = check_dimension(system_size, dim=2)[:, 1] * (layer_depth + 1)
         self.box_length = self.system_size * 2.0
+
         self.lag_number = self.a.shape[0]
         self.a_number, self.b_number = self.a.shape[1], self.b.shape[1]
+        
         self.r_max = self.__set_r_max(r_max)
         self.resolution = resolution
-        self.dr = float(self.r_max / self.resolution)
-        self.pbc = pbc
+        self.dr = self.r_max / self.resolution
+        
+        self.layer = self.__make_layer()
+        self.layer_depth = layer_depth
+        self.is_layered = layer_depth
+        
         self.run()
 
     # run the class
@@ -59,7 +66,6 @@ class RDF:
     # Function for get hist
     def _get_hist(self) -> NDArray[np.float64]:
         self.hist_data = np.zeros(self.resolution)
-        self.__check_pbc = self.__set_pbc_style()
         kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
         for lag in trange(self.lag_number, **kwrgs_trange):
             self.a_unit = self.a[lag, ...].astype(np.float64)
@@ -83,7 +89,9 @@ class RDF:
     def __make_histogram(self):
         for b_line in self.b_unit:
             diff_position = self.__get_diff_position(target=b_line)
-            diff_position = self.__check_pbc(diff_position=diff_position)
+            diff_position = self.__add_layer(diff_position=diff_position)
+            if not self.is_layered:
+              diff_position = self.__check_pbc(diff_position=diff_position)
             distance = self.__get_distance(diff_position=diff_position)
             idx_hist = self.__get_idx_histogram(distance=distance)
             value, count = np.unique(idx_hist, return_counts=True)
@@ -93,26 +101,8 @@ class RDF:
     def __get_diff_position(self, target) -> NDArray[np.float64]:
         return np.abs(np.subtract(self.a_unit, target, dtype=np.float64))
 
-    def __is_pbc_single(self) -> bool:
-        pbc_list = ["single", "layer"]
-        if not self.pbc in pbc_list:
-            raise ValueError(f"pbc <- (single) or (layer) : your Value {self.pbc} is wrong")
-        else:
-            if self.pbc == "single":
-                return True
-            else:
-                return False
-
-    def __set_pbc_style(self) -> object:
-        if self.__is_pbc_single:
-            return self.__set_pbc_single
-
-        else:
-            self.layer = self.__make_first_layer()
-            return self.__set_pbc_layer
-
     # set the pbc only consider single system
-    def __set_pbc_single(self, diff_position) -> NDArray[np.float64]:
+    def __check_pbc(self, diff_position) -> NDArray[np.float64]:
         return np.where(
             diff_position > self.system_size,
             self.box_length - diff_position,
@@ -120,22 +110,18 @@ class RDF:
         )
 
     # set the pbc with 27 system
-    def __set_pbc_layer(self, diff_position) -> NDArray[np.float64]:
+    def __add_layer(self, diff_position) -> NDArray[np.float64]:
         return diff_position[:, np.newaxis, :] + self.layer
 
-    # Make a first layer
-    def __make_first_layer(self) -> NDArray[np.float64]:
-        return self.__make_direction_idx() * self.box_length
-
     # Make a 3D layer_idx
-    def __make_direction_idx(self):
+    def __make_layer(self) -> NDArray[np.float64]:
         list_direction = []
-        idx_direction_ = [-1, 0, 1]
+        idx_direction_ = range(self.-layer_depth, self.layer_depth+1)
         for i in idx_direction_:
             for j in idx_direction_:
                 for k in idx_direction_:
                     list_direction.append([i, j, k])
-        return np.array(list_direction)
+        return np.array(list_direction) *  self.box_length
 
     # get distance from different of position
     def __get_distance(self, diff_position) -> NDArray[np.float64]:
@@ -161,11 +147,7 @@ class RDF:
         if r_max is not None:
             return r_max
         else:
-            box_max_radius = max(self.system_size)
-            if self.__is_pbc_single:
-                return box_max_radius
-            else:
-                return box_max_radius * 3.0
+            return max(self.box_length) * (self.layer_depth + 1)
 
     # Plot the g(r) with radii datas
     def plot_result(self, bins: int = 1, *args, **kwrgs):
