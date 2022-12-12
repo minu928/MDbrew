@@ -2,6 +2,8 @@ from .__init__ import *
 from time import time
 from sys import stdout
 
+__all__ = ["timeCount", "check_dimension"]
+
 # determine the tab
 def check_tab(name: str) -> int:
     TAB_SIZE = 8
