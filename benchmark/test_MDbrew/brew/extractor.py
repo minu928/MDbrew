@@ -1,5 +1,6 @@
-from .tools import *
+from ..tool.timer import timeCount
 from .opener import Opener
+from ..base import *
 
 # Extract the data
 class Extractor(object):
