@@ -1,11 +1,7 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from numpy.typing import NDArray
 from time import time
 from sys import stdout
 
-__all__ = ["np", "pd", "plt", "NDArray", "timeCount", "check_dimension"]
+__all__ = ["timeCount", "check_dimension"]
 
 # determine the tab
 def check_tab(name: str) -> int:
@@ -29,10 +25,3 @@ def timeCount(func):
         return result
 
     return wrapper
-
-
-# Dimension checker
-def check_dimension(array: list, dim: int) -> NDArray[np.float64]:
-    new_array = np.asarray(array, dtype=np.float64)
-    assert new_array.ndim == dim, "[DimensionError] Check your dimension "
-    return new_array

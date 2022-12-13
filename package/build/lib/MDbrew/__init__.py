@@ -1,8 +1,5 @@
-from .extractor import Extractor
-from .opener import LAMMPSOpener
-from .msd import MSD
-from .rdf import RDF
-from .linalg import LinearRegression
+from .analysis import *
+from .brew import *
 
-__version__ = "1.6.2"
+__version__ = "2.0.0"
 __name__ = "MDbrew"

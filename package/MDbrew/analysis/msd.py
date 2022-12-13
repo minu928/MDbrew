@@ -1,5 +1,6 @@
 from tqdm import trange
-from .tools import *
+from ..base import *
+from ..tool import spacer
 
 
 class MSD(object):
@@ -17,7 +18,7 @@ class MSD(object):
         >>> msd_result  = my_msd.result
         """
         self.axis_dict = {"lag": 0, "N_particle": 1, "pos": -1}
-        self.position = check_dimension(position, dim=3)
+        self.position = spacer.check_dimension(position, dim=3)
         self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
         self.N = self.position.shape[0]
         self.fft = fft
@@ -53,7 +54,7 @@ class MSD(object):
         """
         msd_list = np.zeros(self.position.shape[:2])
         for lag in trange(1, self.N, **self.kwrgs_it):
-            diff_position = self.position[lag:] - self.position[:-lag]
+            diff_position = spacer.get_diff_position(self.position[lag:], self.position[:-lag])
             distance = self.__square_sum_position(diff_position)
             msd_list[lag, :] = np.mean(distance, axis=self.axis_dict["lag"])
         return self.__mean_msd_list(msd_list=msd_list)

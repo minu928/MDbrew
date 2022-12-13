@@ -1,4 +1,4 @@
-from .tools import timeCount
+from ..tool.timer import timeCount
 from abc import ABCMeta, abstractmethod
 
 # 1st Generation

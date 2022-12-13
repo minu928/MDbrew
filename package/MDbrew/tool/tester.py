@@ -1,7 +1,8 @@
-from .__init__ import *
+from ..analysis import *
+from ..brew import *
 
 
-def tester(path):
+def do_test(path):
     print("\n\ttest Init \u2713 \t\n")
     source = LAMMPSOpener(path)
     extractor = Extractor(opener=source)

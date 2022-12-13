@@ -1,5 +1,6 @@
 from tqdm import trange
-from .tools import *
+from ..base import *
+from ..tool.spacer import *
 
 # Calculate and Plot the RDF
 class RDF:
@@ -12,7 +13,7 @@ class RDF:
         r_max: float = None,
         resolution: int = 1000,
     ):
-        """init
+        """RDF
 
         Args:
             a (NDArray): [lag time, N_particle, dim]
@@ -89,16 +90,12 @@ class RDF:
     # make a histogram
     def __make_histogram(self):
         for b_line in self.b_unit:
-            diff_position = self.__get_diff_position(target=b_line)
+            diff_position = get_diff_position(self.a_unit, b_line)
             diff_position = self.__apply_boundary(diff_position=diff_position)
-            distance = self.__get_distance(diff_position=diff_position)
+            distance = get_distance(diff_position=diff_position, axis=-1)
             idx_hist = self.__get_idx_histogram(distance=distance)
             value, count = np.unique(idx_hist, return_counts=True)
             self.hist_data[value] += count
-
-    # get position difference
-    def __get_diff_position(self, target) -> NDArray[np.float64]:
-        return np.abs(np.subtract(self.a_unit, target, dtype=np.float64))
 
     # select the mode with Boundary Layer
     def __set_boundary_mode(self):
@@ -109,6 +106,7 @@ class RDF:
 
     # set the pbc only consider single system
     def __check_pbc(self, diff_position) -> NDArray[np.float64]:
+        diff_position = np.abs(diff_position)
         return np.where(
             diff_position > self.system_size,
             self.box_length - diff_position,
@@ -128,10 +126,6 @@ class RDF:
                 for k in idx_direction_:
                     list_direction.append([i, j, k])
         return np.array(list_direction) * self.box_length
-
-    # get distance from different of position
-    def __get_distance(self, diff_position) -> NDArray[np.float64]:
-        return np.sqrt(np.sum(np.square(diff_position), axis=-1))
 
     # get idx for histogram
     def __get_idx_histogram(self, distance) -> NDArray[np.int64]:
