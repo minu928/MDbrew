@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: MDbrew
-Version: 2.0.0
+Version: 2.0.2
 Summary: Postprocessing tools for the MD simulation results (ex. lammps)
 Home-page: https://github.com/MyKnu/MDbrew
 Author: Knu
 Author-email: k1alty@naver.com
 License: UNKNOWN
-Download-URL: https://github.com/MyKnu/install_file/MDbrew-2.0.0.tar.gz
+Download-URL: https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.0.2.tar.gz
 Keywords: MD,LAMMPS
 Platform: UNKNOWN
 Requires-Python: >=3
