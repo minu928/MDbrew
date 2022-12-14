@@ -1,4 +1,4 @@
-from MDbrew.tester import tester
+from MDbrew.tool.tester import do_test
 
 path = "./benchmark/test.lammpstrj"
-tester(path)
+do_test(path)
