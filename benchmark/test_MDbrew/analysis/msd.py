@@ -75,7 +75,7 @@ class MSD(object):
             list[float]: MSD data of each lag time
         """
         S_1 = self.__get_S_1()
-        S_2 = self.__auto_correlation()
+        S_2 = self.__get_S_2()
         msd_list = np.subtract(S_1, 2.0 * S_2)
         return self.__mean_msd_list(msd_list=msd_list)
 
@@ -91,7 +91,7 @@ class MSD(object):
         return S_1
 
     # get S2 for FFT
-    def __auto_correlation(self) -> NDArray[np.float64]:
+    def __get_S_2(self) -> NDArray[np.float64]:
         X = np.fft.fft(self.position, n=2 * self.N, axis=self.axis_dict["lag"])
         dot_X = X * X.conjugate()
         x = np.fft.ifft(dot_X, axis=self.axis_dict["lag"])
