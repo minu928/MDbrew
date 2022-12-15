@@ -2,7 +2,9 @@ from tqdm import trange
 from .._base import *
 from ..tool import spacer
 
+__all__ = ["MSD"]
 
+# Class of Mean Square Displacement
 class MSD(object):
     def __init__(self, position: NDArray, fft: bool = True):
         """MSD

@@ -2,6 +2,8 @@ from ..tool.timer import timeCount
 from .._base import *
 from .._type import OpenerType
 
+__all__ = ["Extractor"]
+
 
 class __Type__(object):
     @timeCount
