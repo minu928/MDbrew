@@ -1,31 +1,11 @@
 from ..tool.timer import timeCount
-from .opener import Opener
-from ..base import *
+from .._base import *
+from .._type import OpenerType
 
-# Extract the data
-class Extractor(object):
-    def __init__(self, opener: Opener, dim: int = 3) -> None:
-        """Extractor
+__all__ = ["Extractor"]
 
-        Extract easily the date from Opener (or LAMMPSOpener)
 
-        Args:
-            opener (Opener): instance of class in MDbrew.opener
-            dim (int, optional): dimension of your data. Defaults to 3.
-
-            >>> extracter = Extractor(opener = LAMMPSOpener, dim = 3)
-            >>> type_list = extracotr.extract_type()
-            >>> one_position = extractor.extract_position(type_ = 1)
-            >>> un_wrapped_pos = extractor.extract_position(type_ = 1, wrapped = False)
-        """
-        self.dim = dim
-        self.database = opener.get_database()
-        self.columns = opener.get_columns()
-        self.system_size = opener.get_system_size()
-        self.time_step = opener.get_time_step()
-        self.lag_number = len(self.database)
-        self.pos_ = self.__check_position()
-
+class __Type__(object):
     @timeCount
     def extract_type(self, key_word: str = "type") -> list[np.float64]:
         """Extract type
@@ -43,6 +23,8 @@ class Extractor(object):
         col_type = df_data[key_word]
         return list(set(col_type))
 
+
+class __Position__(object):
     @timeCount
     def extract_position(self, type_: int, wrapped=True) -> NDArray[np.float64]:
         """Extract position
@@ -84,7 +66,7 @@ class Extractor(object):
             idx_position = self.__df_data[list_in] * box_size
             return np.array(idx_position) + self.__df_wrapped_position()
 
-    def __check_position(self) -> list[str]:
+    def _check_position(self) -> list[str]:
         for idx, column in enumerate(self.columns):
             if column in ["x", "xs"]:
                 self.__already_unwrapped = False
@@ -93,3 +75,28 @@ class Extractor(object):
                 self.__already_unwrapped = True
                 return self.columns[idx : idx + self.dim]
         raise Exception(f"COLUMNS : {self.columns} is not normal case")
+
+
+# Extractor of Something
+class Extractor(__Type__, __Position__):
+    def __init__(self, opener: OpenerType, dim: int = 3) -> None:
+        """Extractor
+
+        Extract easily the date from Opener (or LAMMPSOpener)
+
+        Args:
+            opener (OpenerType): instance of class in MDbrew.opener
+            dim (int, optional): dimension of your data. Defaults to 3.
+
+            >>> extracter = Extractor(opener = LAMMPSOpener, dim = 3)
+            >>> type_list = extracotr.extract_type()
+            >>> one_position = extractor.extract_position(type_ = 1)
+            >>> un_wrapped_pos = extractor.extract_position(type_ = 1, wrapped = False)
+        """
+        self.dim = dim
+        self.database = opener.get_database()
+        self.columns = opener.get_columns()
+        self.system_size = opener.get_system_size()
+        self.time_step = opener.get_time_step()
+        self.lag_number = len(self.database)
+        self.pos_ = self._check_position()

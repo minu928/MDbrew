@@ -1,4 +1,6 @@
-from ..base import *
+from .._base import *
+
+__all__ = ["check_dimension", "get_diff_position", "get_distance"]
 
 # Dimension checker
 def check_dimension(array: list, dim: int) -> NDArray[np.float64]:

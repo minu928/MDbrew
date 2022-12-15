@@ -1,6 +1,10 @@
 from .analysis import *
 from .brew import *
 
+__version__ = "2.0.6"
+__name__ = "MDbrew"
+
+
 """ How to use
 
 ## ZERO. import MDbrew as mdb
@@ -34,6 +38,3 @@ from .brew import *
 >>> msd.plot_result()
 
 """
-
-__version__ = "2.0.5"
-__name__ = "MDbrew"

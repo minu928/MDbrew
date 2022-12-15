@@ -1,6 +1,8 @@
 from tqdm import trange
-from ..base import *
+from .._base import *
 from ..tool.spacer import *
+
+__all__ = ["RDF"]
 
 # Calculate and Plot the RDF
 class RDF:
