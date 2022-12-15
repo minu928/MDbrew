@@ -1,7 +1,7 @@
 from time import time
 from sys import stdout
 
-__all__ = ["timeCount", "check_dimension"]
+__all__ = ["timeCount"]
 
 # determine the tab
 def check_tab(name: str) -> int:
