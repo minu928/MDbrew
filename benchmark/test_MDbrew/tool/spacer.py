@@ -1,4 +1,4 @@
-from ..base import *
+from .._base import *
 
 # Dimension checker
 def check_dimension(array: list, dim: int) -> NDArray[np.float64]:

@@ -3,8 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
 
-__all__ = ["np", "pd", "plt", "NDArray"]
-
 """ How to use
 
 ## ZERO. import MDbrew as mdb
@@ -38,3 +36,5 @@ __all__ = ["np", "pd", "plt", "NDArray"]
 >>> msd.plot_result()
 
 """
+
+__all__ = ["np", "pd", "plt", "NDArray"]

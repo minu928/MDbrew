@@ -1,5 +1,5 @@
 from tqdm import trange
-from ..base import *
+from .._base import *
 from ..tool.spacer import *
 
 # Calculate and Plot the RDF

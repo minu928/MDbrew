@@ -1,6 +1,6 @@
 from ..tool.timer import timeCount
-from .opener import Opener
-from ..base import *
+from .._base import *
+from .._type import OpenerType
 
 
 class __Type__(object):
@@ -77,13 +77,13 @@ class __Position__(object):
 
 # Extractor of Something
 class Extractor(__Type__, __Position__):
-    def __init__(self, opener: Opener, dim: int = 3) -> None:
+    def __init__(self, opener: OpenerType, dim: int = 3) -> None:
         """Extractor
 
         Extract easily the date from Opener (or LAMMPSOpener)
 
         Args:
-            opener (Opener): instance of class in MDbrew.opener
+            opener (OpenerType): instance of class in MDbrew.opener
             dim (int, optional): dimension of your data. Defaults to 3.
 
             >>> extracter = Extractor(opener = LAMMPSOpener, dim = 3)
