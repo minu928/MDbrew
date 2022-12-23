@@ -36,12 +36,12 @@ class __Position__(object):
             wrapped (bool, optional): control the is wrapped. Defaults to True.
 
         Returns:
-            NDArray[np.float64]: data of position, shape = [lag, number_of_particle, dimension]
+            NDArray[np.float64]: data of position, shape = [frames, number_of_particle, dimension]
         """
         db_position = []
         get_position = self.__check_method(wrapped=wrapped)
-        for lag in range(self.lag_number):
-            df_data = pd.DataFrame(data=self.database[lag], columns=self.columns)
+        for frame in range(self.frame_number):
+            df_data = pd.DataFrame(data=self.database[frame], columns=self.columns)
             self.__df_data = df_data[df_data["type"] == type_]
             position = get_position()
             db_position.append(position)
@@ -98,5 +98,5 @@ class Extractor(__Type__, __Position__):
         self.columns = opener.get_columns()
         self.system_size = opener.get_system_size()
         self.time_step = opener.get_time_step()
-        self.lag_number = len(self.database)
+        self.frame_number = len(self.database)
         self.pos_ = self._check_position()
