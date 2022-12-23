@@ -18,8 +18,8 @@ class RDF:
         """RDF
 
         Args:
-            a (NDArray): [lag time, N_particle, dim]
-            b (NDArray): [lag time, N_particle, dim]
+            a (NDArray): [frame, N_particle, dim]
+            b (NDArray): [frame, N_particle, dim]
             system_size (NDArray): [[-lx, lx], [-ly, ly], [-lz, lz]]
 
         Kwargs:
@@ -42,7 +42,7 @@ class RDF:
         self.layer = self.__make_layer()
         self.is_layered = layer_depth
 
-        self.lag_number = self.a.shape[0]
+        self.frame_number = self.a.shape[0]
         self.a_number, self.b_number = self.a.shape[1], self.b.shape[1]
 
         self.r_max = self.__set_r_max(r_max)
@@ -71,9 +71,9 @@ class RDF:
         self.hist_data = np.zeros(self.resolution)
         self.__apply_boundary = self.__set_boundary_mode()
         kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
-        for lag in trange(self.lag_number, **kwrgs_trange):
-            self.a_unit = self.a[lag, ...].astype(np.float64)
-            self.b_unit = self.b[lag, ...].astype(np.float64)
+        for frame in trange(self.frame_number, **kwrgs_trange):
+            self.a_unit = self.a[frame, ...].astype(np.float64)
+            self.b_unit = self.b[frame, ...].astype(np.float64)
             self.__make_histogram()
 
     # Function for get rdf
@@ -86,7 +86,7 @@ class RDF:
 
     # Function for get coordinate number
     def _get_cn(self) -> NDArray[np.float64]:
-        self.n = self.hist_data / (self.lag_number * self.a_number)
+        self.n = self.hist_data / (self.frame_number * self.a_number)
         self.cn = np.cumsum(self.n)
 
     # make a histogram
@@ -139,7 +139,7 @@ class RDF:
         r_i = self.radii[1:]
         g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
         factor = np.array(
-            4.0 * np.pi * self.dr * self.lag_number * self.a_number * self.b_number,
+            4.0 * np.pi * self.dr * self.frame_number * self.a_number * self.b_number,
             dtype=np.float64,
         )
         box_volume = np.prod(self.box_length, dtype=np.float64)
