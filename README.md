@@ -6,7 +6,7 @@ MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 ~~~zsh
 pip install MDbrew
 ~~~
-- VERSION :  (2.0.5)
+- VERSION :  (2.0.7)
 
 ## Package
 
@@ -39,8 +39,8 @@ system_size = data.get_system_size()
 ~~~python
 from MDbrew import Extractor
 extractor = Extractor(opener=opener)
-wrapped_position = extractor.extract_position(type_=1, wrapped=True)
-unwrapped_position = extractor.extract_position(type_=1, wrapped=False)
+wrapped_position = extractor.extract_position(target_type=1, wrapped=True)
+unwrapped_position = extractor.extract_position(target_type=1, wrapped=False)
 type_list = extractor.extract_type()
 system_size = extractor.system_size
 fff
