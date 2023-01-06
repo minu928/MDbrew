@@ -1,70 +1,65 @@
 from ..tool.timer import timeCount
 from .._base import *
-from .._type import OpenerType
+from .._type import OpenerType, NumericType
 
 __all__ = ["Extractor"]
 
 
 class __Type__(object):
     @timeCount
-    def extract_type(self, key_word: str = "type") -> list[np.float64]:
-        """Extract type
-
-        Extract the type format of list
-
-        Args:
-            key_word (str, optional): keyword for find the data in columns. Defaults to "type".
-
-        Returns:
-            list[np.float64]: kind of type in opener.get_database()
-        """
+    def extract_type_list(self, key_word: str = "type") -> NDArray[np.int64]:
         key_word = key_word.lower()
         df_data = pd.DataFrame(data=self.database[0], columns=self.columns)
-        col_type = df_data[key_word]
-        return list(set(col_type))
+        type_list = df_data[key_word].astype("int64")
+        return type_list
+
+    @timeCount
+    def extract_type_set(self, key_word: str = "type") -> list[np.int64]:
+        return set(self.extract_type_list(key_word=key_word))
 
 
 class __Position__(object):
     @timeCount
-    def extract_position(self, type_: int, wrapped=True) -> NDArray[np.float64]:
+    def extract_position(self, target_type: int = "All", wrapped=True) -> NDArray[np.float64]:
         """Extract position
 
         Extract the position in opener
 
         Args:
-            type_ (int): your type name in type_list
+            target_type (int): your type name in type_list, default = "All"
             wrapped (bool, optional): control the is wrapped. Defaults to True.
 
         Returns:
             NDArray[np.float64]: data of position, shape = [frames, number_of_particle, dimension]
         """
+        self.target_type = target_type
         db_position = []
-        get_position = self.__check_method(wrapped=wrapped)
+        get_position = self.__check_position_method(wrapped=wrapped)
         for frame in range(self.frame_number):
             df_data = pd.DataFrame(data=self.database[frame], columns=self.columns)
-            self.__df_data = df_data[df_data["type"] == type_]
+            self.__df_data = self._check_is_type_none(df_data=df_data)
             position = get_position()
             db_position.append(position)
         return np.asarray(db_position, dtype=np.float64)
 
-    def __check_method(self, wrapped):
+    def __check_position_method(self, wrapped):
         if wrapped:
-            return self.__df_wrapped_position
+            return self._wrapped_position_method
         else:
-            return self.__df_unwrapped_position
+            return self._unwrapped_position_method
 
-    def __df_wrapped_position(self) -> NDArray[np.float64]:
+    def _wrapped_position_method(self) -> NDArray[np.float64]:
         return np.array(self.__df_data[self.pos_])
 
-    def __df_unwrapped_position(self) -> NDArray[np.float64]:
+    def _unwrapped_position_method(self) -> NDArray[np.float64]:
         if self.__already_unwrapped:
-            return self.__df_wrapped_position()
+            return self._wrapped_position_method()
         else:
             idx_ix = self.columns.index("ix")
             list_in = self.columns[idx_ix : idx_ix + self.dim]
             box_size = np.array(self.system_size)[:, 1]
             idx_position = self.__df_data[list_in] * box_size
-            return np.array(idx_position) + self.__df_wrapped_position()
+            return np.array(idx_position) + self._wrapped_position_method()
 
     def _check_position(self) -> list[str]:
         for idx, column in enumerate(self.columns):
@@ -75,6 +70,13 @@ class __Position__(object):
                 self.__already_unwrapped = True
                 return self.columns[idx : idx + self.dim]
         raise Exception(f"COLUMNS : {self.columns} is not normal case")
+
+    def _check_is_type_none(self, df_data) -> NDArray[np.float64]:
+        if self.target_type == "All":
+            return df_data
+        else:
+            assert type(self.target_type) is not NumericType, f"{self.target_type} is not NumericType (int or float)"
+            return df_data[df_data["type"] == self.target_type]
 
 
 # Extractor of Something
