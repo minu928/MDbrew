@@ -1,7 +1,7 @@
 from .analysis import *
 from .brew import *
 
-__version__ = "2.0.7"
+__version__ = "2.0.8"
 __name__ = "MDbrew"
 
 
@@ -18,7 +18,8 @@ __name__ = "MDbrew"
 ## Second. Extract your data
 >>> extractor = mdb.Extractor(opener=opener)
 >>> system_size = extractor.system_size
->>> type_ = extractor.extract_type()
+>>> type_list = extractor.extract_type_list()
+>>> id_list = extractor.extract_id_list()
 >>> one_position = extractor.extract_position(type_=1.0)
 >>> two_position = extractor.extract_position(type_=2.0)
 

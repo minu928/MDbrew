@@ -5,17 +5,26 @@ from .._type import OpenerType, NumericType
 __all__ = ["Extractor"]
 
 
+def _find_data_by_keyword(data, columns, keyword) -> NDArray[np.int64]:
+    keyword = keyword.lower()
+    df_data = pd.DataFrame(data=data, columns=columns)
+    return df_data[keyword].to_numpy(dtype=np.int64)
+
+
+class __Id__(object):
+    @timeCount
+    def extract_id_list(self, keyword: str = "id") -> NDArray[np.int64]:
+        return _find_data_by_keyword(data=self.database[0], columns=self.columns, keyword=keyword)
+
+
 class __Type__(object):
     @timeCount
-    def extract_type_list(self, key_word: str = "type") -> NDArray[np.int64]:
-        key_word = key_word.lower()
-        df_data = pd.DataFrame(data=self.database[0], columns=self.columns)
-        type_list = df_data[key_word].astype("int64")
-        return type_list
+    def extract_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
+        return _find_data_by_keyword(data=self.database[0], columns=self.columns, keyword=keyword)
 
     @timeCount
-    def extract_type_set(self, key_word: str = "type") -> list[np.int64]:
-        return set(self.extract_type_list(key_word=key_word))
+    def extract_type_set(self, keyword: str = "type") -> set[np.int64]:
+        return set(self.extract_type_list(keyword=keyword))
 
 
 class __Position__(object):
@@ -79,8 +88,10 @@ class __Position__(object):
             return df_data[df_data["type"] == self.target_type]
 
 
+_Hierchy = [__Id__, __Type__, __Position__]
+
 # Extractor of Something
-class Extractor(__Type__, __Position__):
+class Extractor(*_Hierchy):
     def __init__(self, opener: OpenerType, dim: int = 3) -> None:
         """Extractor
 
