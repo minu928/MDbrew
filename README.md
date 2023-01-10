@@ -6,16 +6,16 @@ MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 ~~~zsh
 pip install MDbrew
 ~~~
-- VERSION :  (2.0.7)
+- VERSION :  (2.0.12)
 
 ## Package
 
-### Opener  
+### brew.opner  
 - LAMMPSOpener : for dump file (ex. dump.lammpstrj)  
-### tools  
+- GromacsOpener : for dump file
+### tool
+- query.py
 - timeCount : decorator for get execute time
-### linalg
-- LinearRegression : Class for linear regression  
 ### extractor
 - Extractor : class for extract the data form of Opener
 ### msd  

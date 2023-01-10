@@ -10,6 +10,15 @@ __all__ = ["Extractor"]
 class __Id__(object):
     @timeCount
     def extract_id_list(self, keyword: str = "id") -> NDArray[np.int64]:
+        """
+        Extract the id from traj file
+
+        Args:
+            keyword (str, optional): keyword of 'id' in your traj. Defaults to "id".
+
+        Returns:
+            NDArray[np.int64]: ndarray of id in sequential
+        """
         return find_data_by_keyword(data=self.database[0], columns=self.columns, keyword=keyword)
 
 
@@ -20,18 +29,54 @@ class __Type__(object):
 
     @timeCount
     def extract_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
+        """
+        Extract the type_list
+
+        Args:
+            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+
+        Returns:
+            NDArray[np.int64]: ndarray data of atom(type) list
+        """
         return self.__get_type_list(keyword=keyword)
 
     @timeCount
-    def extract_type_set(self, keyword: str = "type") -> set[np.int64]:
-        return set(self.__get_type_list(keyword=keyword))
+    def extract_type_info(self, keyword: str = "type"):
+        """
+        Extract the unique data from type_list
+
+        Args:
+            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+
+        Returns:
+            tuple(NDarray, NDarray): [0] = unique data of type_list, [1] = number of each type
+        """
+        return np.unique(self.__get_type_list(keyword=keyword), return_counts=True)
 
     @timeCount
     def extract_atom_list(self, dict_type: dict[int:str], keyword: str = "type") -> NDArray[np.int64]:
+        """
+        Extract the Atom list from your traj file
+
+        Args:
+            dict_type (dict[int:str]): dictionary data || key = number of type in traj || value = atomic name, ex) He
+            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+
+        Returns:
+            NDArray[np.int64]: return the atomic number list
+        """
         return switch_to_atom_list(type_list=self.__get_type_list(keyword=keyword), dict_type=dict_type)
 
     @property
     def atom_info(self):
+        """
+        Load the atom_info.npz
+
+        This data have below key
+            1. atom_name_list = atom_info["atom_name"]
+            2. atom_number_list = atom_info["atom_number"]
+            3. atom_weight_list = atom_info["atom_weight"]
+        """
         return atom_info
 
 

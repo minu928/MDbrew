@@ -3,7 +3,7 @@ from pkg_resources import resource_filename
 
 __all__ = ["switch_to_atom_list", "atom_name_list", "atom_number_list", "atom_weight_list", "periodic_table"]
 
-file_path = resource_filename("test_MDbrew.chemistry", "atom_info.npz")
+file_path = resource_filename(f"{__package__}", "atom_info.npz")
 del resource_filename
 
 # Atom Values
@@ -14,7 +14,17 @@ atom_weight_list = atom_info["atom_weight"]
 periodic_table = dict(zip(atom_name_list, atom_number_list))
 
 # Functions
-def switch_to_atom_list(type_list: list, dict_type: dict[int:str]):
+def switch_to_atom_list(type_list: list[int], dict_type: dict[int:str]):
+    """
+    switch the type(ex. 1,2) to atomic number
+
+    Args:
+        type_list (list[int]): list consisted with type (1, 2, 3)
+        dict_type (dict[int:str]): dictionary data
+
+    Returns:
+        NDArray()
+    """
     componet_type_list = list(set(type_list))
     assert componet_type_list == list(
         dict_type.keys()

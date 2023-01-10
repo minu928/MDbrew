@@ -4,3 +4,5 @@ import matplotlib.pyplot as plt
 from numpy.typing import NDArray
 
 __all__ = ["np", "pd", "plt", "NDArray"]
+
+print(__package__)
