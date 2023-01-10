@@ -1,7 +1,7 @@
 from .analysis import *
 from .brew import *
 
-__version__ = "2.0.9"
+__version__ = "2.0.11"
 __name__ = "MDbrew"
 
 
@@ -20,6 +20,7 @@ __name__ = "MDbrew"
 >>> system_size = extractor.system_size
 >>> type_list = extractor.extract_type_list()
 >>> id_list = extractor.extract_id_list()
+>>> atom_list = extractor.extract_atom_list(dict_type = dict_type)  # dict_typ : set[int:str] = {1:'O', 2:'N'}
 >>> one_position = extractor.extract_position(type_=1.0)
 >>> two_position = extractor.extract_position(type_=2.0)
 

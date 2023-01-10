@@ -1,16 +1,19 @@
 from .._base import *
 from pkg_resources import resource_filename
 
-__all__ = ["switch_to_atom_list"]
+__all__ = ["switch_to_atom_list", "atom_name_list", "atom_number_list", "atom_weight_list", "periodic_table"]
+
 file_path = resource_filename("MDbrew.chemistry", "atom_info.npz")
+del resource_filename
+
+# Atom Values
 atom_info = np.load(file_path)
 atom_name_list = atom_info["atom_name"]
 atom_number_list = atom_info["atom_number"]
 atom_weight_list = atom_info["atom_weight"]
 periodic_table = dict(zip(atom_name_list, atom_number_list))
-del resource_filename
 
-
+# Functions
 def switch_to_atom_list(type_list: list, dict_type: dict[int:str]):
     componet_type_list = list(set(type_list))
     assert componet_type_list == list(
