@@ -29,6 +29,8 @@ MDbrew/analysis/rdf.py
 MDbrew/brew/__init__.py
 MDbrew/brew/extractor.py
 MDbrew/brew/opener.py
+MDbrew/chemistry/__init__.py
+MDbrew/chemistry/atom.py
 MDbrew/tool/__init__.py
 MDbrew/tool/spacer.py
 MDbrew/tool/tester.py

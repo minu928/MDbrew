@@ -1,6 +1,7 @@
 from ..tool.timer import timeCount
 from .._base import *
 from .._type import OpenerType, NumericType
+from ..chemistry.atom import switch_to_atom_list, atom_info
 
 __all__ = ["Extractor"]
 
@@ -18,13 +19,24 @@ class __Id__(object):
 
 
 class __Type__(object):
-    @timeCount
-    def extract_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
+    def __get_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
         return _find_data_by_keyword(data=self.database[0], columns=self.columns, keyword=keyword)
 
     @timeCount
+    def extract_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
+        return self.__get_type_list(keyword=keyword)
+
+    @timeCount
     def extract_type_set(self, keyword: str = "type") -> set[np.int64]:
-        return set(self.extract_type_list(keyword=keyword))
+        return set(self.__get_type_list(keyword=keyword))
+
+    @timeCount
+    def extract_atom_list(self, dict_type: dict[int:str], keyword: str = "type") -> NDArray[np.int64]:
+        return switch_to_atom_list(type_list=self.__get_type_list(keyword=keyword), dict_type=dict_type)
+
+    @property
+    def atom_info(self):
+        return atom_info
 
 
 class __Position__(object):

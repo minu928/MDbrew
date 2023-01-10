@@ -11,6 +11,8 @@ def do_test(path):
     uw_position = extractor.extract_position(target_type=1, wrapped=False)[-10:]
     id_list = extractor.extract_id_list()
     type_list = extractor.extract_type_list()
+    dict_type = {1: "O", 2: "N"}
+    atom_list = extractor.extract_atom_list(dict_type=dict_type)
     rdf = RDF(position, position, system_size)
     rdf.result
     msd = MSD(uw_position)
