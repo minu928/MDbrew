@@ -9,19 +9,26 @@ pip install MDbrew
 - VERSION :  (2.0.12)
 
 ## Package
-
-### brew.opner  
+### brew
+#### opener.py
 - LAMMPSOpener : for dump file (ex. dump.lammpstrj)  
 - GromacsOpener : for dump file
-### tool
-- query.py
+#### extractor.py
+- Extractor : class for extract the data from type OpenerType
+### chemistry
+- atom.py : contain the chemisty atom data
+- atom_info.npz : data of atom
 - timeCount : decorator for get execute time
-### extractor
-- Extractor : class for extract the data form of Opener
-### msd  
-- MSD : Class for get MSD data with position data [ lagtime, Number of Particle, pos ]  
-### rdf  
-- RDF : Class for get RDF data with position data [ lagtime, Number of Particle, pos ]  
+### tool
+#### timer.py
+#### spacer.py
+#### query.py
+#### tester.py
+### analysis
+#### msd.py  
+- MSD : Class for get MSD data with position data [n_Frame, Number of Particle, dim]  
+#### rdf.py  
+- RDF : Class for get RDF data with position data [n_Frame, Number of Particle, dim]  
 
 ## Code
 
@@ -41,9 +48,11 @@ from MDbrew import Extractor
 extractor = Extractor(opener=opener)
 wrapped_position = extractor.extract_position(target_type=1, wrapped=True)
 unwrapped_position = extractor.extract_position(target_type=1, wrapped=False)
-type_list = extractor.extract_type()
-system_size = extractor.system_size
-fff
+
+type_list = extractor.extract_type_list()
+type_info = extractor.extract_type_info()
+
+atom_list = extractor.extract_atom_list()
 ~~~
 
 ### Example - RDF
