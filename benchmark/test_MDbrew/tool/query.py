@@ -1,6 +1,6 @@
 from .._base import *
 
-__all__ = ["_find_data_by_keyword"]
+__all__ = ["find_data_by_keyword"]
 
 
 def find_data_by_keyword(data, columns: list, keyword: str) -> NDArray[np.int64]:
