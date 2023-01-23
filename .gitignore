@@ -1,6 +1,7 @@
 ## file ignore
 __pycache__
+.idea
+
 ## externsion ignore
 *.pyc
 *.ipynb
-.idea

@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     name="MDbrew",
-    version="2.0.12",
+    version="2.0.13",
     author="Knu",
-    author_email="k1alty@naver.com",
+    author_email="rlaalsdn753@korea.ac.kr",
     url="https://github.com/MyKnu/MDbrew",
     download_url="https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.0.12.tar.gz",
     install_requies=[
