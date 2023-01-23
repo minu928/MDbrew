@@ -1,4 +1,4 @@
-from ..tool.timer import timeCount
+from ..tool.timer import time_count
 from abc import ABCMeta, abstractmethod
 
 __all__ = ["Opener", "LAMMPSOpener", "GromacsOpener"]
@@ -80,14 +80,14 @@ class LAMMPSOpener(Opener):
             >>> time_step   = opener.get_time_step
         """
         super().__init__(file_path)
-        target_info = self.__check_target_info(target_info)
+        target_info = ["id", "NUMBER"] if target_info is None else target_info
         self.target_line = target_info[0]
         self.target_word = target_info[1]
         self.system_num = int(self.lines[self._find_idx_by_word(self.target_word) + 1])
         self.start_idx_list: list[int] = self._find_idxlist_by_word(self.target_line)
 
     # Get the database from a, b
-    @timeCount
+    @time_count
     def get_database(self) -> list:
         database: list = []
         for idx in self.start_idx_list:
@@ -99,32 +99,25 @@ class LAMMPSOpener(Opener):
         return database
 
     # Find the columns data in lines
-    @timeCount
+    @time_count
     def get_columns(self, erase_appendix: int = 2) -> list[str]:
         column_idx: int = self.start_idx_list[0]
         return self.lines[column_idx].split(" ")[erase_appendix:]
 
     # find the system size
-    @timeCount
+    @time_count
     def get_system_size(self, dim: int = 3, word: str = "BOX") -> list[float]:
         size_idx = self._find_idx_by_word(word=word) + 1
-        system_size = self.lines[size_idx : size_idx + dim]
+        system_size = self.lines[size_idx: size_idx + dim]
         system_size = self._split_data_in_lines(lines=system_size)
         return system_size
 
     # find the time step
-    @timeCount
+    @time_count
     def get_time_step(self, word: str = "TIMESTEP") -> list[float]:
         time_step_idxlist = self._find_idxlist_by_word(word=word)
         time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idxlist]
         return time_step_list
-
-    # Check target_information
-    def __check_target_info(self, target_info: list[str]) -> list[str]:
-        if target_info == None:
-            return ["id", "NUMBER"]
-        else:
-            return target_info
 
 
 # 2nd Generation -> For ""
