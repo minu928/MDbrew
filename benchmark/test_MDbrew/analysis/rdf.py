@@ -28,7 +28,7 @@ class RDF:
             layer_depth (int) : how many layer do you set, 0 means with PBC (one box) other layered
 
         ## Result of Radial Density Function, Coordination Number
-        >>> my_rdf     = RDF(a_position, b_position, system_size)
+        >>> my_rdf     = RDF(a = a_position, b= b_position, system_size=system_size)
         >>> rdf_result = my_rdf.result
         >>> cn_result  = my_rdf.cn
         """
@@ -67,7 +67,7 @@ class RDF:
         return [self.radii, self.result, self.cn]
 
     # Function for get hist
-    def _get_hist(self) -> NDArray[np.float64]:
+    def _get_hist(self):
         self.hist_data = np.zeros(self.resolution)
         self.__apply_boundary = self.__set_boundary_mode()
         kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
@@ -77,15 +77,15 @@ class RDF:
             self.__make_histogram()
 
     # Function for get rdf
-    def _get_result(self) -> NDArray[np.float64]:
+    def _get_result(self):
         self.result = self.__get_g_r()
 
     # Function for get radii data
-    def _get_radii(self) -> NDArray[np.float64]:
+    def _get_radii(self):
         self.radii = np.linspace(0.0, self.r_max, self.resolution)
 
     # Function for get coordinate number
-    def _get_cn(self) -> NDArray[np.float64]:
+    def _get_cn(self):
         self.n = self.hist_data / (self.frame_number * self.a_number)
         self.cn = np.cumsum(self.n)
 
@@ -93,7 +93,7 @@ class RDF:
     def __make_histogram(self):
         for b_line in self.b_unit:
             diff_position = get_diff_position(self.a_unit, b_line)
-            diff_position = self.__apply_boundary(diff_position=diff_position)
+            diff_position = self.__apply_boundary(diff_position)
             distance = get_distance(diff_position=diff_position, axis=-1)
             idx_hist = self.__get_idx_histogram(distance=distance)
             value, count = np.unique(idx_hist, return_counts=True)

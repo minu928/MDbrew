@@ -1,4 +1,4 @@
-from ..tool.timer import timeCount
+from ..tool.timer import time_count
 from ..tool.query import find_data_by_keyword
 from .._base import *
 from .._type import OpenerType
@@ -6,9 +6,14 @@ from ..chemistry.atom import switch_to_atom_list, atom_info
 
 __all__ = ["Extractor"]
 
-# Id information in database
+
+# id information in database
 class __Id__(object):
-    @timeCount
+    def __int__(self):
+        self.database = None
+        self.columns = None
+
+    @time_count
     def extract_id_list(self, keyword: str = "id") -> NDArray[np.int64]:
         """
         Extract the id from traj file
@@ -24,10 +29,14 @@ class __Id__(object):
 
 # Atom information in database
 class __Type__(object):
+    def __int__(self):
+        self.database = None
+        self.columns = None
+
     def __get_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
         return find_data_by_keyword(data=self.database[0], columns=self.columns, keyword=keyword)
 
-    @timeCount
+    @time_count
     def extract_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
         """
         Extract the type_list
@@ -40,7 +49,7 @@ class __Type__(object):
         """
         return self.__get_type_list(keyword=keyword)
 
-    @timeCount
+    @time_count
     def extract_type_info(self, keyword: str = "type"):
         """
         Extract the unique data from type_list
@@ -49,11 +58,11 @@ class __Type__(object):
             keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
 
         Returns:
-            tuple(NDarray, NDarray): [0] = unique data of type_list, [1] = number of each type
+            tuple(NDArray, NDArray): [0] = unique data of type_list, [1] = number of each type
         """
         return np.unique(self.__get_type_list(keyword=keyword), return_counts=True)
 
-    @timeCount
+    @time_count
     def extract_atom_list(self, dict_type: dict[int:str], keyword: str = "type") -> NDArray[np.int64]:
         """
         Extract the Atom list from your traj file
@@ -80,11 +89,20 @@ class __Type__(object):
         return atom_info
 
 
-# Position infromation in database
+# Position information in database
 class __Position__(object):
-    @timeCount
+    def __init__(self):
+        self.dim = None
+        self.system_size = None
+        self.database = None
+        self.frame_number = None
+        self.columns = None
+        self.pos_ = None
+
+    @time_count
     def extract_position(self, target_type: int = "all", wrapped=True) -> NDArray[np.float64]:
-        """Extract position
+        """
+        Extract position
 
         Extract the position in opener
 
@@ -101,7 +119,7 @@ class __Position__(object):
         for frame in range(self.frame_number):
             df_data = pd.DataFrame(data=self.database[frame], columns=self.columns)
             df_data = df_data if target_type == "all" else df_data[df_data["type"] == target_type]
-            position = get_position_from(df_data=df_data)
+            position = get_position_from(df_data)
             position_list.append(position)
         return np.asarray(position_list, dtype=np.float64)
 
@@ -116,7 +134,7 @@ class __Position__(object):
             return self._wrapped_method(df_data=df_data)
         else:
             idx_ix = self.columns.index("ix")
-            list_in = self.columns[idx_ix : idx_ix + self.dim]
+            list_in = self.columns[idx_ix: idx_ix + self.dim]
             box_size = np.array(self.system_size)[:, 1]
             idx_position = df_data[list_in] * box_size
             return np.array(idx_position) + self._wrapped_method(df_data=df_data)
@@ -125,28 +143,29 @@ class __Position__(object):
         for idx, column in enumerate(self.columns):
             if column in ["x", "xs"]:
                 self.__already_unwrapped = False
-                return self.columns[idx : idx + self.dim]
+                return self.columns[idx: idx + self.dim]
             elif column in ["xu", "xsu"]:
                 self.__already_unwrapped = True
-                return self.columns[idx : idx + self.dim]
+                return self.columns[idx: idx + self.dim]
         raise Exception(f"COLUMNS : {self.columns} is not normal case")
 
 
-_Hierchy = [__Id__, __Type__, __Position__]
+_hierarchy = [__Id__, __Type__, __Position__]
+
 
 # Extractor of Something
-class Extractor(*_Hierchy):
+class Extractor(*_hierarchy):
     def __init__(self, opener: OpenerType, dim: int = 3) -> None:
         """Extractor
 
         Extract easily the date from Opener (or LAMMPSOpener)
 
         Args:
-            opener (OpenerType): instance of class in MDbrew.opener
+            opener (OpenerType): instance of class in MDbrew
             dim (int, optional): dimension of your data. Defaults to 3.
 
-            >>> extracter = Extractor(opener = LAMMPSOpener, dim = 3)
-            >>> type_list = extracotr.extract_type()
+            >>> extractor = Extractor(opener = LAMMPSOpener, dim = 3)
+            >>> type_list = extractor.extract_type()
             >>> one_position = extractor.extract_position(type_ = 1)
             >>> un_wrapped_pos = extractor.extract_position(type_ = 1, wrapped = False)
         """
