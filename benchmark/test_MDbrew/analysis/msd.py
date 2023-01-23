@@ -4,6 +4,7 @@ from ..tool import spacer
 
 __all__ = ["MSD"]
 
+
 # Class of Mean Square Displacement
 class MSD(object):
     def __init__(self, position: NDArray, fft: bool = True):
@@ -16,7 +17,7 @@ class MSD(object):
             fft (bool, optional)    :  default = True
 
         ## Result of 'Mean Square Displacement'
-        >>> my_msd      = MSD(position = position, fft = true)
+        >>> my_msd      = MSD(position = position, fft = True)
         >>> msd_result  = my_msd.result
         """
         self.axis_dict = {"frame": 0, "N_particle": 1, "pos": -1}
@@ -47,10 +48,6 @@ class MSD(object):
 
         Time complexity : O(N**2)
 
-        Args:
-            position (np.ndarray): Data of Particle's position in each frame
-                - shape = [Number of frame, Number of particle, Coordinate data]
-
         Returns:
             list[float]: MSD data of each frame
         """
@@ -68,10 +65,6 @@ class MSD(object):
         Calculate the MSD list with linear loop with numpy function
 
         Time complexity : O(N logN)
-
-        Args:
-            position (np.ndarray): Data of Particle's position in each frame
-                - shape = [Number of frame, Number of particle, Coordinate data]
 
         Returns:
             list[float]: MSD data of each frame
