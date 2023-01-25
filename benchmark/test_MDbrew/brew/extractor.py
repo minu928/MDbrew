@@ -18,11 +18,15 @@ class __Id__(object):
         """
         Extract the id from traj file
 
-        Args:
-            keyword (str, optional): keyword of 'id' in your traj. Defaults to "id".
+        Parameters
+        ---------
+        keyword : str, optional
+            keyword of 'id' in your traj. Defaults to "id".
 
-        Returns:
-            NDArray[np.int64]: ndarray of id in sequential
+        Returns
+        -------
+        NDArray[np.int64]
+            ndarray of id in sequential
         """
         return find_data_by_keyword(data=self.database[0], columns=self.columns, keyword=keyword)
 
@@ -40,11 +44,15 @@ class __Atom__(object):
         """
         Extract the type_list
 
-        Args:
-            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+        Parameters
+        ----------
+        keyword : str, optional
+            atom(type) keyword of your traj file. Defaults to "type".
 
-        Returns:
-            NDArray[np.int64]: ndarray data of atom(type) list
+        Returns
+        -------
+        NDArray[np.int64]
+            ndarray data of atom(type) list
         """
         return self.__get_type_list(keyword=keyword)
 
@@ -52,11 +60,14 @@ class __Atom__(object):
         """
         Extract the unique data from type_list
 
-        Args:
-            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+        Parameters
+        ----------
+        keyword : str, optional
+            atom(type) keyword of your traj file. Defaults to "type".
 
-        Returns:
-            tuple(NDArray, NDArray): [0] = unique data of type_list, [1] = number of each type
+        Returns
+        -------
+        tuple(NDArray, NDArray)[0] = unique data of type_list, [1] = number of each type
         """
         return np.unique(self.__get_type_list(keyword=keyword), return_counts=True)
 
@@ -64,12 +75,17 @@ class __Atom__(object):
         """
         Extract the Atom list from your traj file
 
-        Args:
-            dict_type (dict[int:str]): dictionary data || key = number of type in traj || value = atomic name, ex) He
-            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+        Parameters
+        ----------
+        dict_type : dict[int:str]
+            dictionary data || key = number of type in traj || value = atomic name, ex) He
+        keyword : str, optional
+            atom(type) keyword of your traj file. Defaults to "type".
 
-        Returns:
-            NDArray[np.int64]: return the atomic number list
+        Returns
+        -------
+        NDArray[np.int64]
+            return the atomic number list
         """
         return switch_to_atom_list(type_list=self.__get_type_list(keyword=keyword), dict_type=dict_type)
 
@@ -90,12 +106,17 @@ class __Position__(object):
 
         Extract the position in opener
 
-        Args:
-            target_type (int): your type name in type_list, default = "All"
-            wrapped (bool, optional): control the is wrapped. Defaults to True.
+        Parameters
+        ----------
+        target_type : int
+            your type name in type_list, default = "All"
+        wrapped : bool, optional
+            control the is wrapped. Defaults to True.
 
-        Returns:
-            NDArray[np.float64]: data of position, shape = [frames, number_of_particle, dimension]
+        Returns
+        -------
+        NDArray[np.float64]
+            data of position, shape = [frames, number_of_particle, dimension]
         """
         self.pos_ = self._check_pos_()
         get_position_from = self.__check_position_method(wrapped=wrapped)
@@ -214,11 +235,14 @@ class Extractor(object):
         """
         Extract the unique data from type_list
 
-        Args:
-            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+        Parameters
+        ----------
+        keyword : str, optional
+            atom(type) keyword of your traj file. Defaults to "type".
 
-        Returns:
-            tuple(NDArray, NDArray): [0] = unique data of type_list, [1] = number of each type
+        Returns
+        -------
+        tuple(NDArray, NDArray)[0] = unique data of type_list, [1] = number of each type
         """
         return self.atoms.extract_type_info(keyword=keyword)
 
@@ -227,12 +251,17 @@ class Extractor(object):
         """
         Extract the Atom list from your traj file
 
-        Args:
-            dict_type (dict[int:str]): dictionary data || key = number of type in traj || value = atomic name, ex) He
-            keyword (str, optional): atom(type) keyword of your traj file. Defaults to "type".
+        Parameters
+        ----------
+        dict_type : dict[int:str]
+            dictionary data || key = number of type in traj || value = atomic name, ex) He
+        keyword : str, optional
+            atom(type) keyword of your traj file. Defaults to "type".
 
-        Returns:
-            NDArray[np.int64]: return the atomic number list
+        Returns
+        -------
+        NDArray[np.int64]
+            return the atomic number list
         """
         return self.atoms.extract_atom_list(dict_type=dict_type, keyword=keyword)
 
@@ -241,11 +270,15 @@ class Extractor(object):
         """
         Extract the id from traj file
 
-        Args:
-            keyword (str, optional): keyword of 'id' in your traj. Defaults to "id".
+        Parameters
+        ---------
+        keyword : str, optional
+            keyword of 'id' in your traj. Defaults to "id".
 
-        Returns:
-            NDArray[np.int64]: ndarray of id in sequential
+        Returns
+        -------
+        NDArray[np.int64]
+            ndarray of id in sequential
         """
         return self.id_.extract_list(keyword=keyword)
 

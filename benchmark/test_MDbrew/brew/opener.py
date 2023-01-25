@@ -68,16 +68,20 @@ class LAMMPSOpener(Opener):
 
         Open the file, dump.lammpstrj and Get Database
 
-        Args:
-            file_path   (str)       :   file path of dump.lammpstrj
-            target_info (list[str]) :   List with string, target_line = "id", target_word = "NUMBER"
+        Parameters
+        ----------
+        file_path : str
+            file path of dump.lammpstrj
+        target_info : list[str]
+            List with string, target_line = "id", target_word = "NUMBER"
 
-        Example:
-            >>> opener      = LAMMPSOpener(file_path)
-            >>> database    = opener.get_database
-            >>> columns     = opener.get_columns
-            >>> system_size = opener.get_system_size
-            >>> time_step   = opener.get_time_step
+        Examples
+        --------
+        >>> opener      = LAMMPSOpener(file_path)
+        >>> database    = opener.get_database
+        >>> columns     = opener.get_columns
+        >>> system_size = opener.get_system_size
+        >>> time_step   = opener.get_time_step
         """
         super().__init__(file_path)
         target_info = ["id", "NUMBER"] if target_info is None else target_info
@@ -108,7 +112,7 @@ class LAMMPSOpener(Opener):
     @time_count
     def get_system_size(self, dim: int = 3, word: str = "BOX") -> list[float]:
         size_idx = self._find_idx_by_word(word=word) + 1
-        system_size = self.lines[size_idx: size_idx + dim]
+        system_size = self.lines[size_idx : size_idx + dim]
         system_size = self._split_data_in_lines(lines=system_size)
         return system_size
 
@@ -123,11 +127,6 @@ class LAMMPSOpener(Opener):
 # 2nd Generation -> For ""
 class GromacsOpener(Opener):
     def __init__(self, file_path: str) -> None:
-        """_summary_
-
-        Args:
-            file_path (str): file path of
-        """
         super().__init__(file_path)
 
     def get_columns(self) -> list[str]:

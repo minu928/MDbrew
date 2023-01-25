@@ -1,6 +1,7 @@
 ## file ignore
 __pycache__
 .idea
+dist
 
 ## externsion ignore
 *.pyc
