@@ -1,7 +1,14 @@
 from .._base import *
 from pkg_resources import resource_filename
 
-__all__ = ["switch_to_atom_list", "atom_name_list", "atom_number_list", "atom_weight_list", "periodic_table", "atom_info"]
+__all__ = [
+    "switch_to_atom_list",
+    "atom_name_list",
+    "atom_number_list",
+    "atom_weight_list",
+    "periodic_table",
+    "atom_info",
+]
 
 file_path = resource_filename(f"{__package__}", "atom_info.npz")
 
@@ -20,12 +27,16 @@ def switch_to_atom_list(type_list: NDArray, dict_type: dict[int:str]):
     """
     switch the type(ex. 1,2) to atomic number
 
-    Args:
-        type_list (list[int]): list consisted with type (1, 2, 3)
-        dict_type (dict[int:str]): dictionary data
+    Parameters
+    ----------
+    type_list : list[int]
+        list consisted with type (1, 2, 3)
+    dict_type : dict[int:str]
+        dictionary data
 
-    Returns:
-        NDArray()
+    Returns
+    -------
+    NDArray
     """
     component_type_list = list(set(type_list))
     assert component_type_list == list(
