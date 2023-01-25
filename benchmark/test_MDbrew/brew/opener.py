@@ -85,10 +85,10 @@ class LAMMPSOpener(Opener):
         """
         super().__init__(file_path)
         target_info = ["id", "NUMBER"] if target_info is None else target_info
-        self.target_line = target_info[0]
-        self.target_word = target_info[1]
-        self.system_num = int(self.lines[self._find_idx_by_word(self.target_word) + 1])
-        self.start_idx_list: list[int] = self._find_idxlist_by_word(self.target_line)
+        self.line_target_word = target_info[0]
+        self.system_num_target_word = target_info[1]
+        self.system_num = int(self.lines[self._find_idx_by_word(self.system_num_target_word) + 1])
+        self.start_idx_list: list[int] = self._find_idxlist_by_word(self.line_target_word)
 
     # Get the database from a, b
     @time_count
