@@ -12,9 +12,12 @@ class MSD(object):
 
         Calculate the msd data and return it with method and fft
 
-        Args:
-            position (np.ndarray)   :  Data of Particle's position in each frame
-            fft (bool, optional)    :  default = True
+        Parameters
+        ------------
+        position : NDArray
+            Data of Particle's position in each frame
+        fft : bool, optional
+            default = True, if True the calculation in FFT, else  matrix
 
         ## Result of 'Mean Square Displacement'
         >>> my_msd      = MSD(position = position, fft = True)
@@ -31,8 +34,9 @@ class MSD(object):
     def run(self) -> NDArray[np.float64]:
         """run
 
-        Returns:
-            NDArray[np.float64]: result of MSD
+        Return
+        ----------
+        NDArray[np.float64]: result of MSD
         """
         if self.fft:
             self.result = self.__get_msd_fft()
@@ -48,8 +52,10 @@ class MSD(object):
 
         Time complexity : O(N**2)
 
-        Returns:
-            list[float]: MSD data of each frame
+        Returns
+        ----------
+        NDArray[np.float64]
+            MSD data of each frame
         """
         msd_list = np.zeros(self.position.shape[:2])
         for frame in trange(1, self.N, **self.kwrgs_it):
@@ -66,8 +72,10 @@ class MSD(object):
 
         Time complexity : O(N logN)
 
-        Returns:
-            list[float]: MSD data of each frame
+        Returns
+        ----------
+        NDArray[np.float64]
+            MSD data of each frame
         """
         S_1 = self.__get_S_1()
         S_2 = self.__get_S_2()

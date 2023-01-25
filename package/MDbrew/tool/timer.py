@@ -1,7 +1,8 @@
 from time import time
 from sys import stdout
 
-__all__ = ["timeCount"]
+__all__ = ["time_count", "check_tab"]
+
 
 # determine the tab
 def check_tab(name: str) -> int:
@@ -12,7 +13,7 @@ def check_tab(name: str) -> int:
 
 
 # Wrapper of count the function execution time
-def timeCount(func):
+def time_count(func):
     def wrapper(*args, **kwargs):
         name = func.__name__
         stdout.write(f" STEP (RUN ) :  {name}\r")

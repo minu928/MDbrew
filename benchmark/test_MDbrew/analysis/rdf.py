@@ -15,19 +15,27 @@ class RDF:
         r_max: float = None,
         resolution: int = 1000,
     ):
-        """RDF
+        """
+        Radial Distribution Function
+        you can get result from RDF.result
 
-        Args:
-            a (NDArray): [frame, N_particle, dim]
-            b (NDArray): [frame, N_particle, dim]
-            system_size (NDArray): [[-lx, lx], [-ly, ly], [-lz, lz]]
+        Parameters
+        ----------
+        a : NDArray
+            Position data  ||  shape : [frame, N_particle, dim]
+        b : NDArray
+            Position data  ||  shape : [frame, N_particle, dim]
+        system_size : [[-lx, lx], [-ly, ly], [-lz, lz]]
+            System size of data
+        layer_depth : int, optional
+            how many layer do you set, 0 means with PBC (one box) other layered, by default 0
+        r_max : float, optional
+            you can input the max radius else None means 'calculate max(system_size)', by default None
+        resolution : int, optional
+            resolution of dr, by default 1000
 
-        Kwargs:
-            r_max (float): you can input the max radius else None means 'calculate max(system_size)'
-            resolution (int): resolution of dr
-            layer_depth (int) : how many layer do you set, 0 means with PBC (one box) other layered
-
-        ## Result of Radial Density Function, Coordination Number
+        Result of Radial Density Function, Coordination Number
+        ------------------------------------------------------------
         >>> my_rdf     = RDF(a = a_position, b= b_position, system_size=system_size)
         >>> rdf_result = my_rdf.result
         >>> cn_result  = my_rdf.cn
@@ -57,8 +65,9 @@ class RDF:
 
         Function for calculate the rdf, cn.
 
-        Returns:
-            list[NDArray] : [radii, result, cn]
+        Returns
+        --------
+        list[NDArray] : [radii, result, cn]
         """
         self._get_hist()
         self._get_radii()
