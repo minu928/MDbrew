@@ -6,7 +6,7 @@ setup(
     author="Knu",
     author_email="rlaalsdn753@korea.ac.kr",
     url="https://github.com/MyKnu/MDbrew",
-    download_url="https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.0.12.tar.gz",
+    download_url="https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.0.13.tar.gz",
     install_requies=[
         "numpy>=1.0.0",
         "pandas>=1.0.0",
