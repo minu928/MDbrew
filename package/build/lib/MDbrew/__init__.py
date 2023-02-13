@@ -1,7 +1,7 @@
 from .analysis import *
 from .brew import *
 
-__version__ = "2.0.13"
+__version__ = "2.1.0"
 __name__ = "MDbrew"
 
 
@@ -33,11 +33,10 @@ __name__ = "MDbrew"
 ### RDF
 >>> rdf = mdb.RDF(one_position, two_position, system_size)
 >>> rdf_result = rdf.result
->>> rdf.plot_result()
+>>> coordination = rdf.cn
 
 ### MSD
 >>> msd = mdb.MSD(one_position_unwrapped)
 >>> msd_result = msd.result
->>> msd.plot_result()
 
 """

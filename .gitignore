@@ -2,6 +2,7 @@
 __pycache__
 .idea
 dist
+build
 
 ## externsion ignore
 *.pyc

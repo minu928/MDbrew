@@ -28,10 +28,9 @@ class MSD(object):
         self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
         self.N = self.position.shape[0]
         self.fft = fft
-        self.result = self.run()
 
-    # User
-    def run(self) -> NDArray[np.float64]:
+    @property
+    def result(self) -> NDArray[np.float64]:
         """run
 
         Return
@@ -39,10 +38,10 @@ class MSD(object):
         NDArray[np.float64]: result of MSD
         """
         if self.fft:
-            self.result = self.__get_msd_fft()
+            result = self.__get_msd_fft()
         else:
-            self.result = self.__get_msd_window()
-        return self.result
+            result = self.__get_msd_window()
+        return result
 
     # window method with non-FFT
     def __get_msd_window(self) -> NDArray[np.float64]:
