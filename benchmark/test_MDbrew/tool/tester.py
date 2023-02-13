@@ -17,6 +17,7 @@ def do_test(path):
     atom_list = extractor.extract_atom_list(dict_type=dict_type)
     rdf = RDF(position, position, system_size)
     rdf.result
+    rdf.cn
     msd = MSD(uw_position)
     msd.result
     print("\n\ttest Done \u2713 \t\n")
