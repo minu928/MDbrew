@@ -3,32 +3,12 @@
 
 MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 
-~~~zsh
+- VERSION :  (2.1.0)
+
+## How to install
+~~~bash
 pip install MDbrew
 ~~~
-- VERSION :  (2.0.13)
-
-## Package
-### brew
-#### opener.py
-- LAMMPSOpener : for dump file (ex. dump.lammpstrj)  
-- GromacsOpener : for dump file
-#### extractor.py
-- Extractor : class for extract the data from type OpenerType
-### chemistry
-- atom.py : contain the chemisty atom data
-- atom_info.npz : data of atom
-- timeCount : decorator for get execute time
-### tool
-#### timer.py
-#### spacer.py
-#### query.py
-#### tester.py
-### analysis
-#### msd.py  
-- MSD : Class for get MSD data with position data [n_Frame, Number of Particle, dim]  
-#### rdf.py  
-- RDF : Class for get RDF data with position data [n_Frame, Number of Particle, dim]  
 
 ## Code
 
