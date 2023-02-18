@@ -1,4 +1,5 @@
 from ..tool.timer import time_count
+
 from ..tool.query import find_data_by_keyword
 from .._base import *
 from .._type import OpenerType
@@ -6,7 +7,6 @@ from ..chemistry.atom import switch_to_atom_list, atom_info
 
 
 __all__ = ["Extractor"]
-
 
 # id information in database
 class __Id__(object):
@@ -118,39 +118,23 @@ class __Position__(object):
         NDArray[np.float64]
             data of position, shape = [frames, number_of_particle, dimension]
         """
-        self.pos_ = self._check_pos_()
-        get_position_from = self.__check_position_method(wrapped=wrapped)
-        position_list = []
-        for frame in range(self.frame_number):
-            df_data = pd.DataFrame(data=self.database[frame], columns=self.columns)
-            df_data = df_data if target_type == "all" else df_data[df_data["type"] == target_type]
-            position = get_position_from(df_data)
-            position_list.append(position)
-        return np.asarray(position_list, dtype=np.float64)
-
-    def __check_position_method(self, wrapped):
-        return self._wrapped_method if wrapped else self._unwrapped_method
-
-    def _wrapped_method(self, df_data) -> NDArray[np.float64]:
-        return np.array(df_data[self.pos_])
-
-    def _unwrapped_method(self, df_data) -> NDArray[np.float64]:
-        if self.__already_unwrapped:
-            return self._wrapped_method(df_data=df_data)
-        else:
-            idx_ix = self.columns.index("ix")
-            list_in = self.columns[idx_ix : idx_ix + self.dim]
-            box_size = np.array(self.system_size)[:, 1]
-            idx_position = df_data[list_in] * box_size
-            return np.array(idx_position) + self._wrapped_method(df_data=df_data)
+        two_dim_database = np.reshape(self.database, (-1, len(self.columns)))
+        df_data = pd.DataFrame(data=two_dim_database, columns=self.columns)
+        df_target_data = df_data if target_type == "all" else df_data.query(f"type == {target_type}")
+        df_position = df_target_data.loc[:, self._check_pos_()].to_numpy(dtype=np.float64)
+        if wrapped != self.__already_wrapped:
+            box_length_list = np.array(self.system_size)[:, self.__already_wrapped] * 2.0
+            i_xyz_list = df_target_data.loc[:, ["ix", "iy", "iz"]].to_numpy(dtype=np.float64)
+            df_position += i_xyz_list * box_length_list
+        return df_position.reshape((self.frame_number, -1, self.dim))
 
     def _check_pos_(self) -> list[str]:
         for idx, column in enumerate(self.columns):
             if column in ["x", "xs"]:
-                self.__already_unwrapped = False
+                self.__already_wrapped = 1
                 return self.columns[idx : idx + self.dim]
             elif column in ["xu", "xsu"]:
-                self.__already_unwrapped = True
+                self.__already_wrapped = 0
                 return self.columns[idx : idx + self.dim]
         raise Exception(f"COLUMNS : {self.columns} is not normal case")
 
