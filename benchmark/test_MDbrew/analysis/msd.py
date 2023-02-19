@@ -25,7 +25,7 @@ class MSD(object):
         """
         self.axis_dict = {"frame": 0, "N_particle": 1, "pos": -1}
         self.position = spacer.check_dimension(position, dim=3)
-        self.kwrgs_it = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
+        self.kwrgs_trange = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
         self.N = self.position.shape[0]
         self.fft = fft
 
@@ -57,7 +57,7 @@ class MSD(object):
             MSD data of each frame
         """
         msd_list = np.zeros(self.position.shape[:2])
-        for frame in trange(1, self.N, **self.kwrgs_it):
+        for frame in trange(1, self.N, **self.kwrgs_trange):
             diff_position = spacer.get_diff_position(self.position[frame:], self.position[:-frame])
             distance = self.__square_sum_position(diff_position)
             msd_list[frame, :] = np.mean(distance, axis=self.axis_dict["frame"])
@@ -87,7 +87,7 @@ class MSD(object):
         D = np.append(D, empty_matrix, axis=self.axis_dict["frame"])
         Q = 2.0 * np.sum(D, axis=self.axis_dict["frame"])
         S_1 = empty_matrix
-        for m in trange(self.N, **self.kwrgs_it):
+        for m in trange(self.N, **self.kwrgs_trange):
             Q -= D[m - 1, :] + D[self.N - m, :]
             S_1[m, :] = Q / (self.N - m)
         return S_1
