@@ -1,5 +1,6 @@
 from ..tool.timer import time_count
 from abc import ABCMeta, abstractmethod
+from typing import List
 
 __all__ = ["Opener", "LAMMPSOpener", "GromacsOpener"]
 
@@ -10,48 +11,13 @@ class Opener(metaclass=ABCMeta):
         self.file_path = file_path
         self.lines = self._get_lines()
 
-    # return lines
-    @abstractmethod
-    def get_database(self) -> list[str]:
-        return self.lines
-
-    # return ["None"]
-    @abstractmethod
-    def get_columns(self) -> list[str]:
-        return ["None"]
-
-    # return [0]
-    @abstractmethod
-    def get_system_size(self) -> list[float]:
-        return [0]
-
-    # return [0]
-    @abstractmethod
-    def get_time_step(self) -> list[float]:
-        return [0]
-
     # Open the file and delete all empty line
-    def _get_lines(self) -> list[str]:
+    def _get_lines(self) -> List[str]:
         with open(self.file_path) as file:
-            lines = file.readlines()
-        lines = list(map(lambda line: line.strip(), lines))
-        return lines
-
-    # split data in line with overall lines
-    def _split_data_in_lines(self, lines: list[str]) -> list[float]:
-        return [self.__str_to_float(line=line.split(" ")) for line in lines]
-
-    # Change data string to float
-    def __str_to_float(self, line) -> list[float]:
-        try:
-            line = list(map(lambda string: float(string), line))
-        except:
-            print(line)
-            raise Exception("We cannot change string to float in each data")
-        return line
+            return [line.strip() for line in file if line.strip()]
 
     # # find the idx list of start point
-    def _find_idxlist_by_word(self, word: str) -> list[int]:
+    def _find_idxlist_by_word(self, word: str) -> List[int]:
         return [idx for idx, line in enumerate(self.lines) if word in line]
 
     # find the first idx
@@ -60,10 +26,31 @@ class Opener(metaclass=ABCMeta):
             if word in line:
                 return idx
 
+    # split data in line with overall lines
+    @staticmethod
+    def _str_to_float_list(lines: List[str]) -> List[List[float]]:
+        return [list(map(float, line.split())) for line in lines]
+
+    @abstractmethod
+    def get_database(self) -> List[List[List[float]]]:
+        pass
+
+    @abstractmethod
+    def get_columns(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    def get_system_size(self) -> List[List[float]]:
+        pass
+
+    @abstractmethod
+    def get_time_step(self) -> List[int]:
+        pass
+
 
 # 2nd Generation -> For "dump.lammpstrj"
 class LAMMPSOpener(Opener):
-    def __init__(self, file_path: str, target_info: list[str] = None):
+    def __init__(self, file_path: str, target_info: List[str] = None):
         """Dump Opener
 
         Open the file, dump.lammpstrj and Get Database
@@ -85,41 +72,37 @@ class LAMMPSOpener(Opener):
         """
         super().__init__(file_path)
         target_info = ["id", "NUMBER"] if target_info is None else target_info
-        self.line_target_word = target_info[0]
-        self.system_num_target_word = target_info[1]
-        self.system_num = int(self.lines[self._find_idx_by_word(self.system_num_target_word) + 1])
-        self.start_idx_list: list[int] = self._find_idxlist_by_word(self.line_target_word)
+        self.system_num = int(self.lines[super()._find_idx_by_word(target_info[1]) + 1])
+        self.start_idx_list: list[int] = super()._find_idxlist_by_word(target_info[0])
 
     # Get the database from a, b
     @time_count
-    def get_database(self) -> list:
-        database: list = []
+    def get_database(self) -> List[List[List[float]]]:
+        database: List[List[List[float]]] = []
         for idx in self.start_idx_list:
-            start_idx: int = idx + 1
-            end_idx: int = start_idx + self.system_num
-            data = self.lines[start_idx:end_idx]
-            data = self._split_data_in_lines(lines=data)
-            database.append(data)
+            lines = self.lines[idx + 1 : idx + 1 + self.system_num]
+            lines = super()._str_to_float_list(lines=lines)
+            database.append(lines)
         return database
 
     # Find the columns data in lines
     @time_count
-    def get_columns(self, erase_appendix: int = 2) -> list[str]:
+    def get_columns(self, erase_appendix: int = 2) -> List[str]:
         column_idx: int = self.start_idx_list[0]
         return self.lines[column_idx].split(" ")[erase_appendix:]
 
     # find the system size
     @time_count
-    def get_system_size(self, dim: int = 3, word: str = "BOX") -> list[float]:
+    def get_system_size(self, dim: int = 3, word: str = "BOX") -> List[float]:
         size_idx = self._find_idx_by_word(word=word) + 1
         system_size = self.lines[size_idx : size_idx + dim]
-        system_size = self._split_data_in_lines(lines=system_size)
+        system_size = super()._str_to_float_list(lines=system_size)
         return system_size
 
     # find the time step
     @time_count
-    def get_time_step(self, word: str = "TIMESTEP") -> list[float]:
-        time_step_idxlist = self._find_idxlist_by_word(word=word)
+    def get_time_step(self, word: str = "TIMESTEP") -> List[float]:
+        time_step_idxlist = super()._find_idxlist_by_word(word=word)
         time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idxlist]
         return time_step_list
 
@@ -129,14 +112,14 @@ class GromacsOpener(Opener):
     def __init__(self, file_path: str) -> None:
         super().__init__(file_path)
 
-    def get_columns(self) -> list[str]:
+    def get_columns(self) -> List[str]:
         return super().get_columns()
 
-    def get_database(self) -> list[str]:
+    def get_database(self) -> List[str]:
         return super().get_database()
 
-    def get_system_size(self) -> list[float]:
+    def get_system_size(self) -> List[float]:
         return super().get_system_size()
 
-    def get_time_step(self) -> list[float]:
+    def get_time_step(self) -> List[float]:
         return super().get_time_step()

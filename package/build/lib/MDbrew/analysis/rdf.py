@@ -59,6 +59,8 @@ class RDF:
         self.hist_data = None
         self.radii = np.linspace(0.0, self.r_max, self.resolution)
 
+        self.kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
+
     @property
     def result(self):
         if self.hist_data is None:
@@ -74,15 +76,12 @@ class RDF:
     # Function for get hist
     def _cal_hist_data(self):
         self.hist_data = np.zeros(self.resolution)
-        self.__apply_boundary_condition = self.__set_boundary_condition()
-        kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
-        for frame in trange(self.frame_number, **kwrgs_trange):
-            a_unit = self.a[frame, ...].astype(np.float64)
-            b_unit = self.b[frame, ...].astype(np.float64)
-            a_unit = np.tile(a_unit[:, None, :], (1, self.b_number, 1))
-            b_unit = np.tile(b_unit[None, :, :], (self.a_number, 1, 1))
-            diff_position = get_diff_position(a_unit, b_unit)
-            diff_position = self.__apply_boundary_condition(diff_position)
+        _apply_boundary_condition = self.__set_boundary_condition()
+        for frame in trange(self.frame_number, **self.kwrgs_trange):
+            a_unit = self.a[frame, ...]
+            b_unit = self.b[frame, ...]
+            diff_position = get_diff_position(a_unit[:, None, :], b_unit[None, :, :])
+            diff_position = _apply_boundary_condition(diff_position=diff_position)
             distance = get_distance(diff_position=diff_position, axis=-1)
             idx_hist = self.__cal_idx_histogram(distance=distance)
             value, count = np.unique(idx_hist, return_counts=True)
@@ -90,10 +89,7 @@ class RDF:
 
     # select the mode with Boundary Layer
     def __set_boundary_condition(self):
-        if self.is_layered:
-            return self.__add_layer
-        else:
-            return self.__check_pbc
+        return self.__add_layer if self.is_layered else self.__check_pbc
 
     # set the pbc only consider single system
     def __check_pbc(self, diff_position) -> NDArray[np.float64]:
@@ -119,7 +115,7 @@ class RDF:
         return np.array(list_direction) * self.box_length
 
     # get idx for histogram
-    def __cal_idx_histogram(self, distance) -> NDArray[np.int64]:
+    def __cal_idx_histogram(self, distance: NDArray) -> NDArray[np.int64]:
         idx_hist = (distance / self.dr).astype(np.int64)
         return idx_hist[np.where((0 < idx_hist) & (idx_hist < self.resolution))]
 

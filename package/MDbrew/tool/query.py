@@ -22,4 +22,4 @@ def find_data_by_keyword(data, columns: list, keyword: str) -> NDArray[np.int64]
     """
     keyword = keyword.lower()
     df_data = pd.DataFrame(data=data, columns=columns)
-    return df_data[keyword].to_numpy(dtype=np.int64)
+    return df_data.loc[:, keyword].to_numpy(dtype=np.int64)

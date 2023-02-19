@@ -1,7 +1,7 @@
 from .analysis import *
 from .brew import *
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 __name__ = "MDbrew"
 
 
@@ -38,5 +38,4 @@ __name__ = "MDbrew"
 ### MSD
 >>> msd = mdb.MSD(one_position_unwrapped)
 >>> msd_result = msd.result
-
 """
