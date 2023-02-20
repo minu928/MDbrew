@@ -1,7 +1,7 @@
 from typing import Union
-from .brew.opener import Opener, LAMMPSOpener, GromacsOpener
+from .brew.opener import Opener, LAMMPSOpener, DatOpener
 
 __all__ = ["OpenerType", "NumericType"]
 
-OpenerType = Union[Opener, LAMMPSOpener, GromacsOpener]
+OpenerType = Union[Opener, LAMMPSOpener, DatOpener]
 NumericType = Union[float, int]

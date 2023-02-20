@@ -1,7 +1,7 @@
 from .analysis import *
 from .brew import *
 
-__version__ = "2.1.1"
+__version__ = "2.1.3"
 __name__ = "MDbrew"
 
 

@@ -95,7 +95,7 @@ class LAMMPSOpener(Opener):
     @time_count
     def get_system_size(self, dim: int = 3, word: str = "BOX") -> List[float]:
         size_idx = self._find_idx_by_word(word=word) + 1
-        system_size = super().lines[size_idx : size_idx + dim]
+        system_size = self.lines[size_idx : size_idx + dim]
         system_size = super().str_to_float_list(lines=system_size)
         return system_size
 
@@ -103,7 +103,7 @@ class LAMMPSOpener(Opener):
     @time_count
     def get_time_step(self, word: str = "TIMESTEP") -> List[float]:
         time_step_idxlist = super()._find_idxlist_by_word(word=word)
-        time_step_list = [int(super().lines[idx + 1]) for idx in time_step_idxlist]
+        time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idxlist]
         return time_step_list
 
 

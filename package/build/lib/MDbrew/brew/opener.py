@@ -2,7 +2,7 @@ from ..tool.timer import time_count
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-__all__ = ["Opener", "LAMMPSOpener", "GromacsOpener"]
+__all__ = ["Opener", "LAMMPSOpener", "DatOpener"]
 
 
 # 1st Generation
@@ -28,7 +28,7 @@ class Opener(metaclass=ABCMeta):
 
     # split data in line with overall lines
     @staticmethod
-    def _str_to_float_list(lines: List[str]) -> List[List[float]]:
+    def str_to_float_list(lines: List[str]) -> List[List[float]]:
         return [list(map(float, line.split())) for line in lines]
 
     @abstractmethod
@@ -81,7 +81,7 @@ class LAMMPSOpener(Opener):
         database: List[List[List[float]]] = []
         for idx in self.start_idx_list:
             lines = self.lines[idx + 1 : idx + 1 + self.system_num]
-            lines = super()._str_to_float_list(lines=lines)
+            lines = super().str_to_float_list(lines=lines)
             database.append(lines)
         return database
 
@@ -96,7 +96,7 @@ class LAMMPSOpener(Opener):
     def get_system_size(self, dim: int = 3, word: str = "BOX") -> List[float]:
         size_idx = self._find_idx_by_word(word=word) + 1
         system_size = self.lines[size_idx : size_idx + dim]
-        system_size = super()._str_to_float_list(lines=system_size)
+        system_size = super().str_to_float_list(lines=system_size)
         return system_size
 
     # find the time step
@@ -108,18 +108,18 @@ class LAMMPSOpener(Opener):
 
 
 # 2nd Generation -> For ""
-class GromacsOpener(Opener):
+class DatOpener(Opener):
     def __init__(self, file_path: str) -> None:
         super().__init__(file_path)
 
-    def get_columns(self) -> List[str]:
-        return super().get_columns()
+    def get_columns(self, column_idx: int = 1, erase_que: int = 1) -> List[str]:
+        return self.lines[column_idx].split()[erase_que:]
 
-    def get_database(self) -> List[str]:
-        return super().get_database()
+    def get_database(self, erase_que: int = 2) -> List[str]:
+        return super().str_to_float_list(self.lines[erase_que:])
 
     def get_system_size(self) -> List[float]:
-        return super().get_system_size()
+        return len(self.lines)
 
-    def get_time_step(self) -> List[float]:
-        return super().get_time_step()
+    def get_time_step(self, erase_que: int = 2) -> List[float]:
+        return [int(line.split()[0]) for line in self.lines[erase_que:]]

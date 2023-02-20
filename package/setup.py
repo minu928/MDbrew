@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="MDbrew",
-    version="2.1.1",
+    version="2.1.3",
     author="Knu",
     author_email="minu928@snu.ac.kr",
     url="https://github.com/MyKnu/MDbrew",
