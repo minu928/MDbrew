@@ -123,7 +123,7 @@ class __Position__(object):
         df_target_data = df_data if target_type == "all" else df_data.query(f"type == {target_type}")
         df_position = df_target_data.loc[:, self._check_pos_()].to_numpy(dtype=np.float64)
         if wrapped != self.__already_wrapped:
-            box_length_list = np.array(self.system_size)[:, self.__already_wrapped] * 2.0
+            box_length_list = self.system_size[:, self.__already_wrapped] * 2.0
             i_xyz_list = df_target_data.loc[:, ["ix", "iy", "iz"]].to_numpy(dtype=np.float64)
             df_position += i_xyz_list * box_length_list
         return df_position.reshape((self.frame_number, -1, self.dim))
@@ -141,10 +141,11 @@ class __Position__(object):
 
 # Extractor of Something
 class Extractor(object):
-    def __init__(self, opener: OpenerType, dim: int = 3) -> None:
+    def __init__(self, opener: OpenerType, ordered: bool = True, dim: int = 3) -> None:
         """Extractor
 
         Extract easily the date from Opener (or LAMMPSOpener)
+        Default type is NDArray
 
         Parameters
         ----------
@@ -158,13 +159,7 @@ class Extractor(object):
         >>> one_position = extractor.extract_position(type_ = 1)
         >>> un_wrapped_pos = extractor.extract_position(type_ = 1, wrapped = False)
         """
-
-        self.dim = dim
-        self.database = opener.get_database()
-        self.columns = opener.get_columns()
-        self.system_size = opener.get_system_size()
-        self.time_step = opener.get_time_step()
-        self.frame_number = len(self.database)
+        self.load_database(opener=opener, ordered=ordered)
         self.position = __Position__(
             dim=dim,
             system_size=self.system_size,
@@ -174,6 +169,34 @@ class Extractor(object):
         )
         self.atoms = __Atom__(database=self.database, columns=self.columns)
         self.id_ = __Id__(database=self.database, columns=self.columns)
+
+    @time_count
+    def load_database(self, opener: OpenerType, ordered: bool):
+        database = np.array(opener.get_database())
+        self.columns = np.array(opener.get_columns())
+        self.system_size = np.array(opener.get_system_size())
+        self.time_step = np.array(opener.get_time_step())
+        self.frame_number = len(database)
+        self.database: NDArray[np.float64] = database if ordered else self.sort_database(database)
+
+    def sort_database(self, db):
+        sorted_dfs = [
+            pd.DataFrame(frame, columns=self.columns).sort_values("id").reset_index(drop=True) for frame in db
+        ]
+        return np.stack([df.to_numpy() for df in sorted_dfs])
+
+    @property
+    def atom_info(self):
+        """
+        Load the atom_info.npz
+
+        Keys
+        -------
+        - atom_name_list = atom_info["atom_name"]
+        - atom_number_list = atom_info["atom_number"]
+        - atom_weight_list = atom_info["atom_weight"]
+        """
+        return atom_info
 
     @time_count
     def extract_position(self, target_type: int = "all", wrapped=True) -> NDArray[np.float64]:
@@ -265,16 +288,3 @@ class Extractor(object):
             ndarray of id in sequential
         """
         return self.id_.extract_list(keyword=keyword)
-
-    @property
-    def atom_info(self):
-        """
-        Load the atom_info.npz
-
-        Keys
-        -------
-        - atom_name_list = atom_info["atom_name"]
-        - atom_number_list = atom_info["atom_number"]
-        - atom_weight_list = atom_info["atom_weight"]
-        """
-        return atom_info

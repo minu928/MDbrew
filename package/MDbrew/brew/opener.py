@@ -76,7 +76,6 @@ class LAMMPSOpener(Opener):
         self.start_idx_list: list[int] = super()._find_idxlist_by_word(target_info[0])
 
     # Get the database from a, b
-    @time_count
     def get_database(self) -> List[List[List[float]]]:
         database: List[List[List[float]]] = []
         for idx in self.start_idx_list:
@@ -86,13 +85,11 @@ class LAMMPSOpener(Opener):
         return database
 
     # Find the columns data in lines
-    @time_count
     def get_columns(self, erase_appendix: int = 2) -> List[str]:
         column_idx: int = self.start_idx_list[0]
         return self.lines[column_idx].split(" ")[erase_appendix:]
 
     # find the system size
-    @time_count
     def get_system_size(self, dim: int = 3, word: str = "BOX") -> List[float]:
         size_idx = self._find_idx_by_word(word=word) + 1
         system_size = self.lines[size_idx : size_idx + dim]
@@ -100,7 +97,6 @@ class LAMMPSOpener(Opener):
         return system_size
 
     # find the time step
-    @time_count
     def get_time_step(self, word: str = "TIMESTEP") -> List[float]:
         time_step_idxlist = super()._find_idxlist_by_word(word=word)
         time_step_list = [int(self.lines[idx + 1]) for idx in time_step_idxlist]

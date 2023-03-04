@@ -5,7 +5,7 @@ from ..brew import *
 def do_test(path):
     print("\n\ttest Init \u2713 \t\n")
     source = LAMMPSOpener(path)
-    extractor = Extractor(opener=source)
+    extractor = Extractor(opener=source, ordered=False)
     system_size = extractor.system_size
     position = extractor.extract_position(target_type=1, wrapped=True)[-10:]
     uw_position = extractor.extract_position(target_type=1, wrapped=False)[-10:]
