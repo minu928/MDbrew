@@ -3,7 +3,7 @@ from .analysis.rdf import RDF
 from .brew.extractor import Extractor
 from .brew.opener import LAMMPSOpener, Opener, DatOpener
 
-__version__ = "2.1.4"
+__version__ = "2.1.5"
 __name__ = "MDbrew"
 
 
