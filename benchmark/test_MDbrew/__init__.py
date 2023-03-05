@@ -1,13 +1,17 @@
 from .analysis.msd import MSD
 from .analysis.rdf import RDF
-from .brew.extractor import Extractor
-from .brew.opener import LAMMPSOpener, Opener, DatOpener, WMIopener
 
-__version__ = "2.1.5"
+from .brew.extractor import Extractor
+
+from .opener.datopener import DATOpener
+from .opener.lammpsopener import LAMMPSOpener
+from .opener.wmiopener import WMIOpener
+
+__version__ = "2.1.6"
 __name__ = "MDbrew"
 
 
-__all__ = ["Extractor", "LAMMPSOpener", "Opener", "DatOpener", "WMIopener", "MSD", "RDF"]
+__all__ = ["Extractor", "LAMMPSOpener", "DATOpener", "WMIOpener", "MSD", "RDF"]
 
 """ How to use
 
@@ -17,7 +21,6 @@ __all__ = ["Extractor", "LAMMPSOpener", "Opener", "DatOpener", "WMIopener", "MSD
 ## First. Openr your file
 >>> file_path = './test.lammpstrj'
 >>> opener = mdb.LAMMPSOpener('./test.lammpstrj')
-
 
 ## Second. Extract your data
 >>> extractor = mdb.Extractor(opener=opener)
