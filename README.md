@@ -3,7 +3,7 @@
 
 MDbrew is a tool for postprocessing of LAMMPS data or lammpstrj(dump)
 
-- VERSION :  (2.1.0)
+- VERSION :  (2.1.6)
 
 ## How to install
 ~~~bash
