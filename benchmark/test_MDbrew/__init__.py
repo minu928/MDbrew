@@ -1,13 +1,13 @@
 from .analysis.msd import MSD
 from .analysis.rdf import RDF
 from .brew.extractor import Extractor
-from .brew.opener import LAMMPSOpener, Opener, DatOpener
+from .brew.opener import LAMMPSOpener, Opener, DatOpener, WMIopener
 
 __version__ = "2.1.4"
 __name__ = "MDbrew"
 
 
-__all__ = ["Extractor", "LAMMPSOpener", "Opener", "DatOpener", "MSD", "RDF"]
+__all__ = ["Extractor", "LAMMPSOpener", "Opener", "DatOpener", "WMIopener", "MSD", "RDF"]
 
 """ How to use
 

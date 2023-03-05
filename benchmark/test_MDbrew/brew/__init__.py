@@ -1,4 +1,4 @@
 from .extractor import Extractor
-from .opener import LAMMPSOpener, Opener, DatOpener
+from .opener import LAMMPSOpener, Opener, DatOpener, WMIopener
 
-__all__ = ["Extractor", "LAMMPSOpener", "Opener", "DatOpener"]
+__all__ = ["Extractor", "LAMMPSOpener", "Opener", "DatOpener", "WMIopener"]
