@@ -1,6 +1,6 @@
-from ..tool.timer import time_count
 from abc import ABCMeta, abstractmethod
 from typing import List
+import numpy as np
 
 __all__ = ["Opener", "LAMMPSOpener", "DatOpener"]
 
@@ -119,3 +119,56 @@ class DatOpener(Opener):
 
     def get_time_step(self, erase_que: int = 2) -> List[float]:
         return [int(line.split()[0]) for line in self.lines[erase_que:]]
+
+
+# 2nd Generation -> For "WMI-MD"
+class WMIopener(Opener):
+    def __init__(self, out_file: str, fort77: str) -> None:
+        assert out_file[-4:] == ".out", NameError(f"out_path should be '*.out' file, Your File Name : {out_file}")
+        assert fort77[-7:] == "fort.77", NameError(f"for77_path should be 'fort.77' file, Your File Name : {fort77}")
+        super().__init__(file_path=out_file)
+        self.open_outfile()
+        self.N = len(self.type_list)
+        self.database = self.open_fort77(path=fort77, N=self.N)
+
+    def get_database(self):
+        return self.database["coords"]
+
+    def get_columns(self):
+        return ["type", "x", "y", "z", "charge"]
+
+    def get_system_size(self):
+        return self.database["box"]
+
+    def get_time_step(self):
+        return self.database["t"] * self.database["Si"]
+
+    def open_outfile(self):
+        """open *.out
+
+        Open the file *.out for making the data of type and charge and idx of atom
+        """
+        skip_top_idx = 11
+        skip_bot_idx = -15
+        target_out_file_lines = self.lines[skip_top_idx:skip_bot_idx:2]
+        self.type_list = super().make_itemlist_from_lines(target_out_file_lines, 3)
+        self.charge_list = super().make_itemlist_from_lines(target_out_file_lines, 4)
+
+    def open_fort77(self, path: str, N: int):
+        self.dtype = np.dtype(
+            [
+                ("pre", bytes, 4),
+                ("Nfc", np.int32),
+                ("t", np.float64),
+                ("Si", np.int32),
+                ("box", np.float64, 3),
+                ("mid", bytes, 8),
+                ("coords", np.float32, (N, 3)),
+                ("ter", bytes, 4),
+            ]
+        )
+        try:
+            database = np.memmap(path, dtype=self.dtype, mode="r")
+        except BrokenPipeError:
+            print("Something is Wrong..!")
+        return database
