@@ -1,4 +1,5 @@
 from ..analysis import *
+from ..opener import *
 from ..brew import *
 
 

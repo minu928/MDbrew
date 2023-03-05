@@ -1,6 +1,7 @@
 from tqdm import trange
 from .._base import *
 from ..tool import spacer
+import matplotlib.pyplot as plt
 
 __all__ = ["MSD"]
 
@@ -38,10 +39,10 @@ class MSD(object):
         NDArray[np.float64]: result of MSD
         """
         if self.fft:
-            result = self.__get_msd_fft()
+            self._result = self.__get_msd_fft()
         else:
-            result = self.__get_msd_window()
-        return result
+            self._result = self.__get_msd_window()
+        return self._result
 
     # window method with non-FFT
     def __get_msd_window(self) -> NDArray[np.float64]:
@@ -112,8 +113,8 @@ class MSD(object):
 
     # plot the data
     def plot_result(self, time_step: float = 1, *args, **kwargs):
-        frames = len(self.position)
-        x = np.arange(0, frames * time_step, time_step)
-        y = self.result
-        plt.plot(x, y, *args, **kwargs)
+        if not hasattr(self, "_result"):
+            self.result
+        x = np.arange(0, self.frame_number * time_step, time_step)
+        plt.plot(x, self._result, *args, **kwargs)
         plt.show()

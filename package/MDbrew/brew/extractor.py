@@ -1,10 +1,9 @@
 from ..tool.timer import time_count
-
 from ..tool.query import find_data_by_keyword
 from .._base import *
 from .._type import OpenerType
 from ..chemistry.atom import switch_to_atom_list, atom_info
-
+from types import GeneratorType
 
 __all__ = ["Extractor"]
 
@@ -159,7 +158,8 @@ class Extractor(object):
         >>> one_position = extractor.extract_position(type_ = 1)
         >>> un_wrapped_pos = extractor.extract_position(type_ = 1, wrapped = False)
         """
-        self.load_database(opener=opener, ordered=ordered)
+        self.load_opener(opener=opener)
+        self.prepare_database(ordered=ordered)
         self.position = __Position__(
             dim=dim,
             system_size=self.system_size,
@@ -171,13 +171,20 @@ class Extractor(object):
         self.id_ = __Id__(database=self.database, columns=self.columns)
 
     @time_count
-    def load_database(self, opener: OpenerType, ordered: bool):
-        database = np.array(opener.get_database())
+    def load_opener(self, opener: OpenerType):
+        self._opener = opener
+        self.database = opener.get_database()
         self.columns = np.array(opener.get_columns())
         self.system_size = np.array(opener.get_system_size())
         self.time_step = np.array(opener.get_time_step())
-        self.frame_number = len(database)
-        self.database: NDArray[np.float64] = database if ordered else self.sort_database(database)
+        self.frame_number = len(self.time_step)
+
+    @time_count
+    def prepare_database(self, ordered: bool):
+        self.is_database_generator = False
+        if type(self.database) is GeneratorType:
+            self.is_database_generator = True
+        self.database = np.array(self.database) if ordered else self.sort_database(self.database)
 
     def sort_database(self, db):
         sorted_dfs = [
@@ -218,7 +225,10 @@ class Extractor(object):
             data of position, shape = [F, N, dim]
 
         """
-        return self.position.extract(target_type=target_type, wrapped=wrapped)
+        if self.is_database_generator:
+            return np.array([pos for pos in self._opener.get_database(target_type=target_type)])
+        else:
+            return self.position.extract(target_type=target_type, wrapped=wrapped)
 
     @time_count
     def extract_type_list(self, keyword: str = "type") -> NDArray[np.int64]:
@@ -235,7 +245,10 @@ class Extractor(object):
         NDArray[np.int64]
             ndarray data of atom(type) list
         """
-        return self.atoms.extract_type_list(keyword=keyword)
+        if self.is_database_generator:
+            return self._opener.type_list
+        else:
+            return self.atoms.extract_type_list(keyword=keyword)
 
     @time_count
     def extract_type_info(self, keyword: str = "type"):
@@ -251,7 +264,10 @@ class Extractor(object):
         -------
         tuple(NDArray, NDArray)[0] = unique data of type_list, [1] = number of each type
         """
-        return self.atoms.extract_type_info(keyword=keyword)
+        if self.is_database_generator:
+            return np.unique(self._opener.type_list, return_counts=True)
+        else:
+            return self.atoms.extract_type_info(keyword=keyword)
 
     @time_count
     def extract_atom_list(self, dict_type: dict[int:str], keyword: str = "type") -> NDArray[np.int64]:
@@ -270,7 +286,10 @@ class Extractor(object):
         NDArray[np.int64]
             return the atomic number list
         """
-        return self.atoms.extract_atom_list(dict_type=dict_type, keyword=keyword)
+        if self.is_database_generator:
+            return self._opener.type_list
+        else:
+            return self.atoms.extract_atom_list(dict_type=dict_type, keyword=keyword)
 
     @time_count
     def extract_id_list(self, keyword: str = "id") -> NDArray[np.int64]:
@@ -287,4 +306,7 @@ class Extractor(object):
         NDArray[np.int64]
             ndarray of id in sequential
         """
-        return self.id_.extract_list(keyword=keyword)
+        if self.is_database_generator:
+            return None
+        else:
+            return self.id_.extract_list(keyword=keyword)
