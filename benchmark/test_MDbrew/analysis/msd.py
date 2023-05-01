@@ -1,7 +1,7 @@
+import numpy as np
 from tqdm import trange
-from .._base import *
+from numpy.typing import NDArray
 from ..tool import spacer
-import matplotlib.pyplot as plt
 
 __all__ = ["MSD"]
 
@@ -30,8 +30,7 @@ class MSD(object):
         self.frame_number = self.position.shape[0]
         self.fft = fft
 
-    @property
-    def result(self) -> NDArray[np.float64]:
+    def run(self) -> NDArray[np.float64]:
         """run
 
         Return
@@ -42,6 +41,10 @@ class MSD(object):
             self._result = self.__get_msd_fft()
         else:
             self._result = self.__get_msd_window()
+        return self
+    
+    @property
+    def result(self):
         return self._result
 
     # window method with non-FFT
@@ -110,11 +113,3 @@ class MSD(object):
     # do mean about msd list
     def __mean_msd_list(self, msd_list) -> NDArray[np.float64]:
         return msd_list.mean(axis=self.axis_dict["N_particle"])
-
-    # plot the data
-    def plot_result(self, time_step: float = 1, *args, **kwargs):
-        if not hasattr(self, "_result"):
-            self.result
-        x = np.arange(0, self.frame_number * time_step, time_step)
-        plt.plot(x, self._result, *args, **kwargs)
-        plt.show()

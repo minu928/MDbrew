@@ -1,20 +1,14 @@
+import numpy as np
 from tqdm import trange
-from .._base import *
+from numpy.typing import NDArray
 from ..tool.spacer import *
 
 __all__ = ["RDF"]
 
+
 # Calculate and Plot the RDF
 class RDF:
-    def __init__(
-        self,
-        a: NDArray,
-        b: NDArray,
-        system_size: NDArray,
-        layer_depth: int = 0,
-        r_max: float = None,
-        resolution: int = 1000,
-    ):
+    def __init__(self, a, b, box_size, layer_depth: int = 0, r_max: float = None, resolution: int = 1000):
         """
         Radial Distribution Function
         you can get result from RDF.result
@@ -25,7 +19,7 @@ class RDF:
             Position data  ||  shape : [frame, N_particle, dim]
         b : NDArray
             Position data  ||  shape : [frame, N_particle, dim]
-        system_size : [[-lx, lx], [-ly, ly], [-lz, lz]]
+        system_size : [bx, by, bz]
             System size of data
         layer_depth : int, optional
             how many layer do you set, 0 means with PBC (one box) other layered, by default 0
@@ -43,8 +37,8 @@ class RDF:
         self.a = check_dimension(a, dim=3)
         self.b = check_dimension(b, dim=3)
 
-        self.system_size = check_dimension(system_size, dim=2)[:, 1]
-        self.box_length = self.system_size * 2.0
+        self.box_size = check_dimension(box_size, dim=1)
+        self.half_box_size = box_size * 0.5
 
         self.layer_depth = layer_depth
         self.layer = self.__make_layer()
@@ -61,8 +55,12 @@ class RDF:
 
         self.kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
 
+    def run(self):
+        self._cal_hist_data()
+        return self
+
     @property
-    def result(self):
+    def rdf(self):
         if self.hist_data is None:
             self._cal_hist_data()
         return self.__cal_rdf_from_hist_data()
@@ -95,8 +93,8 @@ class RDF:
     def __check_pbc(self, diff_position) -> NDArray[np.float64]:
         diff_position = np.abs(diff_position)
         return np.where(
-            diff_position > self.system_size,
-            self.box_length - diff_position,
+            diff_position > self.half_box_size,
+            self.box_size - diff_position,
             diff_position,
         )
 
@@ -112,7 +110,7 @@ class RDF:
             for j in idx_direction_:
                 for k in idx_direction_:
                     list_direction.append([i, j, k])
-        return np.array(list_direction) * self.box_length
+        return np.array(list_direction) * self.box_size
 
     # get idx for histogram
     def __cal_idx_histogram(self, distance: NDArray) -> NDArray[np.int64]:
@@ -127,7 +125,7 @@ class RDF:
             4.0 * np.pi * self.dr * self.frame_number * self.a_number * self.b_number,
             dtype=np.float64,
         )
-        box_volume = np.prod(self.box_length, dtype=np.float64)
+        box_volume = np.prod(self.box_size, dtype=np.float64)
         return g_r * box_volume / factor
 
     # Function for get coordinate number

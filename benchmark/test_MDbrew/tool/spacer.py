@@ -1,4 +1,5 @@
-from .._base import *
+import numpy as np
+from numpy.typing import NDArray
 
 __all__ = ["check_dimension", "get_diff_position", "get_distance"]
 
