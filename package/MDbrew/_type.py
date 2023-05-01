@@ -1,6 +1,9 @@
 from typing import Union
-from .opener import *
+from .filetype.lmps import lmpsOpener
+from .filetype.pdb import pdbOpener
+from .filetype.vasp import vaspOpener
+from .filetype.xyz import xyzOpener
 
 __all__ = ["OpenerType"]
 
-OpenerType = Union[LAMMPSOpener, DATOpener, WMIOpener]
+OpenerType = Union[lmpsOpener, pdbOpener, vaspOpener, xyzOpener]
