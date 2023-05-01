@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 import numpy as np
-from scipy import constants
 from tqdm import tqdm
-from ..tool.colorfont import ColorFont
+from scipy import constants
 from ..brewery import Brewery
-from ..tool.deco import color_print
+from ..tool.colorfont import color
+from ..tool.decorator import color_print
 
-color = ColorFont()
 
 class BrewCP2K(object):
     tqmd_option = {"ascii": " #"}
     printing_option = {
-        "2array": f" #CONVERT2  {color.font_yellow}Array{color.reset}",
-        "2a.u": f" #CONVERT2  {color.font_yellow}Atomic Unit{color.reset}",
+        "2array": f" #CONVERT  {color.font_yellow}List2Array{color.reset}",
+        "2a.u": f" #CONVERT  {color.font_yellow}Atomic Unit{color.reset}",
         "save": f" #SAVE  {color.font_yellow}THE DATA{color.reset}",
-        "kind2type": f" #CONVERT2  {color.font_yellow}KIND2TYPE{color.reset}",
+        "kind2type": f" #CONVERT  {color.font_yellow}KIND2TYPE{color.reset}",
     }
 
     def __init__(self, xyz_file, log_file, type_map: list["str"]) -> None:
@@ -107,9 +106,11 @@ class BrewCP2K(object):
         np.savetxt(folder + "type_map.raw", self._type_map, fmt="%s")
 
     def _brew_xyzfile(self, xyz_file):
-        xyz_brewer = Brewery(path=xyz_file).brew()
+        xyz_brewer = Brewery(path=xyz_file).brew(cols=["x", "y", "z"], dtype="float64")
         line_range = tqdm(
-            xyz_brewer, desc=f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}XYZ{color.reset} "
+            xyz_brewer,
+            desc=f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}XYZ{color.reset} ",
+            **self.tqmd_option,
         )
         self._coord_list = [data for data in line_range]
         self.is_contain_coord = True
@@ -226,6 +227,5 @@ class BrewCP2K(object):
 
     @color_print(name=printing_option["kind2type"])
     def _covert_kind2type(self):
-        # type_list = ["H", "O", "Al", "Cl"]
         self._type_dict = {kind: idx for idx, kind in enumerate(self._type_map)}
         self._type_list = [self._type_dict[kind] for kind in self._kind_list]

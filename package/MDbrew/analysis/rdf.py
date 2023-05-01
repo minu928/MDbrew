@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import trange
 from numpy.typing import NDArray
 from ..tool.spacer import *
+from ..tool.colorfont import color
 
 __all__ = ["RDF"]
 
@@ -19,18 +20,18 @@ class RDF:
             Position data  ||  shape : [frame, N_particle, dim]
         b : NDArray
             Position data  ||  shape : [frame, N_particle, dim]
-        system_size : [bx, by, bz]
+        box_size : [bx, by, bz]
             System size of data
         layer_depth : int, optional
             how many layer do you set, 0 means with PBC (one box) other layered, by default 0
         r_max : float, optional
-            you can input the max radius else None means 'calculate max(system_size)', by default None
+            you can input the max radius else None means 'calculate max(box_size)', by default None
         resolution : int, optional
             resolution of dr, by default 1000
 
         Result of Radial Density Function, Coordination Number
         ------------------------------------------------------------
-        >>> my_rdf     = RDF(a = a_position, b= b_position, system_size=system_size)
+        >>> my_rdf     = RDF(a = a_position, b= b_position, box_size=box_size)
         >>> rdf_result = my_rdf.result
         >>> cn_result  = my_rdf.cn
         """
@@ -38,7 +39,7 @@ class RDF:
         self.b = check_dimension(b, dim=3)
 
         self.box_size = check_dimension(box_size, dim=1)
-        self.half_box_size = box_size * 0.5
+        self.half_box_size = self.box_size * 0.5
 
         self.layer_depth = layer_depth
         self.layer = self.__make_layer()
@@ -47,13 +48,17 @@ class RDF:
         self.frame_number = self.a.shape[0]
         self.a_number, self.b_number = self.a.shape[1], self.b.shape[1]
 
-        self.r_max = np.max(self.system_size) * (2.0 * self.layer_depth + 1.0) if r_max is None else r_max
+        self.r_max = np.max(self.half_box_size) * (2.0 * self.layer_depth + 1.0) if r_max is None else r_max
         self.resolution = resolution
         self.dr = self.r_max / self.resolution
         self.hist_data = None
         self.radii = np.linspace(0.0, self.r_max, self.resolution)
 
-        self.kwrgs_trange = {"desc": " RDF  (STEP) ", "ncols": 70, "ascii": True}
+        self.kwrgs_trange = {
+            "desc": f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}RDF{color.reset} ",
+            "ncols": 60,
+            "ascii": True,
+        }
 
     def run(self):
         self._cal_hist_data()

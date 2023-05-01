@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import trange
 from numpy.typing import NDArray
 from ..tool import spacer
+from ..tool.colorfont import color
 
 __all__ = ["MSD"]
 
@@ -26,7 +27,11 @@ class MSD(object):
         """
         self.axis_dict = {"frame": 0, "N_particle": 1, "pos": -1}
         self.position = spacer.check_dimension(position, dim=3)
-        self.kwrgs_trange = {"desc": " MSD  (STEP) ", "ncols": 70, "ascii": True}
+        self.kwrgs_trange = {
+            "desc": f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}MSD{color.reset} ",
+            "ncols": 60,
+            "ascii": True,
+        }
         self.frame_number = self.position.shape[0]
         self.fft = fft
 
@@ -42,7 +47,7 @@ class MSD(object):
         else:
             self._result = self.__get_msd_window()
         return self
-    
+
     @property
     def result(self):
         return self._result

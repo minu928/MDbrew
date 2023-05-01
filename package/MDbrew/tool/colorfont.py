@@ -70,5 +70,4 @@ class ColorFont:
         self.background_bright_white = self.pick_color("white", bright=True, bg=True)
 
 
-if __name__ == "__main__":
-    colorfont = ColorFont()
+color = ColorFont()
