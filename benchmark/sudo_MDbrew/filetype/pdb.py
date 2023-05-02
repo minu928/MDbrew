@@ -1,9 +1,9 @@
-from .openerinterface import OpenerInterface
+from .opener import Opener
 
 
-class pdbOpener(OpenerInterface):
-    def __init__(self, path: str) -> None:
-        super().__init__(path=path)
+class pdbOpener(Opener):
+    def __init__(self, path: str, is_generator: str = False, what: str = None) -> None:
+        super().__init__(path, is_generator, what)
         self.path = path
         self.skip_head = 2
         self.column = ["type", "id", "atom", "x", "y", "z", "ax", "bx", "resdue"]

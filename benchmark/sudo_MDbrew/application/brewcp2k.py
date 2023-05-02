@@ -65,6 +65,7 @@ class BrewCP2K(object):
         print(f"\t[ VIRIAL ] : {self.is_contain_stress} || SHAPE {self.virials.shape}")
         print(f"\t[ COORDS ] : {self.is_contain_coord} || SHAPE {self.coords.shape}")
         print(f"\t[ ENERGY ] : {self.is_contain_energy} || SHAPE {self.energies.shape}")
+        print(f"\t[  TYPE  ] : {self.is_contain_kind} || SHAPE {self.types.shape}")
         print(sep_line)
         return f"\t @CopyRight by  {color.font_blue}minu928@snu.ac.kr{color.reset}\n"
 
@@ -181,16 +182,17 @@ class BrewCP2K(object):
                     self._force_list.append(line.split()[3:6])
                     continue
                 # TYPE
-                if kind_keyword in line:
-                    kind_idx = idx
-                    self.is_contain_kind = True
-                    kind_iter_on = True
-                    continue
-                if kind_iter_on and kind_stop_keyword == line:
-                    kind_iter_on = False
-                if kind_iter_on and idx > kind_idx:
-                    self._kind_list.append(line.split()[2])
-                    continue
+                if not self.is_contain_kind:
+                    if kind_keyword in line:
+                        kind_idx = idx
+                        kind_iter_on = True
+                        continue
+                    if kind_iter_on and kind_stop_keyword == line:
+                        kind_iter_on = False
+                        self.is_contain_kind = True
+                    if kind_iter_on and idx > kind_idx:
+                        self._kind_list.append(line.split()[2])
+                        continue
 
     @color_print(name=printing_option["2array"])
     def _change2array(self, data_type: str = "float32"):

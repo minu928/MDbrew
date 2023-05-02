@@ -1,9 +1,9 @@
-from .openerinterface import OpenerInterface
+from .opener import Opener
 
 
-class xyzOpener(OpenerInterface):
-    def __init__(self, path: str) -> None:
-        super().__init__(path)
+class xyzOpener(Opener):
+    def __init__(self, path: str, is_generator: str = False, what: str = None) -> None:
+        super().__init__(path, is_generator, what)
         self.column = ["atom", "x", "y", "z"]
         self.gen_database()
 
