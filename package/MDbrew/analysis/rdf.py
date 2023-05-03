@@ -5,16 +5,22 @@ from ..main.brewery import Brewery
 from ..tool.spacer import *
 from ..tool.colorfont import color
 
-__all__ = ["RDF"]
-
 
 # Calculate and Plot the RDF
-class RDF:
-    def __init__(self, a, b, box_size, layer_depth: int = 0, r_max: float = None, resolution: int = 1000, max_frame : int = None):
+class RDF(object):
+    kwrgs_trange = {
+        "desc": f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}RDF{color.reset} ",
+        "ncols": 60,
+        "ascii": True,
+    }
+
+    def __init__(
+        self, a, b, box_size, layer: int = 0, r_max: float = None, resolution: int = 1000, max_frame: int = None
+    ):
         if type(a) == Brewery:
             self.is_Brewery_type = True
             self.a = a.reorder().brew(cols=["x", "y", "z"])
-            self.b = b.reorder().brew(cols=["x","y","z"])
+            self.b = b.reorder().brew(cols=["x", "y", "z"])
             self.frame_num = max_frame
             self.a_number = a.atom_num
             self.b_number = b.atom_num
@@ -29,27 +35,21 @@ class RDF:
         self.box_size = check_dimension(box_size, dim=1)
         self.half_box_size = self.box_size * 0.5
 
-        self.layer_depth = layer_depth
+        self.layer_depth = layer
         self.layer = self.__make_layer()
 
         self.resolution = resolution
         self.r_max = np.max(self.half_box_size) * (2.0 * self.layer_depth + 1.0) if r_max is None else r_max
         self.dr = self.r_max / self.resolution
-        
+
         self.hist_data = None
         self.radii = np.linspace(0.0, self.r_max, self.resolution)
-
-        self.kwrgs_trange = {
-            "desc": f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}RDF{color.reset} ",
-            "ncols": 60,
-            "ascii": True,
-        }
 
     def run(self):
         if self.is_Brewery_type:
             self._cal_hist_data_with_generator()
         else:
-            self._cal_hist_data_with_iterator()    
+            self._cal_hist_data_with_iterator()
         return self
 
     @property
@@ -76,14 +76,14 @@ class RDF:
             distance = get_distance(diff_position=diff_position, axis=-1)
             idx_hist = self.__cal_idx_histogram(distance=distance)
             value, count = np.unique(idx_hist, return_counts=True)
-            self.hist_data[value] += count    
+            self.hist_data[value] += count
 
     # Function for get hist
     def _cal_hist_data_with_generator(self):
         self.hist_data = np.zeros(self.resolution)
         _apply_boundary_condition = self.__set_boundary_condition()
         frame_num = 0
-        for a_unit, b_unit in tqdm(zip(self.a, self.b),**self.kwrgs_trange):
+        for a_unit, b_unit in tqdm(zip(self.a, self.b), **self.kwrgs_trange):
             if self.frame_num is not None and frame_num == self.frame_num:
                 break
             frame_num += 1
@@ -91,10 +91,9 @@ class RDF:
             diff_position = _apply_boundary_condition(diff_position=diff_position)
             distance = get_distance(diff_position=diff_position, axis=-1)
             idx_hist = self.__cal_idx_histogram(distance=distance)
-            value, count = np.unique(idx_hist, return_counts=True) 
+            value, count = np.unique(idx_hist, return_counts=True)
             self.hist_data[value] += count
-        self.frame_num = frame_num        
-
+        self.frame_num = frame_num
 
     # select the mode with Boundary Layer
     def __set_boundary_condition(self):

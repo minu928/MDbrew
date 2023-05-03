@@ -13,7 +13,7 @@ def check_tab(name: str) -> int:
 
 
 # Wrapper of count the function execution time
-def color_print(name, verbose:bool = True):
+def color_print(name, verbose: bool = True):
     def deco(func):
         def inner(*args, **kwrgs):
             if verbose:

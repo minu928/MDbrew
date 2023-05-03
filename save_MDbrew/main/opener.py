@@ -43,7 +43,7 @@ class Opener(object):
         self.frame_num = len(database)
         return database
 
-	# Generation database
+    # Generation database
     def _generate_database(self):
         with open(file=self.path, mode="r") as file:
             for _ in range(self.skip_head):

@@ -1,15 +1,26 @@
 import numpy as np
-from tqdm import trange
+from tqdm import trange, tqdm
 from numpy.typing import NDArray
 from ..tool import spacer
+from ..main.brewery import Brewery
 from ..tool.colorfont import color
-
-__all__ = ["MSD"]
 
 
 # Class of Mean Square Displacement
 class MSD(object):
-    def __init__(self, position: NDArray, fft: bool = True):
+    axis_dict = {"frame": 0, "N_particle": 1, "pos": -1}
+    kwrgs_trange = {
+        "desc": f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}MSD{color.reset} ",
+        "ncols": 60,
+        "ascii": True,
+    }
+    kwrgs_pos = {
+        "desc": f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}POS{color.reset} ",
+        "ncols": 60,
+        "ascii": True,
+    }
+
+    def __init__(self, position, fft: bool = True, dtype: str = "float32"):
         """MSD
 
         Calculate the msd data and return it with method and fft
@@ -25,13 +36,13 @@ class MSD(object):
         >>> my_msd      = MSD(position = position, fft = True)
         >>> msd_result  = my_msd.result
         """
-        self.axis_dict = {"frame": 0, "N_particle": 1, "pos": -1}
-        self.position = spacer.check_dimension(position, dim=3)
-        self.kwrgs_trange = {
-            "desc": f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}MSD{color.reset} ",
-            "ncols": 60,
-            "ascii": True,
-        }
+        if type(position) == Brewery:
+            self.is_Brewery_type = True
+            self.position = position.reorder().brew(cols=["x", "y", "z"])
+            pos_range = tqdm(self.position, **self.kwrgs_pos)
+            self.position = np.array([data for data in pos_range], dtype=dtype)
+        else:
+            self.position = spacer.check_dimension(position, dim=3)
         self.frame_number = self.position.shape[0]
         self.fft = fft
 

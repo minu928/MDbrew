@@ -1,4 +1,4 @@
-from .opener import Opener
+from ..opener import Opener
 
 
 class vaspOpener(Opener):

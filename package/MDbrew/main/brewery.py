@@ -1,25 +1,27 @@
 import os
 import numpy as np
-from .brewers.brewer import Brewer
-from ..tool.colorfont import color
-from ..tool.decorator import color_print
-from .filetype.opener import Opener
+from .brewer import Brewer
+from .opener import Opener
 from .filetype.lmps import lmpsOpener
 from .filetype.pdb import pdbOpener
 from .filetype.vasp import vaspOpener
 from .filetype.xyz import xyzOpener
+from ..tool.colorfont import color
+from ..tool.decorator import color_print
 
 
 class Brewery(object):
     __support_opener__ = {"auto": None, "pdb": pdbOpener, "xyz": xyzOpener, "vasp": vaspOpener, "lmps": lmpsOpener}
     __printing_option__ = {"brewery": f" #LOAD  {color.font_yellow}Files      {color.reset}"}
 
-    def __init__(self, path: str, fmt: str = "auto", is_generator: bool = False, what: str = None, _verbose: bool = True) -> None:
+    def __init__(
+        self, path: str, fmt: str = "auto", is_generator: bool = False, what: str = None, verbose: bool = True
+    ):
         self._what = what
+        self._verbose = verbose
         self.is_generator = is_generator
-        self._verbose = _verbose
         self.__check_path(path=path)
-        self.__check_fmt(fmt=fmt)   
+        self.__check_fmt(fmt=fmt)
         self.__load_opener()
         self.__set_atom_info()
 
@@ -28,14 +30,12 @@ class Brewery(object):
         sep_line = "=" * LINE_WIDTH
         print("")
         print(sep_line)
-        print("||" + " " * 22 + " INFO " + " " * 28 + "||")
+        print("||" + " " * 23 + " INFO " + " " * 27 + "||")
         print(sep_line)
         print(f"\t[  ATOM  ] : KIND  ->  {tuple(self.atom_kind)}")
         print(f"\t[  ATOM  ] : NUMB  ->  {tuple(self.atom_info[-1])}")
         print(f"\t[  CELL  ] : SHAPE ->  {np.array(self.box_size).shape}")
-        coord_ment = (
-            f"{self.coords.shape}  in Full" if not self.is_generator else f"{next(self.coords).shape}  per frame"
-        )
+        coord_ment = f"{next(self.coords).shape}  in frame" if self.is_generator else f"{self.coords.shape}  in full"
         print(f"\t[ COORDS ] : SHAPE ->  {coord_ment}")
         print(sep_line)
         self.reload()
@@ -52,7 +52,7 @@ class Brewery(object):
         self.atom_info = np.unique(one_brewing, return_counts=True)
         self.atom_kind = self.atom_info[0]
         self.atom_num = np.sum(self.atom_info[1])
-        self.reload()
+        self.reload() if self.is_generator else None
 
     def __set_opener(self) -> Opener:
         return self.__support_opener__[self.fmt](path=self._path, is_generator=self.is_generator)
@@ -79,15 +79,13 @@ class Brewery(object):
             self.fmt = fmt
 
     def __check_path(self, path):
+        path = os.path.join(os.getcwd(), path)
         assert os.path.isfile(path=path), f"Check your path || not {path}"
         self._path = path
 
     def __load_opener(self):
-        if self._verbose:
-            self.__load_opener_with_verbose()
-        else:
-            self.reload()
-    
+        self.__load_opener_with_verbose() if self._verbose else self.reload()
+
     @color_print(name=__printing_option__["brewery"])
     def __load_opener_with_verbose(self):
         self.reload()
@@ -106,6 +104,5 @@ class Brewery(object):
     def order(self, what: str = None):
         return Brewery(path=self._path, fmt=self.fmt, is_generator=self.is_generator, what=what)
 
-    def reorder(self):
-        reorder_brewery = Brewery(path=self._path, fmt=self.fmt, is_generator=self.is_generator, what=self._what, _verbose=False)
-        return reorder_brewery
+    def reorder(self, verbose: bool = False):
+        return Brewery(path=self._path, fmt=self.fmt, is_generator=self.is_generator, what=self._what, verbose=verbose)
