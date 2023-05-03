@@ -1,13 +1,12 @@
-from .openerinterface import OpenerInterface
+from .opener import Opener
 
 
-class vaspOpener(OpenerInterface):
-    def __init__(self, path: str) -> None:
-        super().__init__(path)
+class vaspOpener(Opener):
+    def __init__(self, path: str, is_generator: str = False) -> None:
+        super().__init__(path, is_generator)
         self.skip_head = 7
         self.column = ["atom", "x", "y", "z"]
         self._set_box_and_atom(path=path)
-        self.gen_database()
 
     def _make_one_frame_data(self, file, first_loop_line):
         step = first_loop_line.split()[-1]

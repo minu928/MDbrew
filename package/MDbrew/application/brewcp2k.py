@@ -2,7 +2,7 @@
 import numpy as np
 from tqdm import tqdm
 from scipy import constants
-from ..brewery import Brewery
+from ..main.brewery import Brewery
 from ..tool.colorfont import color
 from ..tool.decorator import color_print
 
@@ -65,6 +65,7 @@ class BrewCP2K(object):
         print(f"\t[ VIRIAL ] : {self.is_contain_stress} || SHAPE {self.virials.shape}")
         print(f"\t[ COORDS ] : {self.is_contain_coord} || SHAPE {self.coords.shape}")
         print(f"\t[ ENERGY ] : {self.is_contain_energy} || SHAPE {self.energies.shape}")
+        print(f"\t[  TYPE  ] : {self.is_contain_kind} || SHAPE {self.types.shape}")
         print(sep_line)
         return f"\t @CopyRight by  {color.font_blue}minu928@snu.ac.kr{color.reset}\n"
 
@@ -106,9 +107,9 @@ class BrewCP2K(object):
         np.savetxt(folder + "type_map.raw", self._type_map, fmt="%s")
 
     def _brew_xyzfile(self, xyz_file):
-        xyz_brewer = Brewery(path=xyz_file).brew(cols=["x", "y", "z"], dtype="float64")
+        database = Brewery(path=xyz_file, fmt="xyz", is_generator=True).coords
         line_range = tqdm(
-            xyz_brewer,
+            database,
             desc=f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}XYZ{color.reset} ",
             **self.tqmd_option,
         )
@@ -181,16 +182,17 @@ class BrewCP2K(object):
                     self._force_list.append(line.split()[3:6])
                     continue
                 # TYPE
-                if kind_keyword in line:
-                    kind_idx = idx
-                    self.is_contain_kind = True
-                    kind_iter_on = True
-                    continue
-                if kind_iter_on and kind_stop_keyword == line:
-                    kind_iter_on = False
-                if kind_iter_on and idx > kind_idx:
-                    self._kind_list.append(line.split()[2])
-                    continue
+                if not self.is_contain_kind:
+                    if kind_keyword in line:
+                        kind_idx = idx
+                        kind_iter_on = True
+                        continue
+                    if kind_iter_on and kind_stop_keyword == line:
+                        kind_iter_on = False
+                        self.is_contain_kind = True
+                    if kind_iter_on and idx > kind_idx:
+                        self._kind_list.append(line.split()[2])
+                        continue
 
     @color_print(name=printing_option["2array"])
     def _change2array(self, data_type: str = "float32"):

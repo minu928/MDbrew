@@ -1,7 +1,7 @@
 import MDbrew as mdb
-from MDbrew.tool.tester import do_test
+from MDbrew.tool.doctor import doctor
 
 if __name__ == "__main__":
-    path = "./benchmark/test.lammpstrj"
+    path = "/nas/minu928/1.DEV/#.test_space/local_git/MDbrew/benchmark/data/test.lmps"
     print(f"\n{' '*6}Version : {mdb.__version__}")
-    do_test(path=path)
+    doctor(path=path)
