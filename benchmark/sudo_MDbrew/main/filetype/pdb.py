@@ -2,12 +2,11 @@ from .opener import Opener
 
 
 class pdbOpener(Opener):
-    def __init__(self, path: str, is_generator: str = False, what: str = None) -> None:
-        super().__init__(path, is_generator, what)
+    def __init__(self, path: str, is_generator: str = False) -> None:
+        super().__init__(path, is_generator)
         self.path = path
         self.skip_head = 2
         self.column = ["type", "id", "atom", "x", "y", "z", "ax", "bx", "resdue"]
-        self._database = self.gen_database()
 
     def _make_one_frame_data(self, file, first_loop_line):
         second_loop_line = file.readline()
@@ -18,5 +17,4 @@ class pdbOpener(Opener):
             if "END" in line:
                 break
             one_frame_data.append(line.split())
-        self.atom_num = len(one_frame_data)
         return one_frame_data

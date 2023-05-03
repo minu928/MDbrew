@@ -1,7 +1,7 @@
 import numpy as np
-from types import GeneratorType
 from tqdm import trange, tqdm
 from numpy.typing import NDArray
+from ..main.brewery import Brewery
 from ..tool.spacer import *
 from ..tool.colorfont import color
 
@@ -11,15 +11,15 @@ __all__ = ["RDF"]
 # Calculate and Plot the RDF
 class RDF:
     def __init__(self, a, b, box_size, layer_depth: int = 0, r_max: float = None, resolution: int = 1000, max_frame : int = None):
-        if type(a) == GeneratorType:
-            self.is_generatortype = True
-            self.a = a
-            self.b = b
+        if type(a) == Brewery:
+            self.is_Brewery_type = True
+            self.a = a.reorder().brew(cols=["x", "y", "z"])
+            self.b = b.reorder().brew(cols=["x","y","z"])
             self.frame_num = max_frame
-            self.a_number = None
-            self.b_number = None
+            self.a_number = a.atom_num
+            self.b_number = b.atom_num
         else:
-            self.is_generatortype = False
+            self.is_Brewery_type = False
             self.a = check_dimension(a, dim=3)
             self.b = check_dimension(b, dim=3)
             self.frame_num = self.a.shape[0] if max_frame is None else max_frame
@@ -46,7 +46,7 @@ class RDF:
         }
 
     def run(self):
-        if self.is_generatortype:
+        if self.is_Brewery_type:
             self._cal_hist_data_with_generator()
         else:
             self._cal_hist_data_with_iterator()    
@@ -86,8 +86,6 @@ class RDF:
         for a_unit, b_unit in tqdm(zip(self.a, self.b),**self.kwrgs_trange):
             if self.frame_num is not None and frame_num == self.frame_num:
                 break
-            self.a_number = len(a_unit)
-            self.b_number = len(b_unit)
             frame_num += 1
             diff_position = get_diff_position(a_unit[:, None, :], b_unit[None, :, :])
             diff_position = _apply_boundary_condition(diff_position=diff_position)

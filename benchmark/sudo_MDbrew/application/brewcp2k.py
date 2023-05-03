@@ -2,7 +2,7 @@
 import numpy as np
 from tqdm import tqdm
 from scipy import constants
-from ..brewery import Brewery
+from ..main.brewery import Brewery
 from ..tool.colorfont import color
 from ..tool.decorator import color_print
 
@@ -107,9 +107,9 @@ class BrewCP2K(object):
         np.savetxt(folder + "type_map.raw", self._type_map, fmt="%s")
 
     def _brew_xyzfile(self, xyz_file):
-        xyz_brewer = Brewery(path=xyz_file).brew(cols=["x", "y", "z"], dtype="float64")
+        database = Brewery(path=xyz_file, fmt="xyz", is_generator=True).coords
         line_range = tqdm(
-            xyz_brewer,
+            database,
             desc=f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}XYZ{color.reset} ",
             **self.tqmd_option,
         )
