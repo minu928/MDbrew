@@ -1,6 +1,5 @@
 import numpy as np
 from tqdm import trange, tqdm
-from numpy.typing import NDArray
 from ..main.brewery import Brewery
 from ..tool.spacer import *
 from ..tool.colorfont import color
@@ -100,7 +99,7 @@ class RDF(object):
         return self.__add_layer if self.layer_depth else self.__check_pbc
 
     # set the pbc only consider single system
-    def __check_pbc(self, diff_position) -> NDArray[np.float64]:
+    def __check_pbc(self, diff_position):
         diff_position = np.abs(diff_position)
         return np.where(
             diff_position > self.half_box_size,
@@ -109,11 +108,11 @@ class RDF(object):
         )
 
     # set the pbc with 27 system
-    def __add_layer(self, diff_position) -> NDArray[np.float64]:
+    def __add_layer(self, diff_position):
         return diff_position[..., np.newaxis, :] + self.layer
 
     # Make a 3D layer_idx
-    def __make_layer(self) -> NDArray[np.float64]:
+    def __make_layer(self):
         list_direction = []
         idx_direction_ = range(-self.layer_depth, self.layer_depth + 1)
         for i in idx_direction_:
@@ -123,12 +122,12 @@ class RDF(object):
         return np.array(list_direction) * self.box_size
 
     # get idx for histogram
-    def __cal_idx_histogram(self, distance: NDArray) -> NDArray[np.int64]:
+    def __cal_idx_histogram(self, distance):
         idx_hist = (distance / self.dr).astype(np.int64)
         return idx_hist[np.where((0 < idx_hist) & (idx_hist < self.resolution))]
 
     # Calculate the Density Function
-    def __cal_rdf_from_hist_data(self) -> NDArray[np.float64]:
+    def __cal_rdf_from_hist_data(self):
         r_i = self.radii[1:]
         g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
         factor = np.array(

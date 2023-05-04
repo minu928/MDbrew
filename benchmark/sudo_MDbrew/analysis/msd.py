@@ -1,6 +1,5 @@
 import numpy as np
 from tqdm import trange, tqdm
-from numpy.typing import NDArray
 from ..tool import spacer
 from ..main.brewery import Brewery
 from ..tool.colorfont import color
@@ -27,7 +26,7 @@ class MSD(object):
 
         Parameters
         ------------
-        position : NDArray
+        position
             Data of Particle's position in each frame
         fft : bool, optional
             default = True, if True the calculation in FFT, else  matrix
@@ -46,7 +45,7 @@ class MSD(object):
         self.frame_number = self.position.shape[0]
         self.fft = fft
 
-    def run(self) -> NDArray[np.float64]:
+    def run(self):
         """run
 
         Return
@@ -64,7 +63,7 @@ class MSD(object):
         return self._result
 
     # window method with non-FFT
-    def __get_msd_window(self) -> NDArray[np.float64]:
+    def __get_msd_window(self):
         """MSD - Window Method with non-FFT
 
         Calculate the MSD list with linear loop with numpy function
@@ -84,7 +83,7 @@ class MSD(object):
         return self.__mean_msd_list(msd_list=msd_list)
 
     # window method with FFT
-    def __get_msd_fft(self) -> NDArray[np.float64]:
+    def __get_msd_fft(self):
         """MSD - Window method wit FFT
 
         Calculate the MSD list with linear loop with numpy function
@@ -101,7 +100,7 @@ class MSD(object):
         msd_list = np.subtract(S_1, 2.0 * S_2)
         return self.__mean_msd_list(msd_list=msd_list)
 
-    def __get_S_1(self) -> NDArray[np.float64]:
+    def __get_S_1(self):
         empty_matrix = np.zeros(self.position.shape[:2])
         D = self.__square_sum_position(self.position)
         D = np.append(D, empty_matrix, axis=self.axis_dict["frame"])
@@ -113,7 +112,7 @@ class MSD(object):
         return S_1
 
     # get S2 for FFT
-    def __get_S_2(self) -> NDArray[np.float64]:
+    def __get_S_2(self):
         X = np.fft.fft(self.position, n=2 * self.frame_number, axis=self.axis_dict["frame"])
         dot_X = X * X.conjugate()
         x = np.fft.ifft(dot_X, axis=self.axis_dict["frame"])
@@ -123,9 +122,9 @@ class MSD(object):
         return x / n[:, np.newaxis]
 
     # do square and sum about position
-    def __square_sum_position(self, position_data) -> NDArray[np.float64]:
+    def __square_sum_position(self, position_data):
         return np.square(position_data).sum(axis=self.axis_dict["pos"])
 
     # do mean about msd list
-    def __mean_msd_list(self, msd_list) -> NDArray[np.float64]:
+    def __mean_msd_list(self, msd_list):
         return msd_list.mean(axis=self.axis_dict["N_particle"])

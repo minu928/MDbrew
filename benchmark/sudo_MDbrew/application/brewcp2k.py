@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import numpy as np
 from tqdm import tqdm
 from scipy import constants
@@ -82,27 +83,29 @@ class BrewCP2K(object):
     @color_print(name=printing_option["save"])
     def save_data(self, folder: str = "./", mode: str = "dpdata"):
         folder = folder if folder[-1] == "/" else folder + "/"
-        mode_list = ["dpdata", "raw"]
+        data_path = os.path.join(folder, "set.000")
+        if not os.path.exists(data_path):
+            os.makedirs(data_path)
+        mode_list = ("dpdata", "raw")
         mode = mode.lower()
+        energy_path = os.path.join(data_path, "energy.npy")
+        box_path = os.path.join(data_path, "box.npy")
+        virial_path = os.path.join(data_path, "virial.npy")
+        force_path = os.path.join(data_path, "force.npy")
+        coord_path = os.path.join(data_path, "coord.npy")
         assert mode in mode_list, f"[ ERROR ] mode should be dpata, raw || Not {mode}"
         if mode == "dpdata":
-            np.save(folder + "energy.npy", self.energies)
-            np.save(folder + "box.npy", self.cells.reshape(self._num_frame, 9))
-            np.save(folder + "virial.npy", self.virials.reshape(self._num_frame, 9))
-            np.save(
-                folder + "force.npy",
-                self.forces.reshape(self._num_frame, int(self._num_atom * 3)),
-            )
-            np.save(
-                folder + "coord.npy",
-                self.coords.reshape(self._num_frame, int(self._num_atom * 3)),
-            )
+            np.save(energy_path, self.energies)
+            np.save(box_path, self.cells.reshape(self._num_frame, 9))
+            np.save(virial_path, self.virials.reshape(self._num_frame, 9))
+            np.save(force_path, self.forces.reshape(self._num_frame, int(self._num_atom * 3)))
+            np.save(coord_path, self.coords.reshape(self._num_frame, int(self._num_atom * 3)))
         elif mode == "raw":
-            np.save(folder + "energy.npy", self.energies)
-            np.save(folder + "virial.npy", self.virials)
-            np.save(folder + "force.npy", self.forces)
-            np.save(folder + "coord.npy", self.coords)
-            np.save(folder + "box.npy", self.cells)
+            np.save(energy_path, self.energies)
+            np.save(box_path, self.cells)
+            np.save(virial_path, self.virials)
+            np.save(force_path, self.forces)
+            np.save(coord_path, self.coords)
         np.savetxt(folder + "type.raw", self.types, fmt="%d")
         np.savetxt(folder + "type_map.raw", self._type_map, fmt="%s")
 
