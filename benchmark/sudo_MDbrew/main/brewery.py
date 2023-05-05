@@ -48,14 +48,16 @@ class Brewery(object):
     def box_size(self):
         return self._opener.box_size
 
-    def set_box_size(self, box_size):
+    @box_size.setter
+    def box_size(self, box_size):
         self._opener.box_size = box_size
 
     @property
     def columns(self):
         return self._opener.column
 
-    def set_columns(self, colums):
+    @columns.setter
+    def columns(self, colums):
         self._opener.column = colums
 
     @property
