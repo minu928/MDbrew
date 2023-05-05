@@ -2,9 +2,10 @@ from ..opener import Opener
 
 
 class lmpsOpener(Opener):
-    def __init__(self, path: str, is_generator: str = False) -> None:
-        super().__init__(path, is_generator)
+    def __init__(self, path: str) -> None:
+        super().__init__(path)
         self._atom_keyword = "type"
+        self.gen_db()
 
     def _make_one_frame_data(self, file, first_loop_line):
         self.skip_line(file=file, num=2)

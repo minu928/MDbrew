@@ -37,13 +37,12 @@ class MSD(object):
         """
         if type(position) == Brewery:
             self.is_Brewery_type = True
-            self.position = position.reorder().brew(cols=["x", "y", "z"])
-            pos_range = tqdm(self.position, **self.kwrgs_pos)
-            self.position = np.array([data for data in pos_range], dtype=dtype)
+            pos_range = tqdm(position.frange(), **self.kwrgs_pos)
+            self.position = np.array([position.coords for _ in pos_range], dtype=dtype)
         else:
             self.position = spacer.check_dimension(position, dim=3)
         self.frame_number = self.position.shape[0]
-        self.fft = fft
+        self._fft = fft
 
     def run(self):
         """run
@@ -52,7 +51,7 @@ class MSD(object):
         ----------
         NDArray[np.float64]: result of MSD
         """
-        if self.fft:
+        if self._fft:
             self._result = self.__get_msd_fft()
         else:
             self._result = self.__get_msd_window()
@@ -60,6 +59,8 @@ class MSD(object):
 
     @property
     def result(self):
+        if not hasattr(self, "_result"):
+            self.run()
         return self._result
 
     # window method with non-FFT

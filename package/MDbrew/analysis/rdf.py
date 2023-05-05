@@ -14,15 +14,25 @@ class RDF(object):
     }
 
     def __init__(
-        self, a, b, box_size, layer: int = 0, r_max: float = None, resolution: int = 1000, max_frame: int = None
+        self,
+        a,
+        b,
+        box_size=None,
+        layer: int = 0,
+        r_max: float = None,
+        resolution: int = 1000,
+        max_frame: int = None,
+        dtype: str = "float32",
     ):
         if type(a) == Brewery:
             self.is_Brewery_type = True
-            self.a = a.reorder().brew(cols=["x", "y", "z"])
-            self.b = b.reorder().brew(cols=["x", "y", "z"])
+            self.a = a
+            self.b = b
             self.frame_num = max_frame
             self.a_number = a.atom_num
             self.b_number = b.atom_num
+            self.box_size = a.box_size if box_size is None else box_size
+            assert len(self.box_size), "plz set box_size"
         else:
             self.is_Brewery_type = False
             self.a = check_dimension(a, dim=3)
@@ -31,7 +41,7 @@ class RDF(object):
             self.a_number = self.a.shape[1]
             self.b_number = self.b.shape[1]
 
-        self.box_size = check_dimension(box_size, dim=1)
+        self.box_size = np.array(self.box_size, dtype=dtype)
         self.half_box_size = self.box_size * 0.5
 
         self.layer_depth = layer
@@ -82,10 +92,12 @@ class RDF(object):
         self.hist_data = np.zeros(self.resolution)
         _apply_boundary_condition = self.__set_boundary_condition()
         frame_num = 0
-        for a_unit, b_unit in tqdm(zip(self.a, self.b), **self.kwrgs_trange):
+        for _ in tqdm(zip(self.a.frange(), self.b.frange()), **self.kwrgs_trange):
             if self.frame_num is not None and frame_num == self.frame_num:
                 break
             frame_num += 1
+            a_unit = self.a.coords
+            b_unit = self.b.coords
             diff_position = get_diff_position(a_unit[:, None, :], b_unit[None, :, :])
             diff_position = _apply_boundary_condition(diff_position=diff_position)
             distance = get_distance(diff_position=diff_position, axis=-1)

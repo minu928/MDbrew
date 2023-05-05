@@ -14,7 +14,6 @@ MDbrew/analysis/rdf.py
 MDbrew/application/__init__.py
 MDbrew/application/brewcp2k.py
 MDbrew/main/__init__.py
-MDbrew/main/brewer.py
 MDbrew/main/brewery.py
 MDbrew/main/opener.py
 MDbrew/main/filetype/__init__.py

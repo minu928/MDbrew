@@ -13,13 +13,32 @@ def check_tab(name: str) -> int:
 
 
 # Wrapper of count the function execution time
-def color_print(name, verbose: bool = True):
+def color_print(name):
     def deco(func):
         def inner(*args, **kwrgs):
+            print(f"[ {color.font_green}RUNN{color.reset} ] {name}", end="\r")
+            start = time()
+            result = func(*args, **kwrgs)
+            end = time()
+            end_string = f"[ {color.font_red}DONE{color.reset} ] {name}"
+            end_string += "\t" * check_tab(name=name) + f" -> {end - start :5.2f} s \u2705"
+            print(end_string)
+            return result
+
+        return inner
+
+    return deco
+
+
+# Wrapper of count the function execution time
+def color_print_verbose(name):
+    def deco(func):
+        def inner(*args, **kwrgs):
+            verbose = kwrgs.pop("verbose", True)
             if verbose:
                 print(f"[ {color.font_green}RUNN{color.reset} ] {name}", end="\r")
                 start = time()
-            result = func(*args, **kwrgs)
+            result = func(verbose=verbose, *args, **kwrgs)
             if verbose:
                 end = time()
                 end_string = f"[ {color.font_red}DONE{color.reset} ] {name}"
