@@ -110,13 +110,13 @@ class BrewCP2K(object):
         np.savetxt(folder + "type_map.raw", self._type_map, fmt="%s")
 
     def _brew_xyzfile(self, xyz_file):
-        database = Brewery(path=xyz_file, fmt="xyz", is_generator=True).coords
+        brewery = Brewery(path=xyz_file, fmt="xyz")
         line_range = tqdm(
-            database,
+            brewery.frange(),
             desc=f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}XYZ{color.reset} ",
             **self.tqmd_option,
         )
-        self._coord_list = [data for data in line_range]
+        self._coord_list = np.array([brewery.coords for _ in line_range])
         self.is_contain_coord = True
 
     def _brew_logfile(self, log_file):
@@ -209,7 +209,7 @@ class BrewCP2K(object):
         self._type_list = np.array(self._type_list).astype("int32")
 
     @color_print(name=printing_option["2a.u"])
-    def _convert_unit(self):
+    def _convert_unit(self, verbose: bool = True):
         ELE_CHG = constants.elementary_charge  # Elementary Charge, in C
         HARTREE = constants.value("atomic unit of energy")  # Hartree, in Jole
         BOHR = constants.value("atomic unit of length")  # Bohr, in m

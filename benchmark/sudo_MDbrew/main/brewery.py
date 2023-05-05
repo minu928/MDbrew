@@ -1,29 +1,33 @@
 import os
 import numpy as np
-from .brewer import Brewer
+import pandas as pd
 from .opener import Opener
 from .filetype.lmps import lmpsOpener
 from .filetype.pdb import pdbOpener
 from .filetype.vasp import vaspOpener
 from .filetype.xyz import xyzOpener
 from ..tool.colorfont import color
-from ..tool.decorator import color_print
+from ..tool.decorator import color_print_verbose
 
 
 class Brewery(object):
     __support_opener__ = {"auto": None, "pdb": pdbOpener, "xyz": xyzOpener, "vasp": vaspOpener, "lmps": lmpsOpener}
-    __printing_option__ = {"brewery": f" #LOAD  {color.font_yellow}Files      {color.reset}"}
+    __print_option__ = {
+        "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
+        "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
+        "b_coords": f" #BREW  {color.font_yellow}Coords     {color.reset}",
+        "b_atominfo": f" #BREW  {color.font_yellow}Atom Info  {color.reset}",
+    }
 
-    def __init__(
-        self, path: str, fmt: str = "auto", is_generator: bool = False, what: str = None, verbose: bool = True
-    ):
+    def __init__(self, path: str, fmt: str = "auto", what: str = None, verbose: bool = True):
         self._what = what
         self._verbose = verbose
-        self.is_generator = is_generator
-        self.__check_path(path=path)
-        self.__check_fmt(fmt=fmt)
-        self.__load_opener()
-        self.__set_atom_info()
+        self._path = self._check_path(path=path)
+        self.fmt = self._check_fmt(fmt=fmt)
+        self._opener = self._init_opener()
+        self._set_atom_info(verbose=verbose)
+        self._data = None
+        self._coords = None
 
     def __str__(self) -> str:
         LINE_WIDTH = 60
@@ -32,77 +36,97 @@ class Brewery(object):
         print(sep_line)
         print("||" + " " * 23 + " INFO " + " " * 27 + "||")
         print(sep_line)
-        print(f"\t[  ATOM  ] : KIND  ->  {tuple(self.atom_kind)}")
-        print(f"\t[  ATOM  ] : NUMB  ->  {tuple(self.atom_info[-1])}")
-        print(f"\t[  CELL  ] : SHAPE ->  {np.array(self.box_size).shape}")
-        coord_ment = f"{next(self.coords).shape}  in frame" if self.is_generator else f"{self.coords.shape}  in full"
-        print(f"\t[ COORDS ] : SHAPE ->  {coord_ment}")
+        print(f"\t[  ATOM  ]:  KIND  ->   {tuple(self.atom_kind)}")
+        print(f"\t[  ATOM  ]:  NUMB  ->   {tuple(self.atom_info[-1])}")
+        print(f"\t[   BOX  ]:  SHAPE ->   {np.array(self.box_size).shape}")
+        print(f"\t[ COORDS ]:  SHAPE ->   {self.coords.shape}")
+        print(f"\t[ FRAMES ]:   NOW  ->   {self.frame:4d}")
         print(sep_line)
-        self.reload()
-        return f"\t @CopyRight by  {color.font_blue}minu928@snu.ac.kr{color.reset}\n"
+        return f"\t    @CopyRight by  {color.font_blue}minu928@snu.ac.kr{color.reset}\n"
 
     @property
-    def coords(self, cols: list[str] = None, max_iter: int = None, dtype: str = "float32"):
-        xyz_list = ["x", "y", "z"] if cols is None else cols
-        return self.brew(cols=xyz_list, max_iter=max_iter, dtype=dtype)
+    def box_size(self):
+        return self._opener.box_size
 
-    def __set_atom_info(self):
-        one_brewing = self.brew(cols=self._opener._atom_keyword, max_iter=1, dtype="str")
-        one_brewing = next(one_brewing) if self.is_generator else one_brewing
-        self.atom_info = np.unique(one_brewing, return_counts=True)
-        self.atom_kind = self.atom_info[0]
-        self.atom_num = np.sum(self.atom_info[1])
-        self.reload() if self.is_generator else None
-
-    def __set_opener(self) -> Opener:
-        return self.__support_opener__[self.fmt](path=self._path, is_generator=self.is_generator)
-
-    def __set_brewer(self) -> Brewer:
-        return Brewer(opener=self._opener, what=self._what)
-
-    def __load_data(self):
-        self._opener.make_database()
-        self.database = self._opener.database
-
-    def __load_info(self):
-        self.columns = self._opener.column
-        self.box_size = self._opener.box_size
-        self.frame_num = self._opener.frame_num
-
-    def __check_fmt(self, fmt: str):
-        assert fmt in self.__support_opener__.keys(), f"fmt should be in {list(self.__support_opener__.keys())}"
-        if fmt == "auto":
-            file_name = self._path.split("/")[-1]
-            file_fmt = file_name.split(".")[-1]
-            self.fmt = file_fmt
-        else:
-            self.fmt = fmt
-
-    def __check_path(self, path):
-        path = os.path.join(os.getcwd(), path)
-        assert os.path.isfile(path=path), f"Check your path || not {path}"
-        self._path = path
-
-    def __load_opener(self):
-        self.__load_opener_with_verbose() if self._verbose else self.reload()
-
-    @color_print(name=__printing_option__["brewery"])
-    def __load_opener_with_verbose(self):
-        self.reload()
-
-    def reload(self):
-        self._opener = self.__set_opener()
-        self._brewer = self.__set_brewer()
-        self.__load_data()
-        self.__load_info()
+    def set_box_size(self, box_size):
+        self._opener.box_size = box_size
 
     @property
-    def brew(self, cols: list[str] = None, dtype: str = "float32", **kwrgs):
-        self.__load_info()
-        return self._brewer
+    def columns(self):
+        return self._opener.column
+
+    def set_columns(self, colums):
+        self._opener.column = colums
+
+    @property
+    def coords(self):
+        return self.brew(cols=["x", "y", "z"], verbose=False)
+
+    @property
+    def data(self):
+        return self._opener.data
+
+    @property
+    def frame(self):
+        return self._opener.frame
+
+    @property
+    def next_frame(self):
+        self._opener.next_frame()
+
+    @color_print_verbose(name=__print_option__["b_brewing"])
+    def brew(self, cols: list[str], dtype: str = "float32", verbose: bool = True):
+        data = pd.DataFrame(data=self.data, columns=self.columns)
+        data = data.query(self._what) if self._what is not None else data
+        data = data.loc[:, cols] if cols is not None else data
+        return data.to_numpy().astype(dtype=dtype)
+
+    def reset(self):
+        self._opener.reset()
 
     def order(self, what: str = None):
-        return Brewery(path=self._path, fmt=self.fmt, is_generator=self.is_generator, what=what)
+        return Brewery(path=self._path, fmt=self.fmt, what=what)
 
-    def reorder(self, verbose: bool = False):
-        return Brewery(path=self._path, fmt=self.fmt, is_generator=self.is_generator, what=self._what, verbose=verbose)
+    @color_print_verbose(name=__print_option__["brewery"])
+    def _set_atom_info(self, verbose: bool = True):
+        atom_brew_data = self.brew(cols=self._opener._atom_keyword, dtype=str, verbose=False)
+        self.atom_info = np.unique(atom_brew_data, return_counts=True)
+        self.atom_kind = self.atom_info[0]
+        self.atom_num = np.sum(self.atom_info[1])
+
+    def _init_opener(self) -> Opener:
+        return self.__support_opener__[self.fmt](path=self._path)
+
+    def _check_fmt(self, fmt: str):
+        fmt_list = list(self.__support_opener__.keys())
+        assert fmt in fmt_list, f"fmt should be in {fmt_list}"
+        if fmt == "auto":
+            file_name = self._path.split("/")[-1]
+            fmt = file_name.split(".")[-1]
+        return fmt
+
+    def _check_path(self, path):
+        path = os.path.join(os.getcwd(), path)
+        assert os.path.isfile(path=path), f"Check your path || not {path}"
+        return path
+
+    def frange(self, __start: int = 0, __end: int = None, __step: int = 1):
+        self.reset()
+        assert __start >= 0, ValueError("Frame start idx should be positive")
+        i = 0
+        while i < __start:
+            max_frame = i
+            try:
+                self.next_frame
+                i += 1
+            except:
+                raise ValueError(f"start idx should be lower than {max_frame}")
+        while True:
+            try:
+                if self.frame == __end:
+                    break
+                if not (self.frame - __start) % __step:
+                    yield self.frame
+                self.next_frame
+            except:
+                break

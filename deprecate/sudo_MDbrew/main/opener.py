@@ -7,10 +7,13 @@ class Opener(object):
         self.skip_head = 0
         self.column = []
         self.box_size = []
-        self.frame_num = 0
+        self.frame_num = -1
         self._database = None
         self.is_generator = is_generator
         self._atom_keyword = "atom"
+
+    def reset(self):
+        self.__init__(path=self.path, is_generator=self.is_generator)
 
     @property
     def database(self):

@@ -20,6 +20,10 @@ class Brewer(object):
         self._columns = self._opener.column
         self._frame_num = self._opener.frame_num
 
+    @property
+    def frame(self):
+        return self._opener.frame_num
+
     def load_system_info(self):
         self._database = self._opener.database
         self._columns = self._opener.column
