@@ -2,14 +2,15 @@ from ..opener import Opener
 
 
 class vaspOpener(Opener):
-    def __init__(self, path: str) -> None:
-        super().__init__(path)
+    def __init__(self, path: str, *args, **kwrgs) -> None:
+        super().__init__(path, *args, **kwrgs)
         self.skip_head = 7
         self.column = ["atom", "x", "y", "z"]
         self._set_box_and_atom(path=path)
-        self.gen_db()
+        super().gen_db()
 
-    def _make_one_frame_data(self, file, first_loop_line):
+    def _make_one_frame_data(self, file):
+        first_loop_line = file.readline()
         step = first_loop_line.split()[-1]
         num_atom = sum(self.atom_kind_num)
         database = []
