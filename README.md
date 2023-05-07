@@ -3,7 +3,7 @@
 
 MDbrew is a tool for postprocessing of molecular dynamics data
 
-- VERSION :  (2.2.4)
+- VERSION :  (2.3.0)
 
 ## How to install
 ~~~bash
@@ -35,15 +35,4 @@ order_2 = my_brewery.order(what="type == 2")
 rdf = RDF(order_1, order_2, box_size).run()
 rdf_result = rdf.result
 rdf_cn = rdf.cn
-~~~
-
-### Example - MSD
-~~~python
-from MDbrew import MSD
-order1 = my_brewery.order(what="type == 1")
-position = order1.reorder().coords
-ixiyiz = order1.reorder().brew(cols=["ix", "iy", "iz"])
-unwrapped_position = np.array([pos + ixyz for pos, ixyz in tqdm(zip(position, ixiyiz))])
-ot_msd = mdb.MSD(position=unwrapped_position, fft=True).run()
-msd.result
 ~~~
