@@ -84,9 +84,10 @@ class Brewery(object):
         self._opener.next_frame()
 
     @color_print_verbose(name=__print_option__["b_brewing"])
-    def brew(self, cols: list[str], dtype: str = "float32", verbose: bool = True):
+    def brew(self, cols: list[str], what: str = None, dtype: str = "float32", verbose: bool = True):
         data = pd.DataFrame(data=self.data, columns=self.columns)
         data = data.query(self._what) if self._what is not None else data
+        data = data.query(what) if what is not None else data
         data = data.loc[:, cols] if cols is not None else data
         return data.to_numpy().astype(dtype=dtype)
 
