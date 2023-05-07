@@ -8,7 +8,7 @@ def doctor(path):
     LINE_WIDTH = 60
     sep_line = "=" * LINE_WIDTH
     print(sep_line)
-    mb = Brewery(path=path, fmt="lmps")
+    mb = Brewery(trj_file=path, fmt="lmps")
     coords = mb.coords
     atom_info = mb.atom_info
     order1 = mb.order(what="type == 1")

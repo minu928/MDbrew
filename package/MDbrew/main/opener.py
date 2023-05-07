@@ -3,10 +3,11 @@ import abc
 
 class Opener(object):
     skip_head = 0
+    read_mode = "r"
+    is_require_gro = False
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, *args, **kwrgs) -> None:
         self.path = path
-        # self.skip_head = 0
         self.column = []
         self.box_size = []
         self._atom_keyword = "atom"
@@ -28,20 +29,20 @@ class Opener(object):
         return self._data
 
     def next_frame(self):
-        self._data = next(self.database)
+        self._data = next(self._database)
 
     @abc.abstractmethod
-    def _make_one_frame_data(self, file, first_loop_line):
+    def _make_one_frame_data(self, file):
         pass
 
     # Generation database
     def _generate_database(self):
-        with open(file=self.path, mode="r") as file:
+        with open(file=self.path, mode=self.read_mode) as file:
             for _ in range(self.skip_head):
                 file.readline()
             while True:
-                line = file.readline()
-                if not line:
+                try:
+                    self.frame += 1
+                    yield self._make_one_frame_data(file=file)
+                except:
                     break
-                self.frame += 1
-                yield self._make_one_frame_data(file=file, first_loop_line=line)
