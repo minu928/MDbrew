@@ -2,13 +2,13 @@ from ..opener import Opener
 
 
 class lmpsOpener(Opener):
-    def __init__(self, path: str) -> None:
-        super().__init__(path)
+    def __init__(self, path: str, *args, **kwrgs) -> None:
+        super().__init__(path, *args, **kwrgs)
         self._atom_keyword = "type"
-        self.gen_db()
+        super().gen_db()
 
-    def _make_one_frame_data(self, file, first_loop_line):
-        self.skip_line(file=file, num=2)
+    def _make_one_frame_data(self, file):
+        self.skip_line(file=file, num=3)
         atom_num = int(file.readline().split()[0])
         self.skip_line(file=file, num=1)
         self.box_size = [sum([abs(float(box_length)) for box_length in file.readline().split()]) for _ in range(3)]

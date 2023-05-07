@@ -6,12 +6,20 @@ from .filetype.lmps import lmpsOpener
 from .filetype.pdb import pdbOpener
 from .filetype.vasp import vaspOpener
 from .filetype.xyz import xyzOpener
+from .filetype.trr import trrOpener
 from ..tool.colorfont import color
 from ..tool.decorator import color_print_verbose
 
 
 class Brewery(object):
-    __support_opener__ = {"auto": None, "pdb": pdbOpener, "xyz": xyzOpener, "vasp": vaspOpener, "lmps": lmpsOpener}
+    __support_opener__: dict["str":Opener] = {
+        "auto": None,
+        "pdb": pdbOpener,
+        "xyz": xyzOpener,
+        "vasp": vaspOpener,
+        "lmps": lmpsOpener,
+        "trr": trrOpener,
+    }
     __print_option__ = {
         "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
         "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
@@ -19,13 +27,12 @@ class Brewery(object):
         "b_atominfo": f" #BREW  {color.font_yellow}Atom Info  {color.reset}",
     }
 
-    def __init__(self, path: str, fmt: str = "auto", what: str = None, verbose: bool = True):
-        self._what = what
-        self._verbose = verbose
-        self._path = self._check_path(path=path)
-        self.fmt = self._check_fmt(fmt=fmt)
-        self._opener = self._init_opener()
-        self._set_atom_info(verbose=verbose)
+    def __init__(self, trj_file: str, fmt: str = "auto", *args, **kwrgs):
+        self._what = kwrgs.pop("what", None)
+        self._path = self._check_path(path=trj_file, **kwrgs)
+        self._fmt = self._check_fmt(fmt=fmt)
+        self._opener = self._init_opener(**kwrgs)
+        self._set_atom_info(verbose=kwrgs.pop("verbose", True))
         self._data = None
         self._coords = None
 
@@ -87,7 +94,7 @@ class Brewery(object):
         self._opener.reset()
 
     def order(self, what: str = None):
-        return Brewery(path=self._path, fmt=self.fmt, what=what)
+        return Brewery(trj_file=self._path, fmt=self._fmt, what=what)
 
     @color_print_verbose(name=__print_option__["brewery"])
     def _set_atom_info(self, verbose: bool = True):
@@ -96,8 +103,14 @@ class Brewery(object):
         self.atom_kind = self.atom_info[0]
         self.atom_num = np.sum(self.atom_info[1])
 
-    def _init_opener(self) -> Opener:
-        return self.__support_opener__[self.fmt](path=self._path)
+    def _init_opener(self, **kwrgs) -> Opener:
+        trj_opener: Opener = self.__support_opener__[self._fmt]
+        if trj_opener.is_require_gro:
+            gro_file = kwrgs.pop("gro_file", None)
+            assert gro_file is not None, f"{self._fmt} format require gro file, plz input with gro_file='some_gro'"
+            return trj_opener(path=self._path, gro=gro_file)
+        else:
+            return trj_opener(path=self._path)
 
     def _check_fmt(self, fmt: str):
         fmt_list = list(self.__support_opener__.keys())
@@ -107,7 +120,7 @@ class Brewery(object):
             fmt = file_name.split(".")[-1]
         return fmt
 
-    def _check_path(self, path):
+    def _check_path(self, path, **kwrgs):
         path = os.path.join(os.getcwd(), path)
         assert os.path.isfile(path=path), f"Check your path || not {path}"
         return path
