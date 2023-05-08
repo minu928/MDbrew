@@ -1,6 +1,6 @@
 from ..opener import Opener
 
-GRO_COLUMNS = ["molecule", "atom", "id", "x", "y", "z"]
+GRO_COLUMNS = ["resid", "atom", "id", "x", "y", "z", "vx", "vy", "vz"]
 
 
 def _read_gro_file(gro, idx: int = 3):

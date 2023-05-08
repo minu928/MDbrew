@@ -45,7 +45,7 @@ class Brewery(object):
         print(sep_line)
         print(f"\t[  ATOM  ]:  KIND  ->   {tuple(self.atom_kind)}")
         print(f"\t[  ATOM  ]:  NUMB  ->   {tuple(self.atom_info[-1])}")
-        print(f"\t[   BOX  ]:  SHAPE ->   {np.array(self.box_size).shape}")
+        print(f"\t[  BOX   ]:  SHAPE ->   {np.array(self.box_size).shape}")
         print(f"\t[ COORDS ]:  SHAPE ->   {self.coords.shape}")
         print(f"\t[ FRAMES ]:   NOW  ->   {self.frame:4d}")
         print(sep_line)
@@ -84,7 +84,7 @@ class Brewery(object):
         self._opener.next_frame()
 
     @color_print_verbose(name=__print_option__["b_brewing"])
-    def brew(self, cols: list[str], what: str = None, dtype: str = "float32", verbose: bool = True):
+    def brew(self, cols: list[str] = None, what: str = None, dtype: str = "float32", verbose: bool = True):
         data = pd.DataFrame(data=self.data, columns=self.columns)
         data = data.query(self._what) if self._what is not None else data
         data = data.query(what) if what is not None else data
@@ -126,11 +126,11 @@ class Brewery(object):
         assert os.path.isfile(path=path), f"Check your path || not {path}"
         return path
 
-    def frange(self, __start: int = 0, __end: int = None, __step: int = 1):
+    def frange(self, start: int = 0, end: int = None, step: int = 1):
         self.reset()
-        assert __start >= 0, ValueError("Frame start idx should be positive")
+        assert start >= 0, ValueError("Frame start idx should be positive")
         i = 0
-        while i < __start:
+        while i < start:
             max_frame = i
             try:
                 self.next_frame
@@ -139,9 +139,9 @@ class Brewery(object):
                 raise ValueError(f"start idx should be lower than {max_frame}")
         while True:
             try:
-                if self.frame == __end:
+                if self.frame == end:
                     break
-                if not (self.frame - __start) % __step:
+                if not (self.frame - start) % step:
                     yield self.frame
                 self.next_frame
             except:

@@ -74,11 +74,15 @@ class BrewCP2K(object):
         F_energy = len(self._energy_list)
         F_stress = len(self._stress_list) / 3
         F_coords = len(self._coord_list)
-        assert (
-            F_energy == F_stress == F_coords
-        ), f"Frame of Energy {F_energy}, Frame of Stress {F_stress} , Frame of Coords {F_coords}"
         self._num_frame = F_energy
         self._num_atom = len(self._force_list) / F_energy
+
+    def delete(self, idx):
+        self._cell_list = np.delete(self._cell_list, idx)
+        self._force_list = np.delete(self._force_list, idx)
+        self._energy_list = np.delete(self._energy_list, idx)
+        self._virial_list = np.delete(self._virial_list, idx)
+        print(f"DELETE : {idx} is deleted")
 
     @color_print(name=printing_option["save"])
     def save_data(self, folder: str = "./", mode: str = "dpdata"):
@@ -110,7 +114,7 @@ class BrewCP2K(object):
         np.savetxt(folder + "type_map.raw", self._type_map, fmt="%s")
 
     def _brew_xyzfile(self, xyz_file):
-        brewery = Brewery(path=xyz_file, fmt="xyz")
+        brewery = Brewery(trj_file=xyz_file)
         line_range = tqdm(
             brewery.frange(),
             desc=f"[ {color.font_cyan}BREW{color.reset} ]  #{color.font_green}XYZ{color.reset} ",
@@ -121,6 +125,8 @@ class BrewCP2K(object):
 
     def _brew_logfile(self, log_file):
         # BASE for brewing
+        restart_keyword = "RESTART INFORMATION"
+        self._restart_list = []
         ## CELL
         cell_keyword = "CELL| Vector "
         self.is_contain_cell = False
@@ -155,6 +161,8 @@ class BrewCP2K(object):
                 )
             )
             for idx, line in line_range:
+                if restart_keyword in line:
+                    self._restart_list.append(len(self._energy_list))
                 # CELL
                 if len(self._cell_list) < 3:
                     if cell_keyword in line:
