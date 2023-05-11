@@ -13,6 +13,7 @@ class lmpsOpener(Opener):
         self.skip_line(file=file, num=1)
         self.box_size = [sum([abs(float(box_length)) for box_length in file.readline().split()]) for _ in range(3)]
         self.column = file.readline().split()[2:]
+        self.total_line_num = 9 + atom_num
         return [self.str2float_list(file.readline().split()) for _ in range(atom_num)]
 
     def skip_line(self, file, num):

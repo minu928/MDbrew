@@ -21,14 +21,12 @@ class RDF(object):
         layer: int = 0,
         r_max: float = None,
         resolution: int = 1000,
-        max_frame: int = None,
         dtype: str = "float32",
     ):
         if type(a) == Brewery:
             self.is_Brewery_type = True
             self.a = a
             self.b = b
-            self.frame_num = max_frame
             self.a_number = a.atom_num
             self.b_number = b.atom_num
             self.box_size = a.box_size if box_size is None else box_size
@@ -37,9 +35,9 @@ class RDF(object):
             self.is_Brewery_type = False
             self.a = check_dimension(a, dim=3)
             self.b = check_dimension(b, dim=3)
-            self.frame_num = self.a.shape[0] if max_frame is None else max_frame
             self.a_number = self.a.shape[1]
             self.b_number = self.b.shape[1]
+            self.box_size = box_size
 
         self.box_size = np.array(self.box_size, dtype=dtype)
         self.half_box_size = self.box_size * 0.5
@@ -54,11 +52,11 @@ class RDF(object):
         self.hist_data = None
         self.radii = np.linspace(0.0, self.r_max, self.resolution)
 
-    def run(self):
+    def run(self, start=0, end=None, step=1):
         if self.is_Brewery_type:
-            self._cal_hist_data_with_generator()
+            self._cal_hist_data_with_generator(start=start, end=end, step=step)
         else:
-            self._cal_hist_data_with_iterator()
+            self._cal_hist_data_with_iterator(start=start, end=end, step=step)
         return self
 
     @property
@@ -74,10 +72,11 @@ class RDF(object):
         return self.__cal_cn_from_hist_data()
 
     # Function for get hist
-    def _cal_hist_data_with_iterator(self):
+    def _cal_hist_data_with_iterator(self, start=0, end=None, step=1):
         self.hist_data = np.zeros(self.resolution)
         _apply_boundary_condition = self.__set_boundary_condition()
-        for frame in trange(self.frame_num, **self.kwrgs_trange):
+        self.frame_num = self.a.shape[0] if end is None else end - start + 1
+        for frame in trange(start=start, stop=end, step=step, **self.kwrgs_trange):
             a_unit = self.a[frame, ...]
             b_unit = self.b[frame, ...]
             diff_position = get_diff_position(a_unit[:, None, :], b_unit[None, :, :])
@@ -88,13 +87,14 @@ class RDF(object):
             self.hist_data[value] += count
 
     # Function for get hist
-    def _cal_hist_data_with_generator(self):
+    def _cal_hist_data_with_generator(self, start=0, end=None, step=1):
         self.hist_data = np.zeros(self.resolution)
         _apply_boundary_condition = self.__set_boundary_condition()
         frame_num = 0
-        for _ in tqdm(zip(self.a.frange(), self.b.frange()), **self.kwrgs_trange):
-            if self.frame_num is not None and frame_num == self.frame_num:
-                break
+        for _ in tqdm(
+            zip(self.a.frange(start=start, end=end, step=step), self.b.frange(start=start, end=end, step=step)),
+            **self.kwrgs_trange,
+        ):
             frame_num += 1
             a_unit = self.a.coords
             b_unit = self.b.coords

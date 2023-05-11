@@ -8,7 +8,7 @@ from ..tool.colorfont import color
 from ..tool.decorator import color_print
 
 
-class BrewCP2K(object):
+class CP2K2NPY(object):
     tqmd_option = {"ascii": " #"}
     printing_option = {
         "2array": f" #CONVERT  {color.font_yellow}List2Array{color.reset}",

@@ -17,7 +17,7 @@ def doctor(path):
     position = order1.coords
     ixiyiz = order1.brew(cols=["ix", "iy", "iz"])
     unwrapped_position = [position + ixiyiz for _ in order1.frange()]
-    rdf = RDF(order1, order2, mb.box_size, max_frame=100).run()
+    rdf = RDF(order1, order2, mb.box_size).run(start=2, end=100, step=2)
     rdf.result
     msd = MSD(unwrapped_position).run()
     msd.result

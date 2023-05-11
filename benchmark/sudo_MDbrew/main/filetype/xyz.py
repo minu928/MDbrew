@@ -11,4 +11,5 @@ class xyzOpener(Opener):
         first_loop_line = file.readline()
         atom_num = int(first_loop_line.split()[0])
         second_line = file.readline()
+        self.total_line_num = atom_num + 2
         return [file.readline().split() for _ in range(atom_num)]

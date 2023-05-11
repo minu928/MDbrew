@@ -127,16 +127,7 @@ class Brewery(object):
         return path
 
     def frange(self, start: int = 0, end: int = None, step: int = 1):
-        self.reset()
-        assert start >= 0, ValueError("Frame start idx should be positive")
-        i = 0
-        while i < start:
-            max_frame = i
-            try:
-                self.next_frame
-                i += 1
-            except:
-                raise ValueError(f"start idx should be lower than {max_frame}")
+        self.move_frame(num=start)
         while True:
             try:
                 if self.frame == end:
@@ -146,3 +137,6 @@ class Brewery(object):
                 self.next_frame
             except:
                 break
+
+    def move_frame(self, num):
+        self._opener.skip_frame(num=num)

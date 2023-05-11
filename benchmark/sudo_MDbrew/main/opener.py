@@ -1,10 +1,11 @@
-import abc
+from abc import abstractmethod
 
 
 class Opener(object):
     skip_head = 0
     read_mode = "r"
     is_require_gro = False
+    total_line_num = 0
 
     def __init__(self, path: str, *args, **kwrgs) -> None:
         self.path = path
@@ -12,8 +13,8 @@ class Opener(object):
         self.box_size = []
         self._atom_keyword = "atom"
 
-    def gen_db(self):
-        self.frame = -1
+    def gen_db(self, frame=0):
+        self.frame = frame - 1
         self._database = self._generate_database()
         self.next_frame()
 
@@ -31,7 +32,7 @@ class Opener(object):
     def next_frame(self):
         self._data = next(self._database)
 
-    @abc.abstractmethod
+    @abstractmethod
     def _make_one_frame_data(self, file):
         pass
 
@@ -46,3 +47,8 @@ class Opener(object):
                     yield self._make_one_frame_data(file=file)
                 except:
                     break
+
+    def skip_frame(self, num):
+        total_skip_line = self.total_line_num * num
+        self.skip_head += total_skip_line
+        self.gen_db(frame=num)
