@@ -13,6 +13,7 @@ class vaspOpener(Opener):
         first_loop_line = file.readline()
         step = first_loop_line.split()[-1]
         num_atom = sum(self.atom_kind_num)
+        self.total_line_num = num_atom + 1
         database = []
         c_atom_num = 0
         pointer = 0

@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Name: MDbrew
+Version: 2.3.3
+Summary: Postprocessing tools for the MD simulation results (ex. lammps)
+Home-page: https://github.com/MyKnu/MDbrew
+Download-URL: https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.3.3.tar.gz
+Author: Knu
+Author-email: minu928@snu.ac.kr
+Keywords: MD,LAMMPS,GROMACS
+Requires-Python: >=3.6
