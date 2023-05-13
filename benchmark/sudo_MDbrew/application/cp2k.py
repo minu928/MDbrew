@@ -8,7 +8,7 @@ from ..tool.colorfont import color
 from ..tool.decorator import color_print
 
 
-class CP2K2NPY(object):
+class BrewCP2k(object):
     tqmd_option = {"ascii": " #"}
     printing_option = {
         "2array": f" #CONVERT  {color.font_yellow}List2Array{color.reset}",
@@ -78,10 +78,11 @@ class CP2K2NPY(object):
         self._num_atom = len(self._force_list) / F_energy
 
     def delete(self, idx):
-        self._cell_list = np.delete(self._cell_list, idx)
-        self._force_list = np.delete(self._force_list, idx)
-        self._energy_list = np.delete(self._energy_list, idx)
-        self._virial_list = np.delete(self._virial_list, idx)
+        self._cell_list = np.delete(self._cell_list, idx, axis=0)
+        self._force_list = np.delete(self._force_list, idx, axis=0)
+        self._energy_list = np.delete(self._energy_list, idx, axis=0)
+        self._virial_list = np.delete(self._virial_list, idx, axis=0)
+        self._num_frame = len(self._energy_list)
         print(f"DELETE : {idx} is deleted")
 
     @color_print(name=printing_option["save"])

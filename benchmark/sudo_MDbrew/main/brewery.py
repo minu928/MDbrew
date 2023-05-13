@@ -89,7 +89,7 @@ class Brewery(object):
         data = data.query(self._what) if self._what is not None else data
         data = data.query(what) if what is not None else data
         data = data.loc[:, cols] if cols is not None else data
-        return data.to_numpy().astype(dtype=dtype)
+        return data.to_numpy().astype(dtype=dtype)   
 
     def reset(self):
         self._opener.reset()
@@ -127,7 +127,9 @@ class Brewery(object):
         return path
 
     def frange(self, start: int = 0, end: int = None, step: int = 1):
-        self.move_frame(num=start)
+        self.skip_frame(num=start)
+        if end != None:
+            assert start < end, "start should be lower than end"
         while True:
             try:
                 if self.frame == end:
@@ -138,5 +140,5 @@ class Brewery(object):
             except:
                 break
 
-    def move_frame(self, num):
+    def skip_frame(self, num):
         self._opener.skip_frame(num=num)

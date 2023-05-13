@@ -33,12 +33,13 @@ class RDF(object):
             assert len(self.box_size), "plz set box_size"
         else:
             self.is_Brewery_type = False
-            self.a = check_dimension(a, dim=3)
-            self.b = check_dimension(b, dim=3)
+            self.a = check_dimension(a, dim=3, dtype=dtype)
+            self.b = check_dimension(b, dim=3, dtype=dtype)
             self.a_number = self.a.shape[1]
             self.b_number = self.b.shape[1]
             self.box_size = box_size
 
+        self._dtype = dtype
         self.box_size = np.array(self.box_size, dtype=dtype)
         self.half_box_size = self.box_size * 0.5
 
@@ -135,7 +136,7 @@ class RDF(object):
 
     # get idx for histogram
     def __cal_idx_histogram(self, distance):
-        idx_hist = (distance / self.dr).astype(np.int64)
+        idx_hist = (distance / self.dr).astype("int32")
         return idx_hist[np.where((0 < idx_hist) & (idx_hist < self.resolution))]
 
     # Calculate the Density Function
@@ -144,9 +145,9 @@ class RDF(object):
         g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
         factor = np.array(
             4.0 * np.pi * self.dr * self.frame_num * self.a_number * self.b_number,
-            dtype=np.float64,
+            dtype=self._dtype,
         )
-        box_volume = np.prod(self.box_size, dtype=np.float64)
+        box_volume = np.prod(self.box_size, dtype=self._dtype)
         return g_r * box_volume / factor
 
     # Function for get coordinate number
