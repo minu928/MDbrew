@@ -207,7 +207,7 @@ class BrewCP2k(object):
                         continue
 
     @color_print(name=printing_option["2array"])
-    def _change2array(self, data_type: str = "float32"):
+    def _change2array(self, data_type: str = "float64"):
         F = int(self._num_frame)
         N = int(self._num_atom)
         self._stress_list = np.array(self._stress_list).astype(data_type).reshape(F, 3, 3)
@@ -215,7 +215,7 @@ class BrewCP2k(object):
         self._cell_list = np.tile(self._cell_list, (self._num_frame, 1)).astype(data_type).reshape(F, 3, 3)
         self._energy_list = np.array(self._energy_list).astype(data_type)
         self._coord_list = np.array(self._coord_list).astype(data_type)
-        self._type_list = np.array(self._type_list).astype("int32")
+        self._type_list = np.array(self._type_list).astype("int64")
 
     @color_print(name=printing_option["2a.u"])
     def _convert_unit(self, verbose: bool = True):

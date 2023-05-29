@@ -91,11 +91,13 @@ class RDF(object):
     def _cal_hist_data_with_generator(self, start=0, end=None, step=1):
         self.hist_data = np.zeros(self.resolution)
         _apply_boundary_condition = self.__set_boundary_condition()
+        frange = (
+            self.a.frange(start=start, end=end, step=step)
+            if self.a is self.b
+            else zip(self.a.frange(start=start, end=end, step=step), self.b.frange(start=start, end=end, step=step))
+        )
         frame_num = 0
-        for _ in tqdm(
-            zip(self.a.frange(start=start, end=end, step=step), self.b.frange(start=start, end=end, step=step)),
-            **self.kwrgs_trange,
-        ):
+        for _ in tqdm(frange, **self.kwrgs_trange):
             frame_num += 1
             a_unit = self.a.coords
             b_unit = self.b.coords
