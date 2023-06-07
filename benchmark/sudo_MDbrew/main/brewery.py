@@ -126,8 +126,11 @@ class Brewery(object):
     def order(self, what: str = None):
         return Brewery(trj_file=self._path, fmt=self._fmt, what=what)
 
+    def reorder(self):
+        return Brewery(trj_file=self._path, fmt=self._fmt, what=self._what)
+
     def frange(self, start: int = 0, end: int = None, step: int = 1):
-        self.skip_frame(num=start)
+        self.move_frame(num=start)
         if end != None:
             assert start < end, "start should be lower than end"
         while True:

@@ -25,8 +25,8 @@ class RDF(object):
     ):
         if type(a) == Brewery:
             self.is_Brewery_type = True
-            self.a = a
-            self.b = b
+            self.a = a.reorder()
+            self.b = b.reorder()
             self.a_number = a.atom_num
             self.b_number = b.atom_num
             self.box_size = a.box_size if box_size is None else box_size
