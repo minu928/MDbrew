@@ -6,11 +6,16 @@ from ..tool.colorfont import color
 class Writer(object):
     _save_path = None
     _fmt = None
+    _out_name = None
 
-    def __init__(self, path: str, brewery) -> None:
+    def __init__(self, path: str, brewery, **kwrgs) -> None:
         self._save_path = path
         self._brewery = brewery
         self._print_option = f"[ {color.font_cyan}BREW{color.reset} ]  #WRITE {color.font_yellow}{self._brewery._fmt}->{self._fmt} {color.reset}"
+        self._atom_dict = kwrgs.pop("atom_dict", None)
+        self._requied_atom_dict = self._check_require_atom_dict()
+
+        self.__error__()
 
     def write(self, start, end, step):
         frange = self._brewery.frange(start=start, end=end, step=step)
@@ -21,3 +26,14 @@ class Writer(object):
     @abstractmethod
     def _write_one_frame_data(self, file, idx):
         pass
+
+    def __error__(self):
+        self._check_atom_dict()
+
+    def _check_require_atom_dict(self):
+        require_list = ["lmps"]
+        return True if self._brewery._fmt in require_list else False
+
+    def _check_atom_dict(self):
+        if self._requied_atom_dict and self._atom_dict == None:
+            raise ValueError("Please input atom_dict, Ex {1 : 'Al'}")

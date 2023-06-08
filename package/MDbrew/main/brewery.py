@@ -5,7 +5,7 @@ from .opener import Opener
 from .writer import Writer
 from .filetype.lmps import lmpsOpener
 from .filetype.pdb import pdbOpener
-from .filetype.vasp import vaspOpener
+from .filetype.vasp import vaspOpener, POSCARWriter
 from .filetype.xyz import xyzOpener, xyzWriter
 from .filetype.trr import trrOpener
 from ..tool.colorfont import color
@@ -21,9 +21,7 @@ class Brewery(object):
         "lmps": lmpsOpener,
         "trr": trrOpener,
     }
-    __support_writer__: dict["str":Writer] = {
-        "xyz": xyzWriter,
-    }
+    __support_writer__: dict["str":Writer] = {"xyz": xyzWriter, "vasp_poscar": POSCARWriter}
     __print_option__ = {
         "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
         "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
@@ -150,6 +148,6 @@ class Brewery(object):
     def move_frame(self, num):
         self._opener.skip_frame(num=num)
 
-    def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1):
-        _writer = self.__support_writer__[fmt](save_path, self)
+    def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, **kwrgs):
+        _writer = self.__support_writer__[fmt](save_path, self, **kwrgs)
         _writer.write(start=start, end=end, step=step)

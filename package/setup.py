@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name="MDbrew",
-    version="2.3.5",
+    version="2.3.6",
     author="Knu",
     author_email="minu928@snu.ac.kr",
     url="https://github.com/MyKnu/MDbrew",
-    download_url="https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.3.3.tar.gz",
+    download_url="https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.3.6.tar.gz",
     install_requies=[
         "numpy>=1.0.0",
         "pandas>=1.0.0",

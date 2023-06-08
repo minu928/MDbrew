@@ -17,14 +17,15 @@ class xyzOpener(Opener):
 
 
 class xyzWriter(Writer):
-    def __init__(self, path: str, brewery) -> None:
+    def __init__(self, path: str, brewery, **kwrgs) -> None:
         self._fmt = "xyz"
-        super().__init__(path, brewery)
+        super().__init__(path, brewery, **kwrgs)
 
     def _write_one_frame_data(self, file, idx):
         file.write(f"\t{self._brewery.atom_num}\n")
         file.write(f" i = {idx}\n")
         xyz = self._brewery.coords
-        atoms = self._brewery.brew(["atom"], dtype=str, verbose=False)
+        atoms = self._brewery.brew(self._brewery._opener._atom_keyword, dtype=str, verbose=False)
         for atom, dat in zip(atoms, xyz):
-            file.write(f"{atom[0]:>2s} {dat[0]:15.10f} {dat[1]:15.10f} {dat[2]:15.10f}\n")
+            atom = self._atom_dict[int(atom[0])] if self._requied_atom_dict else atom[0]
+            file.write(f"{atom:>3s} {dat[0]:15.10f} {dat[1]:15.10f} {dat[2]:15.10f}\n")
