@@ -25,20 +25,21 @@ class RDF(object):
     ):
         if type(a) == Brewery:
             self.is_Brewery_type = True
-            self.a = a
-            self.b = b
+            self.a = a.reorder()
+            self.b = b.reorder()
             self.a_number = a.atom_num
             self.b_number = b.atom_num
             self.box_size = a.box_size if box_size is None else box_size
             assert len(self.box_size), "plz set box_size"
         else:
             self.is_Brewery_type = False
-            self.a = check_dimension(a, dim=3)
-            self.b = check_dimension(b, dim=3)
+            self.a = check_dimension(a, dim=3, dtype=dtype)
+            self.b = check_dimension(b, dim=3, dtype=dtype)
             self.a_number = self.a.shape[1]
             self.b_number = self.b.shape[1]
             self.box_size = box_size
 
+        self._dtype = dtype
         self.box_size = np.array(self.box_size, dtype=dtype)
         self.half_box_size = self.box_size * 0.5
 
@@ -90,11 +91,13 @@ class RDF(object):
     def _cal_hist_data_with_generator(self, start=0, end=None, step=1):
         self.hist_data = np.zeros(self.resolution)
         _apply_boundary_condition = self.__set_boundary_condition()
+        frange = (
+            self.a.frange(start=start, end=end, step=step)
+            if self.a is self.b
+            else zip(self.a.frange(start=start, end=end, step=step), self.b.frange(start=start, end=end, step=step))
+        )
         frame_num = 0
-        for _ in tqdm(
-            zip(self.a.frange(start=start, end=end, step=step), self.b.frange(start=start, end=end, step=step)),
-            **self.kwrgs_trange,
-        ):
+        for _ in tqdm(frange, **self.kwrgs_trange):
             frame_num += 1
             a_unit = self.a.coords
             b_unit = self.b.coords
@@ -135,7 +138,7 @@ class RDF(object):
 
     # get idx for histogram
     def __cal_idx_histogram(self, distance):
-        idx_hist = (distance / self.dr).astype(np.int64)
+        idx_hist = (distance / self.dr).astype("int32")
         return idx_hist[np.where((0 < idx_hist) & (idx_hist < self.resolution))]
 
     # Calculate the Density Function
@@ -144,9 +147,9 @@ class RDF(object):
         g_r = np.append(0.0, self.hist_data[1:] / np.square(r_i))
         factor = np.array(
             4.0 * np.pi * self.dr * self.frame_num * self.a_number * self.b_number,
-            dtype=np.float64,
+            dtype=self._dtype,
         )
-        box_volume = np.prod(self.box_size, dtype=np.float64)
+        box_volume = np.prod(self.box_size, dtype=self._dtype)
         return g_r * box_volume / factor
 
     # Function for get coordinate number

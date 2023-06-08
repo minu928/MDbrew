@@ -28,11 +28,6 @@ COLUMNS = (
 )
 
 
-def unpack_fmt_and_read_line(file, fmt):
-    size = struct.calcsize(fmt)
-    data = file.read(size)
-    data = struct.unpack(fmt, data)
-    return data
 
 
 def check_double(columns_info):
@@ -63,6 +58,7 @@ class trrOpener(Opener):
 
     # Abstract data
     def _make_one_frame_data(self, file):
+        self.total_line_num = 0
         self.columns_info = self._make_columns(file=file)
         self.system_data, self.motion_data = self._make_database(file=file)
         self.box_size = np.diagonal(self.system_data["box"])
@@ -70,17 +66,17 @@ class trrOpener(Opener):
         return self._transform_database(self.motion_data)
 
     def _make_columns(self, file):
-        info = unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}1i")
-        tnum = unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}2i")
-        vers = unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}{tnum[0]-1}s")
+        info = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}1i")
+        tnum = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}2i")
+        vers = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}{tnum[0]-1}s")
         version = vers[0].split(b"\0", 1)[0].decode("utf-8")
         assert info[0] == 1993, "I can not open this file"
         assert version == "GMX_trn_file", ValueError("Unkown format")
-        column_data = unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}13i")
+        column_data = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}13i")
         columns_info = {COLUMNS[idx]: data for idx, data in enumerate(column_data)}
         self._is_double = check_double(columns_info=columns_info)
         num_fmt = f"{self._arrow}2d" if self._is_double else f"{self._arrow}2f"
-        num = unpack_fmt_and_read_line(file=file, fmt=num_fmt)
+        num = self._unpack_fmt_and_read_line(file=file, fmt=num_fmt)
         columns_info["time"] = num[0]
         columns_info["lambda"] = num[1]
         return columns_info
@@ -118,5 +114,12 @@ class trrOpener(Opener):
     def _read_main_data(self, file, idx):
         fmt = f"{self._arrow}{idx * self._dim}"
         fmt += "d" if self._is_double else "f"
-        data = unpack_fmt_and_read_line(file=file, fmt=fmt)
+        data = self._unpack_fmt_and_read_line(file=file, fmt=fmt)
         return np.array(data).reshape([idx, self._dim])
+
+    def _unpack_fmt_and_read_line(self, file, fmt):
+        size = struct.calcsize(fmt)
+        self.total_line_num += size
+        data = file.read(size)
+        data = struct.unpack(fmt, data)
+        return data

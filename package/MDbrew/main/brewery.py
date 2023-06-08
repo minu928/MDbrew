@@ -2,10 +2,11 @@ import os
 import numpy as np
 import pandas as pd
 from .opener import Opener
+from .writer import Writer
 from .filetype.lmps import lmpsOpener
 from .filetype.pdb import pdbOpener
 from .filetype.vasp import vaspOpener
-from .filetype.xyz import xyzOpener
+from .filetype.xyz import xyzOpener, xyzWriter
 from .filetype.trr import trrOpener
 from ..tool.colorfont import color
 from ..tool.decorator import color_print_verbose
@@ -19,6 +20,9 @@ class Brewery(object):
         "vasp": vaspOpener,
         "lmps": lmpsOpener,
         "trr": trrOpener,
+    }
+    __support_writer__: dict["str":Writer] = {
+        "xyz": xyzWriter,
     }
     __print_option__ = {
         "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
@@ -83,20 +87,6 @@ class Brewery(object):
     def next_frame(self):
         self._opener.next_frame()
 
-    @color_print_verbose(name=__print_option__["b_brewing"])
-    def brew(self, cols: list[str] = None, what: str = None, dtype: str = "float32", verbose: bool = True):
-        data = pd.DataFrame(data=self.data, columns=self.columns)
-        data = data.query(self._what) if self._what is not None else data
-        data = data.query(what) if what is not None else data
-        data = data.loc[:, cols] if cols is not None else data
-        return data.to_numpy().astype(dtype=dtype)
-
-    def reset(self):
-        self._opener.reset()
-
-    def order(self, what: str = None):
-        return Brewery(trj_file=self._path, fmt=self._fmt, what=what)
-
     @color_print_verbose(name=__print_option__["brewery"])
     def _set_atom_info(self, verbose: bool = True):
         atom_brew_data = self.brew(cols=self._opener._atom_keyword, dtype=str, verbose=False)
@@ -126,8 +116,27 @@ class Brewery(object):
         assert os.path.isfile(path=path), f"Check your path || not {path}"
         return path
 
+    @color_print_verbose(name=__print_option__["b_brewing"])
+    def brew(self, cols: list[str] = None, what: str = None, dtype: str = "float32", verbose: bool = False):
+        data = pd.DataFrame(data=self.data, columns=self.columns)
+        data = data.query(self._what) if self._what is not None else data
+        data = data.query(what) if what is not None else data
+        data = data.loc[:, cols] if cols is not None else data
+        return data.to_numpy(dtype=dtype)
+
+    def reset(self):
+        self._opener.reset()
+
+    def order(self, what: str = None):
+        return Brewery(trj_file=self._path, fmt=self._fmt, what=what)
+
+    def reorder(self):
+        return Brewery(trj_file=self._path, fmt=self._fmt, what=self._what)
+
     def frange(self, start: int = 0, end: int = None, step: int = 1):
         self.move_frame(num=start)
+        if end != None:
+            assert start < end, "start should be lower than end"
         while True:
             try:
                 if self.frame == end:
@@ -140,3 +149,7 @@ class Brewery(object):
 
     def move_frame(self, num):
         self._opener.skip_frame(num=num)
+
+    def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1):
+        _writer = self.__support_writer__[fmt](save_path, self)
+        _writer.write(start=start, end=end, step=step)

@@ -2,10 +2,11 @@ import os
 import numpy as np
 import pandas as pd
 from .opener import Opener
+from .writer import Writer
 from .filetype.lmps import lmpsOpener
 from .filetype.pdb import pdbOpener
 from .filetype.vasp import vaspOpener
-from .filetype.xyz import xyzOpener
+from .filetype.xyz import xyzOpener, xyzWriter
 from .filetype.trr import trrOpener
 from ..tool.colorfont import color
 from ..tool.decorator import color_print_verbose
@@ -19,6 +20,9 @@ class Brewery(object):
         "vasp": vaspOpener,
         "lmps": lmpsOpener,
         "trr": trrOpener,
+    }
+    __support_writer__: dict["str":Writer] = {
+        "xyz": xyzWriter,
     }
     __print_option__ = {
         "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
@@ -145,3 +149,7 @@ class Brewery(object):
 
     def move_frame(self, num):
         self._opener.skip_frame(num=num)
+
+    def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1):
+        _writer = self.__support_writer__[fmt](save_path, self)
+        _writer.write(start=start, end=end, step=step)

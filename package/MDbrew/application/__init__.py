@@ -1,1 +1,1 @@
-from cp2k2npy import CP2K2NPY
+__all__ = ["cp2k"]
