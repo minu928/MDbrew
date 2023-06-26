@@ -34,7 +34,7 @@ def color_print(name):
 def color_print_verbose(name):
     def deco(func):
         def inner(*args, **kwrgs):
-            verbose = kwrgs.pop("verbose", True)
+            verbose = kwrgs.pop("verbose", False)
             if verbose:
                 print(f"[ {color.font_green}RUNN{color.reset} ] {name}", end="\r")
                 start = time()

@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name="MDbrew",
-    version="2.3.6",
+    version="2.3.7",
     author="Knu",
     author_email="minu928@snu.ac.kr",
     url="https://github.com/MyKnu/MDbrew",
-    download_url="https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.3.6.tar.gz",
+    download_url="https://github.com/MyKnu/MDbrew/install_file/MDbrew-2.3.7.tar.gz",
     install_requies=[
-        "numpy>=1.0.0",
+        "numpy>=1.19.0",
         "pandas>=1.0.0",
         "matplotlib>=1.0.0",
         "tqdm>=1.0.0",

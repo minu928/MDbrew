@@ -11,9 +11,8 @@ from .filetype.trr import trrOpener
 from ..tool.colorfont import color
 from ..tool.decorator import color_print_verbose
 
-
 class Brewery(object):
-    __support_opener__: dict["str":Opener] = {
+    __support_opener__ = {
         "auto": None,
         "pdb": pdbOpener,
         "xyz": xyzOpener,
@@ -21,7 +20,7 @@ class Brewery(object):
         "lmps": lmpsOpener,
         "trr": trrOpener,
     }
-    __support_writer__: dict["str":Writer] = {"xyz": xyzWriter, "vasp_poscar": POSCARWriter}
+    __support_writer__ = {"xyz": xyzWriter, "vasp_poscar": POSCARWriter}
     __print_option__ = {
         "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
         "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
@@ -107,6 +106,7 @@ class Brewery(object):
         if fmt == "auto":
             file_name = self._path.split("/")[-1]
             fmt = file_name.split(".")[-1]
+            fmt = "lmps" if "lamm" in file_name else fmt
         return fmt
 
     def _check_path(self, path, **kwrgs):
@@ -115,7 +115,7 @@ class Brewery(object):
         return path
 
     @color_print_verbose(name=__print_option__["b_brewing"])
-    def brew(self, cols: list[str] = None, what: str = None, dtype: str = "float32", verbose: bool = False):
+    def brew(self, cols = None, what: str = None, dtype: str = "float64", verbose: bool = False):
         data = pd.DataFrame(data=self.data, columns=self.columns)
         data = data.query(self._what) if self._what is not None else data
         data = data.query(what) if what is not None else data
@@ -125,11 +125,11 @@ class Brewery(object):
     def reset(self):
         self._opener.reset()
 
-    def order(self, what: str = None):
-        return Brewery(trj_file=self._path, fmt=self._fmt, what=what)
+    def order(self, what: str = None, verbose:bool=False):
+        return Brewery(trj_file=self._path, fmt=self._fmt, what=what, verbose=verbose)
 
     def reorder(self):
-        return Brewery(trj_file=self._path, fmt=self._fmt, what=self._what)
+        return Brewery(trj_file=self._path, fmt=self._fmt, what=self._what, verbose=False)
 
     def frange(self, start: int = 0, end: int = None, step: int = 1):
         self.move_frame(num=start)
