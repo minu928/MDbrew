@@ -11,6 +11,7 @@ from .filetype.trr import trrOpener
 from ..tool.colorfont import color
 from ..tool.decorator import color_print_verbose
 
+
 class Brewery(object):
     __support_opener__ = {
         "auto": None,
@@ -115,7 +116,7 @@ class Brewery(object):
         return path
 
     @color_print_verbose(name=__print_option__["b_brewing"])
-    def brew(self, cols = None, what: str = None, dtype: str = "float64", verbose: bool = False):
+    def brew(self, cols=None, what: str = None, dtype: str = "float64", verbose: bool = False):
         data = pd.DataFrame(data=self.data, columns=self.columns)
         data = data.query(self._what) if self._what is not None else data
         data = data.query(what) if what is not None else data
@@ -125,7 +126,7 @@ class Brewery(object):
     def reset(self):
         self._opener.reset()
 
-    def order(self, what: str = None, verbose:bool=False):
+    def order(self, what: str = None, verbose: bool = False):
         return Brewery(trj_file=self._path, fmt=self._fmt, what=what, verbose=verbose)
 
     def reorder(self):
