@@ -7,7 +7,15 @@ from ..tool.colorfont import color
 
 # Calculate and Plot the RDF
 class RDF(object):
-    def __init__(self, a, b, box=None, r_max: float = None, resolution: int = 1000, dtype: str = "float64"):
+    def __init__(
+        self,
+        a,
+        b,
+        box=None,
+        r_max: float = None,
+        resolution: int = 1000,
+        dtype: str = "float64",
+    ):
         if type(a) == Brewery:
             self.instance_rdf = BreweryRDF(a=a, b=b, box=box, r_max=r_max, resolution=resolution, dtype=dtype)
         else:
@@ -45,7 +53,15 @@ class InterfaceRDF(object):
     hist_data = None
     radii = None
 
-    def __init__(self, a, b, box=None, r_max: float = None, resolution: int = 1000, dtype: str = "float64"):
+    def __init__(
+        self,
+        a,
+        b,
+        box=None,
+        r_max: float = None,
+        resolution: int = 1000,
+        dtype: str = "float64",
+    ):
         self.r_max = np.max(self.box) * 0.5 if r_max is None else r_max
         self.resolution = resolution
         self._dtype = dtype
@@ -80,11 +96,20 @@ class InterfaceRDF(object):
 
 
 class BreweryRDF(InterfaceRDF):
-    def __init__(self, a, b, box=None, r_max: float = None, resolution: int = 1000, dtype: str = "float64"):
+    def __init__(
+        self,
+        a,
+        b,
+        box=None,
+        r_max: float = None,
+        resolution: int = 1000,
+        dtype: str = "float64",
+    ):
         self.a: Brewery = a.reorder()
         self.b: Brewery = b.reorder()
         self.a_number = a.atom_num
         self.b_number = b.atom_num
+        self._is_external_box = box is None
         self.box = a.box_size if box is None else box
         assert len(self.box), "plz set box"
         super().__init__(self.a, self.b, self.box, r_max, resolution, dtype)
@@ -94,10 +119,10 @@ class BreweryRDF(InterfaceRDF):
         self.gr = np.zeros(self.resolution)
         self.hist_data = np.zeros(self.resolution)
         frange = self._make_frange(start=start, end=end, step=step)
-        for _ in tqdm(frange, **self.kwrgs_trange):
+        for idx in tqdm(frange, **self.kwrgs_trange):
             a_unit = self.a.coords
             b_unit = self.b.coords
-            box_unit = np.array(self.a.box_size)
+            box_unit = self._make_box(self.box, idx)
             self._unit_run(a_unit=a_unit, b_unit=b_unit, box_unit=box_unit)
 
     def _make_frange(self, start=0, end=None, step=1):
@@ -107,9 +132,24 @@ class BreweryRDF(InterfaceRDF):
         else:
             return zip(self.a.frange(**kwrgs), self.b.frange(**kwrgs))
 
+    def _make_box(self, box, idx):
+        if self._is_external_box:
+            return np.array(self.a.box_size)
+        else:
+            box = np.array([box])
+            return box if box.shape[0] == 1 else box[0][idx]
+
 
 class NormalRDF(InterfaceRDF):
-    def __init__(self, a, b, box=None, r_max: float = None, resolution: int = 1000, dtype: str = "float64"):
+    def __init__(
+        self,
+        a,
+        b,
+        box=None,
+        r_max: float = None,
+        resolution: int = 1000,
+        dtype: str = "float64",
+    ):
         self.a = check_dimension(a, dim=3, dtype=dtype)
         self.b = check_dimension(b, dim=3, dtype=dtype)
         self.a_number = self.a.shape[1]
