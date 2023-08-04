@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import trange, tqdm
 from ..main.brewery import Brewery
-from ..tool.spacer import *
+from ..spatial.spacer import *
 from ..tool.colorfont import color
 
 

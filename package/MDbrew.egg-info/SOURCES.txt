@@ -1,5 +1,4 @@
 MANIFEST.in
-requirement.txt
 setup.cfg
 setup.py
 MDbrew/__init__.py
@@ -9,6 +8,7 @@ MDbrew.egg-info/dependency_links.txt
 MDbrew.egg-info/not-zip-safe
 MDbrew.egg-info/top_level.txt
 MDbrew/analysis/__init__.py
+MDbrew/analysis/hydrogen_bonding.py
 MDbrew/analysis/msd.py
 MDbrew/analysis/rdf.py
 MDbrew/application/__init__.py
@@ -24,8 +24,10 @@ MDbrew/main/filetype/pdb.py
 MDbrew/main/filetype/trr.py
 MDbrew/main/filetype/vasp.py
 MDbrew/main/filetype/xyz.py
+MDbrew/spatial/__init__.py
+MDbrew/spatial/periodic_kdtree.py
+MDbrew/spatial/spacer.py
 MDbrew/tool/__init__.py
 MDbrew/tool/colorfont.py
 MDbrew/tool/decorator.py
 MDbrew/tool/doctor.py
-MDbrew/tool/spacer.py

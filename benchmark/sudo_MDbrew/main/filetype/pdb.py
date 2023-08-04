@@ -1,14 +1,34 @@
 from ..opener import Opener
 
+atomic_dict = {
+    "pdbtype": [0, 4],
+    "idx": [6, 11],
+    "atom": [12, 16],
+    "indicator": [16, 17],
+    "resname": [17, 20],
+    "chain": [21, 22],
+    "resid": [22, 26],
+    "rescode": [26, 27],
+    "x": [30, 38],
+    "y": [38, 46],
+    "z": [46, 54],
+    "occupancy": [54, 60],
+    "temp_factor": [60, 66],
+    "seg_id": [72, 76],
+    "element": [76, 78],
+    "charge": [78, 80],
+}
+
 
 class pdbOpener(Opener):
     ending_num_for_pdb = None
+    is_column_updated = False
 
     def __init__(self, path: str, *args, **kwrgs) -> None:
         super().__init__(path, *args, **kwrgs)
         self.path = path
         self.skip_head = 2
-        self.column = ["type", "id", "atom", "x", "y", "z", "ax", "bx", "residue"]
+        self.column = []
         super().gen_db()
 
     def _make_one_frame_data(self, file):
@@ -24,11 +44,24 @@ class pdbOpener(Opener):
                 if "END" in line:
                     break
                 self.total_line_num += 1
-                splited_line = line.split()
+                ##############################
+                splited_line = self.apply_atom_type(line)
+                #############################
                 one_frame_data.append(splited_line)
                 self.ending_num_for_pdb = int(splited_line[1])
+                self.is_column_updated = True
         else:
             self.total_line_num += self.ending_num_for_pdb
-            one_frame_data = [file.readline().split() for _ in range(self.ending_num_for_pdb)]
+            one_frame_data = [self.apply_atom_type(file.readline()) for _ in range(self.ending_num_for_pdb)]
             file.readline()
         return one_frame_data
+
+    def apply_atom_type(self, line):
+        data_list = []
+        for key, idxes in atomic_dict.items():
+            data = line[idxes[0] : idxes[1]].strip()
+            if data:
+                data_list.append(data)
+                if not self.is_column_updated:
+                    self.column.append(key)
+        return data_list

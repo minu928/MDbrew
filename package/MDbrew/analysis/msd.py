@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import trange, tqdm
-from ..tool import spacer
+from ..spatial import spacer
 from ..main.brewery import Brewery
 from ..tool.colorfont import color
 

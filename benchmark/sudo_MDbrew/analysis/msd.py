@@ -19,7 +19,7 @@ class MSD(object):
         "ascii": True,
     }
 
-    def __init__(self, position, fft: bool = True, dtype: str = "float32"):
+    def __init__(self, position, fft: bool = True, dtype: str = "float64", do_unwrap: bool = False):
         """MSD
 
         Calculate the msd data and return it with method and fft
@@ -36,7 +36,6 @@ class MSD(object):
         >>> msd_result  = my_msd.result
         """
         if type(position) == Brewery:
-            self.is_Brewery_type = True
             pos_range = tqdm(position.frange(), **self.kwrgs_pos)
             self.position = np.array([position.coords for _ in pos_range], dtype=dtype)
         else:
