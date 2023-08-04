@@ -12,6 +12,7 @@ setup(
         "pandas>=1.0.0",
         "matplotlib>=1.0.0",
         "tqdm>=1.0.0",
+        "scipy",
     ],
     description="Postprocessing tools for the MD simulation results (ex. lammps)",
     packages=find_packages(),
