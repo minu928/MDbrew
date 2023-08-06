@@ -2,7 +2,7 @@ import numpy as np
 from ..spatial import PeriodicCKDTree, calculate_angle_between_vectors
 
 
-def analyse_hydrogen_bonding(O_position, H_position, box):
+def search_in_H2O(O_position, H_position, box):
     threshold_angle = 30.0
     threshold_distance = 1.2
     H_tree = PeriodicCKDTree(H_position, bounds=box)
@@ -23,8 +23,7 @@ def analyse_hydrogen_bonding(O_position, H_position, box):
         vec1_arr = O_position[second_O] - this_O_position
         vec1_arr = vec1_arr[~np.all(vec1_arr == 0, axis=1)]
         vec2_arr = this_O_position - H_position[this_H2_idxes[this_H2_idxes != INF_IDX]]
-
-        angles = calculate_angle_between_vectors(vec1_arr, vec2_arr)
+        angles = np.array([calculate_angle_between_vectors(vec1_arr, vec2) for vec2 in vec2_arr])
         idx_of_hydrogen_bonding = np.where(angles < threshold_angle)
         dist = np.linalg.norm(vec1_arr[idx_of_hydrogen_bonding[0]])
         if dist:

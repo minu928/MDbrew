@@ -29,10 +29,10 @@ def calculate_distance(diff_position, axis: int = -1, dtype: str = float):
 
 # calculate the angle between vectors
 def calculate_angle_between_vectors(v1, v2):
-    dot_product = v1 @ v2.transpose()
+    dot_product = np.sum(v1 * v2, axis=-1)
     norm_v1 = np.linalg.norm(v1, axis=-1)
     norm_v2 = np.linalg.norm(v2, axis=-1)
-    return np.arccos(dot_product / (norm_v1[:, None] * norm_v2)) * 180.0 / np.pi
+    return np.arccos(dot_product / (norm_v1 * norm_v2)) * 180.0 / np.pi
 
 
 # wrap the position data
@@ -58,3 +58,11 @@ def unwrap_position(position, pre_position, box, ixyz=None, return_ixyz=False):
         return unwrapped_position, ixyz
     else:
         return unwrapped_position
+
+
+# do pbc
+def apply_pbc(diff_position, box):
+    box = np.array(box, dtype=float)
+    diff_position = np.where(diff_position > box * 0.5, diff_position - box, diff_position)
+    diff_position = np.where(diff_position < -box * 0.5, diff_position + box, diff_position)
+    return diff_position
