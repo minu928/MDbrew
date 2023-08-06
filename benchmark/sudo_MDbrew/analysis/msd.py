@@ -50,6 +50,7 @@ class MSD(object):
         if type(self.position) == Brewery:
             if self._do_unwrap:
                 self.position.move_frame(start)
+                ixyz = None
                 unwrapped_position = self.position.coords[None, :]
                 pre_position = self.position.coords
                 pos_range = tqdm(self.position.frange(start=start + 1, end=end, step=step), **self.kwrgs_pos)
@@ -62,9 +63,9 @@ class MSD(object):
                         ixyz=ixyz,
                         return_ixyz=True,
                     )
-                    pre_position = this_position.copy()
+                    pre_position = this_position
                     unwrapped_position = np.concatenate([unwrapped_position, up[None, :]], axis=0)
-                self.position = unwrapped_position.copy()
+                self.position = unwrapped_position
             else:
                 pos_range = tqdm(self.position.frange(start=start, end=end, step=step), **self.kwrgs_pos)
                 self.position = np.array([self.position.coords for _ in pos_range], dtype=self._dtype)
@@ -98,7 +99,7 @@ class MSD(object):
         """
         msd_list = np.zeros(self.position.shape[:2])
         for frame in trange(1, self.frame_number, **self.kwrgs_trange):
-            diff_position = spacer.get_diff_position(self.position[frame:], self.position[:-frame])
+            diff_position = spacer.calculate_diff_position(self.position[frame:], self.position[:-frame])
             distance = self.__square_sum_position(diff_position)
             msd_list[frame, :] = np.mean(distance, axis=self.axis_dict["frame"])
         return self.__mean_msd_list(msd_list=msd_list)

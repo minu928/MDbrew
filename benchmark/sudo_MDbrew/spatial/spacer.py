@@ -2,8 +2,8 @@ import numpy as np
 
 __all__ = [
     "check_dimension",
-    "get_diff_position",
-    "get_distance",
+    "calculate_diff_position",
+    "calculate_distance",
     "wrap_position",
     "unwrap_position",
     "calculate_angle_between_vectors",
@@ -18,12 +18,12 @@ def check_dimension(array, dim: int, dtype: str = float):
 
 
 # get difference of position A & B
-def get_diff_position(a_position, b_position, dtype: str = float):
+def calculate_diff_position(a_position, b_position, dtype: str = float):
     return np.subtract(a_position, b_position, dtype=dtype)
 
 
 # get distance from difference position
-def get_distance(diff_position, axis: int = -1, dtype: str = float):
+def calculate_distance(diff_position, axis: int = -1, dtype: str = float):
     return np.sqrt(np.sum(np.square(diff_position), axis=axis)).astype(dtype)
 
 
@@ -52,9 +52,9 @@ def unwrap_position(position, pre_position, box, ixyz=None, return_ixyz=False):
     delta_position = position - pre_position
     ixyz += np.where(delta_position < -box * 0.5, 1, 0)
     ixyz -= np.where(delta_position > box * 0.5, 1, 0)
-    position += ixyz * box
+    unwrapped_position = position + ixyz * box
 
     if return_ixyz:
-        return position, ixyz
+        return unwrapped_position, ixyz
     else:
-        return position
+        return unwrapped_position

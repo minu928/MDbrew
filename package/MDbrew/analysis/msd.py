@@ -19,7 +19,7 @@ class MSD(object):
         "ascii": True,
     }
 
-    def __init__(self, position, fft: bool = True, dtype: str = "float32"):
+    def __init__(self, position, fft: bool = True, dtype: str = float, do_unwrap: bool = False):
         """MSD
 
         Calculate the msd data and return it with method and fft
@@ -35,22 +35,43 @@ class MSD(object):
         >>> my_msd      = MSD(position = position, fft = True)
         >>> msd_result  = my_msd.result
         """
-        if type(position) == Brewery:
-            self.is_Brewery_type = True
-            pos_range = tqdm(position.frange(), **self.kwrgs_pos)
-            self.position = np.array([position.coords for _ in pos_range], dtype=dtype)
-        else:
-            self.position = spacer.check_dimension(position, dim=3)
-        self.frame_number = self.position.shape[0]
+        self.position = position
+        self._dtype = dtype
+        self._do_unwrap = do_unwrap
         self._fft = fft
 
-    def run(self):
+    def run(self, start: int = 0, end: int = None, step: int = 1):
         """run
 
         Return
         ----------
         NDArray[np.float64]: result of MSD
         """
+        if type(self.position) == Brewery:
+            if self._do_unwrap:
+                self.position.move_frame(start)
+                ixyz = None
+                unwrapped_position = self.position.coords[None, :]
+                pre_position = self.position.coords
+                pos_range = tqdm(self.position.frange(start=start + 1, end=end, step=step), **self.kwrgs_pos)
+                for _ in pos_range:
+                    this_position = self.position.coords
+                    up, ixyz = spacer.unwrap_position(
+                        pre_position=pre_position,
+                        position=this_position,
+                        box=self.position.box_size,
+                        ixyz=ixyz,
+                        return_ixyz=True,
+                    )
+                    pre_position = this_position
+                    unwrapped_position = np.concatenate([unwrapped_position, up[None, :]], axis=0)
+                self.position = unwrapped_position
+            else:
+                pos_range = tqdm(self.position.frange(start=start, end=end, step=step), **self.kwrgs_pos)
+                self.position = np.array([self.position.coords for _ in pos_range], dtype=self._dtype)
+        else:
+            self.position = spacer.check_dimension(self.position, dim=3)
+        self.frame_number = self.position.shape[0]
         if self._fft:
             self._result = self.__get_msd_fft()
         else:
@@ -78,7 +99,7 @@ class MSD(object):
         """
         msd_list = np.zeros(self.position.shape[:2])
         for frame in trange(1, self.frame_number, **self.kwrgs_trange):
-            diff_position = spacer.get_diff_position(self.position[frame:], self.position[:-frame])
+            diff_position = spacer.calculate_diff_position(self.position[frame:], self.position[:-frame])
             distance = self.__square_sum_position(diff_position)
             msd_list[frame, :] = np.mean(distance, axis=self.axis_dict["frame"])
         return self.__mean_msd_list(msd_list=msd_list)

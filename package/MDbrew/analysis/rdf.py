@@ -70,9 +70,9 @@ class InterfaceRDF(object):
         pass
 
     def _unit_run(self, a_unit, b_unit, box_unit):
-        diff_position = get_diff_position(a_unit[:, None, :], b_unit[None, :, :])
+        diff_position = calculate_diff_position(a_unit[:, None, :], b_unit[None, :, :])
         diff_position = self._check_pbc(diff_position=diff_position, box=box_unit)
-        distance = get_distance(diff_position=diff_position, axis=-1)
+        distance = calculate_distance(diff_position=diff_position, axis=-1)
         each_hist, dr_arr = np.histogram(distance, bins=self.resolution, range=(0, self.r_max))
         self.frame_num += 1
         self.hist_data += each_hist
