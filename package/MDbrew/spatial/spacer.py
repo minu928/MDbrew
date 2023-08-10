@@ -7,6 +7,7 @@ __all__ = [
     "wrap_position",
     "unwrap_position",
     "calculate_angle_between_vectors",
+    "apply_pbc",
 ]
 
 
