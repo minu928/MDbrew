@@ -1,7 +1,8 @@
 from .spatial import *
 from .analysis import *
 from .main.brewery import Brewery
+from .tool import plot
 
-__version__ = "2.3.13"
+__version__ = "2.3.14"
 __name__ = "MDbrew"
-__all__ = ["MSD", "RDF", "Brewery"]
+__all__ = ["MSD", "RDF", "Brewery", "plot"]
