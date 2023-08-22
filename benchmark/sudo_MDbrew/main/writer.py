@@ -11,9 +11,9 @@ class Writer(object):
     def __init__(self, path: str, brewery, **kwrgs) -> None:
         self._save_path = path
         self._brewery = brewery
-        self._print_option = f"[ {color.font_cyan}BREW{color.reset} ]  #WRITE {color.font_yellow}{self._brewery._fmt}->{self._fmt} {color.reset}"
+        self._print_option = f"[ {color.font_cyan}BREW{color.reset} ]  #WRITE {color.font_yellow}{self._brewery.fmt}->{self._fmt} {color.reset}"
         self._atom_dict = kwrgs.pop("atom_dict", None)
-        self._requied_atom_dict = self._check_require_atom_dict()
+        self._required_atom_dict = self._check_require_atom_dict()
 
         self.__error__()
 
@@ -32,8 +32,8 @@ class Writer(object):
 
     def _check_require_atom_dict(self):
         require_list = ["lmps"]
-        return True if self._brewery._fmt in require_list else False
+        return True if self._brewery.fmt in require_list else False
 
     def _check_atom_dict(self):
-        if self._requied_atom_dict and self._atom_dict == None:
+        if self._required_atom_dict and self._atom_dict is None:
             raise ValueError("Please input atom_dict, Ex {1 : 'Al'}")

@@ -5,8 +5,8 @@ GRO_COLUMNS = ["resid", "atom", "id", "x", "y", "z", "vx", "vy", "vz"]
 
 def _read_gro_file(gro, idx: int = 3):
     with open(file=gro, mode="r") as file:
-        datbase, box_line = _make_gro_data(file=file, idx=idx)
-        return datbase
+        database, box_line = _make_gro_data(file=file, idx=idx)
+        return database
 
 
 def _make_gro_data(file, idx: int = 3):
@@ -14,7 +14,7 @@ def _make_gro_data(file, idx: int = 3):
     num_atom = int(file.readline().strip())
     data = [file.readline().split()[:idx] for _ in range(num_atom)]
     box_line = file.readline()
-    return (data, box_line)
+    return data, box_line
 
 
 class groOpener(Opener):

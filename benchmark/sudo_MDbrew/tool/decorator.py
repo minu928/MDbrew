@@ -1,7 +1,7 @@
 from time import time
 from ..tool.colorfont import color
 
-__all__ = ["time_count", "check_tab"]
+__all__ = ["check_tab", "color_print", "color_print_verbose"]
 
 
 # determine the tab

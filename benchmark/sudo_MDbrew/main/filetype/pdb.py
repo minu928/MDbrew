@@ -45,10 +45,10 @@ class pdbOpener(Opener):
                     break
                 self.total_line_num += 1
                 ##############################
-                splited_line = self.apply_atom_type(line)
+                split_line = self.apply_atom_type(line)
                 #############################
-                one_frame_data.append(splited_line)
-                self.ending_num_for_pdb = int(splited_line[1])
+                one_frame_data.append(split_line)
+                self.ending_num_for_pdb = int(split_line[1])
                 self.is_column_updated = True
         else:
             self.total_line_num += self.ending_num_for_pdb

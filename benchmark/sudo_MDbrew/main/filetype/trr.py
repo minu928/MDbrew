@@ -28,15 +28,13 @@ COLUMNS = (
 )
 
 
-
-
 def check_double(columns_info):
     key_order = ("box_size", "x_size", "v_size", "f_size")
     size = 0
     for key in key_order:
         if columns_info[key] != 0:
             if key == "box_size":
-                size = int(columns_info[key] / DIM**2)
+                size = int(columns_info[key] / DIM ** 2)
                 break
             else:
                 size = int(columns_info[key] / (columns_info["natoms"] * DIM))
@@ -68,10 +66,10 @@ class trrOpener(Opener):
     def _make_columns(self, file):
         info = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}1i")
         tnum = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}2i")
-        vers = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}{tnum[0]-1}s")
+        vers = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}{tnum[0] - 1}s")
         version = vers[0].split(b"\0", 1)[0].decode("utf-8")
         assert info[0] == 1993, "I can not open this file"
-        assert version == "GMX_trn_file", ValueError("Unkown format")
+        assert version == "GMX_trn_file", ValueError("Unknown format")
         column_data = self._unpack_fmt_and_read_line(file=file, fmt=f"{self._arrow}13i")
         columns_info = {COLUMNS[idx]: data for idx, data in enumerate(column_data)}
         self._is_double = check_double(columns_info=columns_info)
