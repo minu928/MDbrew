@@ -31,3 +31,4 @@ MDbrew/tool/__init__.py
 MDbrew/tool/colorfont.py
 MDbrew/tool/decorator.py
 MDbrew/tool/doctor.py
+MDbrew/tool/plot.py

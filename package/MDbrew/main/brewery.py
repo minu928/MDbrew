@@ -21,7 +21,7 @@ class Brewery(object):
         "lmps": lmpsOpener,
         "trr": trrOpener,
     }
-    __support_writer__ = {"xyz": xyzWriter, "vasp_poscar": POSCARWriter}
+    __support_writer__ = {"xyz": xyzWriter, "poscar": POSCARWriter}
     __print_option__ = {
         "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
         "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
@@ -81,8 +81,7 @@ class Brewery(object):
     def frame(self):
         return self._opener.frame
 
-    @property
-    def next_frame(self):
+    def move_on_next_frame(self):
         self._opener.next_frame()
 
     @color_print_verbose(name=__print_option__["brewery"])
@@ -142,7 +141,7 @@ class Brewery(object):
                     break
                 if not (self.frame - start) % step:
                     yield self.frame
-                self.next_frame
+                self.move_on_next_frame()
             except:
                 break
 
@@ -150,5 +149,7 @@ class Brewery(object):
         self._opener.skip_frame(num=num)
 
     def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, **kwrgs):
+        fmt = fmt.lower()
+        assert fmt in self.__support_writer__.keys(), f"Supporting fmt is {self.__support_writer__.keys()}"
         _writer = self.__support_writer__[fmt](save_path, self, **kwrgs)
         _writer.write(start=start, end=end, step=step)
