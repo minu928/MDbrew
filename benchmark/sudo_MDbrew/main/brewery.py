@@ -8,7 +8,7 @@ from .filetype.vasp import vaspOpener, POSCARWriter
 from .filetype.xyz import xyzOpener, xyzWriter
 from .filetype.trr import trrOpener
 from ..tool.colorfont import color
-from ..tool.decorator import color_print_verbose
+from ..tool.decorator import color_print_verbose, color_tqdm
 
 
 def _check_path(path, **kwrgs):
@@ -131,10 +131,10 @@ class Brewery(object):
     def reorder(self):
         return Brewery(trj_file=self._path, fmt=self.fmt, what=self._what, verbose=False)
 
-    def frange(self, start: int = 0, end: int = None, step: int = 1):
+    @color_tqdm(name="FRAME")
+    def frange(self, start: int = 0, end: int = None, step: int = 1, verbose: bool = False):
         self.move_frame(num=start)
-        if end is not None:
-            assert start < end, "start should be lower than end"
+        assert end is None or start < end, "start should be lower than end"
         while True:
             try:
                 if self.frame == end:

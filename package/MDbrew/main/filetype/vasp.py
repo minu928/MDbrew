@@ -49,7 +49,7 @@ class POSCARWriter(Writer):
 
     def _write_one_frame_data(self, file, idx):
         atom_list = self._brewery.atom_kind
-        atom_list = [self._atom_dict[int(float(kind))] for kind in atom_list] if self._requied_atom_dict else atom_list
+        atom_list = [self._atom_dict[int(float(kind))] for kind in atom_list] if self._required_atom_dict else atom_list
         file.write(" ".join(atom_list) + "\n")
         file.write(f" {1.0:15.10f}\n")
         file.write(f"\t{self._brewery.box_size[0]:15.10f}{0.0:15.10f}{0.0:15.10f}\n")
@@ -67,7 +67,7 @@ class POSCARWriter(Writer):
             file.write(f"{xyz[0]:24.16f}{xyz[1]:24.16f}{xyz[2]:24.16f}\n")
 
     def _sort_xyz(self):
-        atom_list = self._brewery.brew(self._brewery._opener._atom_keyword, dtype="str")
+        atom_list = self._brewery.brew(self._brewery.opener.atom_keyword, dtype="str")
         sorted_xyz = np.zeros((1, 3), dtype="float")
         for atom in self._brewery.atom_kind:
             atom_idx = np.where(atom == atom_list)

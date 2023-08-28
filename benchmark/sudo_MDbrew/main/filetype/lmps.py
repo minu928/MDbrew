@@ -1,13 +1,10 @@
 from ..opener import Opener
+from ..writer import Writer
 
 
 def skip_line(file, num):
     for _ in range(num):
         file.readline()
-
-
-def str2float_list(str_list):
-    return [float(data) for data in str_list]
 
 
 class lmpsOpener(Opener):
@@ -26,4 +23,4 @@ class lmpsOpener(Opener):
         ]
         self.column = file.readline().split()[2:]
         self.total_line_num = 9 + atom_num
-        return [str2float_list(file.readline().split()) for _ in range(atom_num)]
+        return [file.readline().split() for _ in range(atom_num)]

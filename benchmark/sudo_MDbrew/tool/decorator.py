@@ -1,4 +1,5 @@
 from time import time
+from tqdm import tqdm
 from ..tool.colorfont import color
 
 __all__ = ["check_tab", "color_print", "color_print_verbose"]
@@ -45,6 +46,20 @@ def color_print_verbose(name):
                 end_string += "\t" * check_tab(name=name) + f" -> {end - start :5.2f} s \u2705"
                 print(end_string)
             return result
+
+        return inner
+
+    return deco
+
+
+def color_tqdm(name):
+    def deco(func):
+        def inner(*args, **kwrgs):
+            verbose = kwrgs.pop("verbose", False)
+            if verbose:
+                return tqdm(func(verbose=verbose, *args, **kwrgs), desc=f"[ {color.font_magenta}{name}{color.reset} ]")
+            else:
+                return func(verbose=verbose, *args, **kwrgs)
 
         return inner
 

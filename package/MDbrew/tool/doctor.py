@@ -11,8 +11,8 @@ def doctor(path):
     mb = Brewery(trj_file=path, fmt="lmps")
     coords = mb.coords
     atom_info = mb.atom_info
-    order1 = mb.order(what="type == 1")
-    order2 = mb.order(what="type == 2")
+    order1 = mb.order(what="type == '1'")
+    order2 = mb.order(what="type == '2'")
     print(sep_line)
     position = order1.coords
     ixiyiz = order1.brew(cols=["ix", "iy", "iz"])

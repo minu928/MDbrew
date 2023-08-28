@@ -11,7 +11,7 @@ class Opener(object):
         self.path = path
         self.column = []
         self.box_size = []
-        self._atom_keyword = "atom"
+        self.atom_keyword = "atom"
 
     @property
     def database(self):
