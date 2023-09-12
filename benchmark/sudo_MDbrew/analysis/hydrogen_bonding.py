@@ -53,5 +53,5 @@ def distribute_OHn(idxes_O_in_H):
 def count_hydrogen_bonding_from_donor(donor_idx_arr):
     acceptor_idx, acceptor_num = np.unique(np.concatenate(donor_idx_arr), return_counts=True)
     donor_num_arr = np.array([len(i) for i in donor_idx_arr])
-    full_num_arr = donor_num_arr[acceptor_idx] + acceptor_num
-    return full_num_arr
+    donor_num_arr[acceptor_idx] += acceptor_num
+    return donor_num_arr
