@@ -8,6 +8,7 @@ MDbrew.egg-info/dependency_links.txt
 MDbrew.egg-info/not-zip-safe
 MDbrew.egg-info/top_level.txt
 MDbrew/analysis/__init__.py
+MDbrew/analysis/autocorrelation.py
 MDbrew/analysis/hydrogen_bonding.py
 MDbrew/analysis/msd.py
 MDbrew/analysis/rdf.py
