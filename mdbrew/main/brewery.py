@@ -95,7 +95,6 @@ class Brewery(object):
 
     def _check_fmt(self, fmt: str):
         fmt_list = list(opener_programs.keys())
-        print(fmt_list)
         if fmt == "auto":
             file_name = self._path.split("/")[-1]
             fmt = file_name.split(".")[-1]
