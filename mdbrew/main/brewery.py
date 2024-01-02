@@ -42,6 +42,7 @@ class Brewery(object):
         self._set_atom_info(verbose=kwrgs.pop("verbose", True))
         self._data = None
         self._coords = None
+        self._kwrgs = kwrgs
 
     def __str__(self) -> str:
         LINE_WIDTH = 60
@@ -126,10 +127,10 @@ class Brewery(object):
         self.opener.reset()
 
     def order(self, what: str = None, verbose: bool = False):
-        return Brewery(trj_file=self._path, fmt=self.fmt, what=what, verbose=verbose)
+        return Brewery(trj_file=self._path, fmt=self.fmt, what=what, verbose=verbose, **self._kwrgs)
 
     def reorder(self):
-        return Brewery(trj_file=self._path, fmt=self.fmt, what=self._what, verbose=False)
+        return Brewery(trj_file=self._path, fmt=self.fmt, what=self._what, verbose=False, **self._kwrgs)
 
     @color_tqdm(name="FRAME")
     def frange(self, start: int = 0, end: int = None, step: int = 1, verbose: bool = False):
