@@ -1,12 +1,8 @@
 import os
 import numpy as np
 import pandas as pd
-from .opener import Opener
-from .filetype.lmps import lmpsOpener
-from .filetype.pdb import pdbOpener
-from .filetype.vasp import vaspOpener, POSCARWriter
-from .filetype.xyz import xyzOpener, xyzWriter
-from .filetype.trr import trrOpener
+from .opener import opener_programs
+from .writer import writer_programs
 from ..tool.colorfont import color
 from ..tool.decorator import color_print_verbose, color_tqdm
 
@@ -18,15 +14,6 @@ def _check_path(path, **kwrgs):
 
 
 class Brewery(object):
-    __support_opener__ = {
-        "auto": None,
-        "pdb": pdbOpener,
-        "xyz": xyzOpener,
-        "vasp": vaspOpener,
-        "lmps": lmpsOpener,
-        "trr": trrOpener,
-    }
-    __support_writer__ = {"xyz": xyzWriter, "poscar": POSCARWriter}
     __print_option__ = {
         "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
         "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
@@ -97,8 +84,8 @@ class Brewery(object):
         self.atom_kind = self.atom_info[0]
         self.atom_num = np.sum(self.atom_info[1])
 
-    def _init_opener(self, **kwrgs) -> Opener:
-        trj_opener: Opener = self.__support_opener__[self.fmt]
+    def _init_opener(self, **kwrgs):
+        trj_opener = opener_programs[self.fmt]
         if trj_opener.is_require_gro:
             gro_file = kwrgs.pop("gro_file", None)
             assert gro_file is not None, f"{self.fmt} format require gro file, plz input with gro_file='some_gro'"
@@ -107,12 +94,13 @@ class Brewery(object):
             return trj_opener(path=self._path)
 
     def _check_fmt(self, fmt: str):
-        fmt_list = list(self.__support_opener__.keys())
-        assert fmt in fmt_list, f"fmt should be in {fmt_list}"
+        fmt_list = list(opener_programs.keys())
+        print(fmt_list)
         if fmt == "auto":
             file_name = self._path.split("/")[-1]
             fmt = file_name.split(".")[-1]
             fmt = "lmps" if "lammps" in file_name else fmt
+        assert fmt in fmt_list, f"fmt should be in {fmt_list}"
         return fmt
 
     @color_print_verbose(name=__print_option__["b_brewing"])
@@ -151,6 +139,6 @@ class Brewery(object):
 
     def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, **kwrgs):
         fmt = fmt.lower()
-        assert fmt in self.__support_writer__.keys(), f"Supporting fmt is {self.__support_writer__.keys()}"
-        _writer = self.__support_writer__[fmt](save_path, self, **kwrgs)
+        assert fmt in writer_programs.keys(), f"Supporting fmt is {writer_programs.keys()}"
+        _writer = writer_programs[fmt](save_path, self, **kwrgs)
         _writer.write(start=start, end=end, step=step)

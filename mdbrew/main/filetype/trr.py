@@ -1,7 +1,6 @@
 import struct
 import numpy as np
 from ..opener import Opener
-
 from .gro import GRO_COLUMNS, _read_gro_file
 
 GRO_IDX = 3
@@ -34,7 +33,7 @@ def check_double(columns_info):
     for key in key_order:
         if columns_info[key] != 0:
             if key == "box_size":
-                size = int(columns_info[key] / DIM ** 2)
+                size = int(columns_info[key] / DIM**2)
                 break
             else:
                 size = int(columns_info[key] / (columns_info["natoms"] * DIM))

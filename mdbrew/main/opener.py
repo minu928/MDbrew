@@ -1,3 +1,4 @@
+from typing import Dict, Type
 from abc import abstractmethod
 
 
@@ -12,6 +13,10 @@ class Opener(object):
         self.column = []
         self.box_size = []
         self.atom_keyword = "atom"
+
+    def __init_subclass__(cls) -> None:
+        name = cls.__module__.split(".")[-1].lower()
+        opener_programs[name] = cls
 
     @property
     def database(self):
@@ -61,3 +66,6 @@ class Opener(object):
 
     def next_frame(self):
         self._data = next(self._database)
+
+
+opener_programs: Dict[str, Type[Opener]] = {}

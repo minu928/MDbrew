@@ -1,5 +1,6 @@
 from ..opener import Opener
 
+
 GRO_COLUMNS = ["resid", "atom", "id", "x", "y", "z", "vx", "vy", "vz"]
 
 

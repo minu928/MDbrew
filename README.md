@@ -1,28 +1,32 @@
 # MDbrew
+
 <img src="https://img.shields.io/badge/Python-383b40?style=round-square&logo=Python&logoColor=#f5f5f5"/> <img src="https://img.shields.io/badge/Jupyter-383b40?style=round-square&logo=Jupyter&logoColor=#f5f5f5"/>
 
-MDbrew is a package for postprocessing of molecular dynamics simulation  
-Supported Format : [".xyz", "vasp_trj", "pdb", "gro"]
+mdbrew is a package for postprocessing of molecular dynamics simulation  
+Supported Format : [".xyz", "vasp_trj", "pdb", "gro", "trr", "gro]
 
-- VERSION :  (2.3.15)
+- VERSION : (2.4.2)
 
 ## How to install
-~~~bash
+
+```bash
 pip install MDbrew
-~~~
+```
 
 ## Example Code For Brewery
 
 ### Example - Load the file
-~~~python
-import MDbrew as mdb
+
+```python
+import mdbrew as mdb
 file_path = "somewhere"
 mb= mdb.Brewery(path=file_path, fmt="xyz")
-~~~
+```
 
 ### Example - brewing something
-~~~python
-import MDbrew as mdb
+
+```python
+import mdbrew as mdb
 file_path = "somewhere"
 mb= mdb.Brewery(path=file_path, fmt="xyz")
 # Properties of Brewery
@@ -41,12 +45,14 @@ mb.frange(start=100, end=200, step=2) # Generator
 something = mb.brew(cols=["x", "y", "z"], what="atom == 'O'")
 # order
 O_ = mb.order(what="atom == 'O'")
-~~~
+```
+
 - ! brew option is as same as pandas query
 
 ### Example - RDF
-~~~python
-import MDbrew as mdb
+
+```python
+import mdbrew as mdb
 file_path = "somewhere"
 mb= mdb.Brewery(path=file_path, fmt="xyz")
 box_size = mb.box_size
@@ -55,11 +61,12 @@ order_2 = mb.order(what="type == 2")
 rdf = mdb.RDF(order_1, order_2, box_size).run(start=0, end=None, step=1)
 rdf_result = rdf.result
 rdf_cn = rdf.cn
-~~~
+```
 
 ### Example - MSD
-~~~python
-import MDbrew as mdb
+
+```python
+import mdbrew as mdb
 file_path = "somewhere"
 mb= mdb.Brewery(path=file_path, fmt="xyz")
 box_size = mb.box_size
@@ -68,13 +75,14 @@ order_2 = mb.order(what="type == 2")
 rdf = mdb.MSD(order_1, fft=True, do_unwrap=True).run(start=0, end=None, step=1)
 rdf_result = rdf.result
 rdf_cn = rdf.cn
-~~~
+```
 
 ### Example - write
-~~~python
-import MDbrew as mdb
+
+```python
+import mdbrew as mdb
 FRAME = 1000
 file_path = "somewhere"
 mb= mdb.Brewery(path=file_path, fmt="xyz")
 mb.write(fmt="poscar", save_path="./POSCAR", start=FRAME, end=FRAME+1)
-~~~
+```
