@@ -1,4 +1,4 @@
-from ..opener import Opener
+from mdbrew.main.interface.opener import OpenerInterface
 
 
 GRO_COLUMNS = ["resid", "atom", "id", "x", "y", "z", "vx", "vy", "vz"]
@@ -18,7 +18,9 @@ def _make_gro_data(file, idx: int = 3):
     return data, box_line
 
 
-class groOpener(Opener):
+class groOpener(OpenerInterface):
+    fmt: str = "gro"
+
     def __init__(self, path: str, *args, **kwrgs) -> None:
         super().__init__(path, *args, **kwrgs)
         self.column = GRO_COLUMNS

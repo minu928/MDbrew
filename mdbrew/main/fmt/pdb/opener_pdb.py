@@ -1,4 +1,5 @@
-from ..opener import Opener
+from mdbrew.main.interface import OpenerInterface
+
 
 atomic_dict = {
     "pdbtype": [0, 4],
@@ -20,9 +21,10 @@ atomic_dict = {
 }
 
 
-class pdbOpener(Opener):
+class pdbOpener(OpenerInterface):
     ending_num_for_pdb = None
     is_column_updated = False
+    fmt: str = "pdb"
 
     def __init__(self, path: str, *args, **kwrgs) -> None:
         super().__init__(path, *args, **kwrgs)

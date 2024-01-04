@@ -1,10 +1,10 @@
-from tqdm import tqdm
-from abc import abstractmethod
 from typing import Dict, Type
-from ..tool.colorfont import color
+from abc import abstractmethod, abstractproperty, ABCMeta
+from tqdm import tqdm
+from mdbrew.tool.colorfont import color
 
 
-class Writer(object):
+class WriterInterface(metaclass=ABCMeta):
     _save_path = None
     _fmt = None
     _out_name = None
@@ -13,7 +13,7 @@ class Writer(object):
         self._save_path = path
         self._brewery = brewery
         self._print_option = (
-            f"[ {color.font_cyan}BREW{color.reset} ]  #WRITE {color.font_yellow}{self._brewery.fmt}->{self._fmt} {color.reset}"
+            f"[ {color.font_cyan}BREW{color.reset} ]  #WRITE {color.font_yellow}{self._brewery.fmt}->{self.fmt} {color.reset}"
         )
         self._atom_dict = kwrgs.pop("atom_dict", None)
         self._required_atom_dict = self._check_require_atom_dict()
@@ -29,6 +29,10 @@ class Writer(object):
         with open(self._save_path, "w+") as f:
             for i in tqdm(frange, desc=self._print_option):
                 self._write_one_frame_data(file=f, idx=i)
+
+    @abstractproperty
+    def fmt(self) -> str:
+        pass
 
     @abstractmethod
     def _write_one_frame_data(self, file, idx):
@@ -46,4 +50,4 @@ class Writer(object):
             raise ValueError("Please input atom_dict, Ex {1 : 'Al'}")
 
 
-writer_programs: Dict[str, Type[Writer]] = {}
+writer_programs: Dict[str, Type[WriterInterface]] = {}

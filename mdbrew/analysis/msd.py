@@ -1,8 +1,8 @@
 import numpy as np
 from tqdm import trange, tqdm
-from ..spatial import spacer
-from ..main.brewery import Brewery
-from ..tool.colorfont import color
+from mdbrew.tool.space import _spacer
+from mdbrew.main.brewery import Brewery
+from mdbrew.tool.colorfont import color
 
 
 # Class of Mean Square Displacement
@@ -56,7 +56,7 @@ class MSD(object):
                 pos_range = tqdm(self.position.frange(start=start + 1, end=end, step=step), **self.kwrgs_pos)
                 for _ in pos_range:
                     this_position = self.position.coords
-                    up, ixyz = spacer.unwrap_position(
+                    up, ixyz = _spacer.unwrap_position(
                         pre_position=pre_position,
                         position=this_position,
                         box=self.position.box_size,
@@ -70,7 +70,7 @@ class MSD(object):
                 pos_range = tqdm(self.position.frange(start=start, end=end, step=step), **self.kwrgs_pos)
                 self.position = np.array([self.position.coords for _ in pos_range], dtype=self._dtype)
         else:
-            self.position = spacer.check_dimension(self.position, dim=3)
+            self.position = _spacer.check_dimension(self.position, dim=3)
         self.frame_number = self.position.shape[0]
         if self._fft:
             self._result = self.__get_msd_fft()
@@ -99,7 +99,7 @@ class MSD(object):
         """
         msd_list = np.zeros(self.position.shape[:2])
         for frame in trange(1, self.frame_number, **self.kwrgs_trange):
-            diff_position = spacer.calculate_diff_position(self.position[frame:], self.position[:-frame])
+            diff_position = _spacer.calculate_diff_position(self.position[frame:], self.position[:-frame])
             distance = self.__square_sum_position(diff_position)
             msd_list[frame, :] = np.mean(distance, axis=self.axis_dict["frame"])
         return self.__mean_msd_list(msd_list=msd_list)

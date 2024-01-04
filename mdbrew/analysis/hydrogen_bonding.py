@@ -1,5 +1,6 @@
 import numpy as np
-from ..spatial import PeriodicCKDTree, calculate_angle_between_vectors, apply_pbc
+from mdbrew.tool.space import PeriodicCKDTree, calculate_angle_between_vectors, apply_pbc
+
 
 __all__ = ["search_in_H2O", "distribute_OHn"]
 

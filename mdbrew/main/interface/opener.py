@@ -1,8 +1,8 @@
 from typing import Dict, Type
-from abc import abstractmethod
+from abc import abstractmethod, abstractproperty, ABCMeta
 
 
-class Opener(object):
+class OpenerInterface(metaclass=ABCMeta):
     skip_head = 0
     read_mode = "r"
     is_require_gro = False
@@ -15,7 +15,7 @@ class Opener(object):
         self.atom_keyword = "atom"
 
     def __init_subclass__(cls) -> None:
-        name = cls.__module__.split(".")[-1].lower()
+        name = cls.fmt.lower()
         opener_programs[name] = cls
 
     @property
@@ -25,6 +25,10 @@ class Opener(object):
     @property
     def data(self):
         return self._data
+
+    @abstractproperty
+    def fmt(self) -> str:
+        pass
 
     def _skip_the_line(self, file):
         if self.read_mode == "r":
@@ -68,4 +72,4 @@ class Opener(object):
         self._data = next(self._database)
 
 
-opener_programs: Dict[str, Type[Opener]] = {}
+opener_programs: Dict[str, Type[OpenerInterface]] = {}
