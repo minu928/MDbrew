@@ -144,7 +144,7 @@ class Brewery(object):
             fmt = self._path.split(os.path.sep)[-1].split(".")[-1].lower()
         trj_opener = get_opener(fmt=fmt)
         if trj_opener.is_require_gro:
-            gro_file = kwrgs.pop("gro_file", None)
-            assert gro_file is not None, f"{fmt} require gro file, plz input with 'gro_file=path_of_gro'"
+            gro_file = kwrgs.pop("gro", None)
+            assert gro_file is not None, f"{fmt} require gro file, plz input with 'gro=path_of_gro'"
             return trj_opener(path=self._path, gro=gro_file)
         return trj_opener(path=self._path)
