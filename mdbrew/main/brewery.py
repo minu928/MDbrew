@@ -64,6 +64,14 @@ class Brewery(object):
         return self.brew(cols=["x", "y", "z"], dtype=float, verbose=False)
 
     @property
+    def velocities(self):
+        return self.brew(cols=["vx", "vy", "vz"], dtype=float, verbose=False)
+
+    @property
+    def forces(self):
+        return self.brew(cols=["fx", "fy", "fz"], dtype=float, verbose=False)
+
+    @property
     def data(self):
         if not hasattr(self, "_data"):
             self._data = pd.DataFrame(data=self.opener.data, columns=self.columns)
@@ -77,8 +85,16 @@ class Brewery(object):
     def fmt(self):
         return self.opener.fmt
 
+    def update_data(self):
+        self._data = pd.DataFrame(data=self.opener.data, columns=self.columns)
+
     def next_frame(self):
         self.opener.next_frame()
+        self.update_data()
+
+    def move_frame(self, num: int):
+        self.opener.move_frame(num=int(num))
+        self.update_data()
 
     @color_print_verbose(name=__print_option__["b_brewing"])
     def brew(self, cols=None, what: str = None, dtype: str = str, verbose: bool = False):
@@ -100,18 +116,20 @@ class Brewery(object):
     @color_tqdm(name="FRAME")
     def frange(self, start: int = 0, end: int = None, step: int = 1, verbose: bool = False):
         assert end is None or start < end, "start should be lower than end"
-        self.move_frame(num=start)
-        while self.frame != end:
-            self.next_frame()
-            if (self.frame - start) % step == 0:
-                yield self.frame
-
-    def move_frame(self, num: int):
-        self.opener.move_frame(num=int(num))
+        self.opener.move_frame(num=int(start))
+        try:
+            while self.frame != end:
+                if (self.frame - start) % step == 0:
+                    yield self.frame
+                self.next_frame()
+        except StopIteration:
+            pass
+        finally:
+            self.move_frame(0)  # Reset the database
 
     def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, **kwrgs):
         fmt = fmt.lower()
-        _writer = get_writer(fmt=fmt)(save_path, self, **kwrgs)
+        _writer = get_writer(fmt=fmt)(save_path, brewery=self, **kwrgs)
         _writer.write(start=start, end=end, step=step)
 
     @color_print_verbose(name=__print_option__["brewery"])

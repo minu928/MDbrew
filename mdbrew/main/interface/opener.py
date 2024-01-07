@@ -1,4 +1,4 @@
-from typing import Dict, Type, TextIO
+from typing import Dict, Type
 from abc import abstractmethod, abstractproperty, ABCMeta
 
 
@@ -41,7 +41,7 @@ class OpenerInterface(metaclass=ABCMeta):
         total_skip_line = self.total_line_num * num
         self.skip_head += total_skip_line
         self._database = self.generate_database(frame_num=num)
-        self.next_frame()
+        self._data = next(self._database)
         self.skip_head -= total_skip_line
 
     # Generation database
