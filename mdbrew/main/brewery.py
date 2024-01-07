@@ -25,7 +25,6 @@ class Brewery(object):
         self._what = kwrgs.pop("what", None)
         self._path = _check_path(path=trj_file, **kwrgs)
         self.opener = self._match_fmt_with_opener(fmt=fmt, **kwrgs)
-        self._set_atom_info(verbose=kwrgs.pop("verbose", True))
         self._kwrgs = kwrgs
 
     def __str__(self) -> str:
@@ -42,6 +41,24 @@ class Brewery(object):
         print(f"\t[ FRAMES ]:   NOW  ->   {self.frame:4d}")
         print(sep_line)
         return f"\t    @CopyRight by  {color.font_blue}minu928@snu.ac.kr{color.reset}\n"
+
+    @property
+    def atom_info(self):
+        if not hasattr(self, "_atom_info"):
+            self._set_atom_info()
+        return self._atom_info
+
+    @property
+    def atom_kind(self):
+        if not hasattr(self, "_atom_kind"):
+            self._set_atom_info()
+        return self._atom_kind
+
+    @property
+    def atom_num(self):
+        if not hasattr(self, "_atom_num"):
+            self._set_atom_info()
+        return self._atom_num
 
     @property
     def box_size(self):
@@ -74,7 +91,7 @@ class Brewery(object):
     @property
     def data(self):
         if not hasattr(self, "_data"):
-            self._data = pd.DataFrame(data=self.opener.data, columns=self.columns)
+            self.update_data()
         return self._data
 
     @property
@@ -87,6 +104,9 @@ class Brewery(object):
 
     def update_data(self):
         self._data = pd.DataFrame(data=self.opener.data, columns=self.columns)
+        if self._what is not None:
+            self._data.query(self._what, inplace=True)
+        assert len(self._data), "Data is empty"
 
     def next_frame(self):
         self.opener.next_frame()
@@ -99,7 +119,6 @@ class Brewery(object):
     @color_print_verbose(name=__print_option__["b_brewing"])
     def brew(self, cols=None, what: str = None, dtype: str = str, verbose: bool = False):
         data = self.data
-        data = data.query(self._what) if self._what is not None else data
         data = data.query(what) if what is not None else data
         data = data.loc[:, cols] if cols is not None else data
         return data.to_numpy(dtype=dtype)
@@ -135,9 +154,9 @@ class Brewery(object):
     @color_print_verbose(name=__print_option__["brewery"])
     def _set_atom_info(self, verbose: bool = True):
         atom_brew_data = self.brew(cols=self.opener.atom_keyword, dtype=str, verbose=False)
-        self.atom_info = np.unique(atom_brew_data, return_counts=True)
-        self.atom_kind = self.atom_info[0]
-        self.atom_num = np.sum(self.atom_info[1])
+        self._atom_info = np.unique(atom_brew_data, return_counts=True)
+        self._atom_kind = self.atom_info[0]
+        self._atom_num = np.sum(self.atom_info[1])
 
     def _match_fmt_with_opener(self, fmt, **kwrgs):
         if fmt == "auto":
