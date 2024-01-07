@@ -24,7 +24,6 @@ class groOpener(OpenerInterface):
     def __init__(self, path: str, *args, **kwrgs) -> None:
         super().__init__(path, *args, **kwrgs)
         self.column = GRO_COLUMNS
-        super().gen_db()
 
     def _make_one_frame_data(self, file):
         read_data = _make_gro_data(file=file, idx=len(self.column))

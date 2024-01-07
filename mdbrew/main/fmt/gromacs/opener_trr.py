@@ -52,7 +52,6 @@ class trrOpener(OpenerInterface):
         self._arrow = ">"
         self._dim = DIM
         self._gro_data = _read_gro_file(gro=kwrgs.pop("gro"), idx=GRO_IDX)
-        super().gen_db()
 
     # Abstract data
     def _make_one_frame_data(self, file):

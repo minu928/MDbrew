@@ -31,7 +31,6 @@ class pdbOpener(OpenerInterface):
         self.path = path
         self.skip_head = 2
         self.column = []
-        super().gen_db()
 
     def _make_one_frame_data(self, file):
         first__loop_line = file.readline()

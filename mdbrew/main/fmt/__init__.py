@@ -1,7 +1,12 @@
-import glob
-from os.path import dirname, join, sep
+from importlib import import_module
+from pathlib import Path
 
 
-modules = glob.glob(join(dirname(__file__), "*"))
-__all__ = [file.split(sep)[-1] for file in modules if not "__" in file]
-del modules
+HEAD = "mdbrew.main.fmt"
+
+for fmt_folder in Path(__file__).parent.glob("*"):
+    for py_file in fmt_folder.glob("*.py"):
+        if not "__" in py_file.stem:
+            import_module(f".{fmt_folder.stem}.{py_file.stem}", HEAD)
+
+del import_module, Path

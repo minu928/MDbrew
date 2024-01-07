@@ -1,4 +1,4 @@
-from typing import Dict, Type
+from typing import Dict, Type, TextIO
 from abc import abstractmethod, abstractproperty, ABCMeta
 
 
@@ -20,14 +20,44 @@ class OpenerInterface(metaclass=ABCMeta):
 
     @property
     def database(self):
+        if not hasattr(self, "_database"):
+            self._database = self.generate_database()
         return self._database
 
     @property
     def data(self):
+        if not hasattr(self, "_data"):
+            self._data = next(self.database)
         return self._data
 
     @abstractproperty
     def fmt(self) -> str:
+        pass
+
+    def next_frame(self):
+        self._data = next(self._database)
+
+    def move_frame(self, num):
+        total_skip_line = self.total_line_num * num
+        self.skip_head += total_skip_line
+        self._database = self.generate_database(frame_num=num)
+        self.next_frame()
+        self.skip_head -= total_skip_line
+
+    # Generation database
+    def generate_database(self, frame_num: int = 0):
+        self.frame = frame_num - 1
+        with open(file=self.path, mode=self.read_mode) as file:
+            self._skip_the_line(file=file)
+            while True:
+                try:
+                    self.frame += 1
+                    yield self._make_one_frame_data(file=file)
+                except:
+                    break
+
+    @abstractmethod
+    def _make_one_frame_data(self, file):
         pass
 
     def _skip_the_line(self, file):
@@ -38,38 +68,6 @@ class OpenerInterface(metaclass=ABCMeta):
             file.read(self.skip_head)
         else:
             raise ValueError("plz input correct read mode")
-
-    @abstractmethod
-    def _make_one_frame_data(self, file):
-        pass
-
-    # Generation database
-    def _generate_database(self):
-        with open(file=self.path, mode=self.read_mode) as file:
-            self._skip_the_line(file=file)
-            while True:
-                try:
-                    self.frame += 1
-                    yield self._make_one_frame_data(file=file)
-                except:
-                    break
-
-    def gen_db(self, frame=0):
-        self.frame = frame - 1
-        self._database = self._generate_database()
-        self.next_frame()
-
-    def reset(self):
-        self.gen_db()
-
-    def skip_frame(self, num):
-        total_skip_line = self.total_line_num * num
-        self.skip_head += total_skip_line
-        self.gen_db(frame=num)
-        self.skip_head -= total_skip_line
-
-    def next_frame(self):
-        self._data = next(self._database)
 
 
 opener_programs: Dict[str, Type[OpenerInterface]] = {}

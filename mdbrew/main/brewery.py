@@ -26,8 +26,6 @@ class Brewery(object):
         self._path = _check_path(path=trj_file, **kwrgs)
         self.opener = self._match_fmt_with_opener(fmt=fmt, **kwrgs)
         self._set_atom_info(verbose=kwrgs.pop("verbose", True))
-        self._data = None
-        self._coords = None
         self._kwrgs = kwrgs
 
     def __str__(self) -> str:
@@ -67,7 +65,9 @@ class Brewery(object):
 
     @property
     def data(self):
-        return self.opener.data
+        if not hasattr(self, "_data"):
+            self._data = pd.DataFrame(data=self.opener.data, columns=self.columns)
+        return self._data
 
     @property
     def frame(self):
@@ -77,12 +77,12 @@ class Brewery(object):
     def fmt(self):
         return self.opener.fmt
 
-    def move_on_next_frame(self):
+    def next_frame(self):
         self.opener.next_frame()
 
     @color_print_verbose(name=__print_option__["b_brewing"])
     def brew(self, cols=None, what: str = None, dtype: str = str, verbose: bool = False):
-        data = pd.DataFrame(data=self.data, columns=self.columns)
+        data = self.data
         data = data.query(self._what) if self._what is not None else data
         data = data.query(what) if what is not None else data
         data = data.loc[:, cols] if cols is not None else data
@@ -99,20 +99,15 @@ class Brewery(object):
 
     @color_tqdm(name="FRAME")
     def frange(self, start: int = 0, end: int = None, step: int = 1, verbose: bool = False):
-        self.move_frame(num=start)
         assert end is None or start < end, "start should be lower than end"
-        while True:
-            try:
-                if self.frame == end:
-                    break
-                if not (self.frame - start) % step:
-                    yield self.frame
-                self.move_on_next_frame()
-            except:
-                break
+        self.move_frame(num=start)
+        while self.frame != end:
+            self.next_frame()
+            if (self.frame - start) % step == 0:
+                yield self.frame
 
-    def move_frame(self, num):
-        self.opener.skip_frame(num=num)
+    def move_frame(self, num: int):
+        self.opener.move_frame(num=int(num))
 
     def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, **kwrgs):
         fmt = fmt.lower()
