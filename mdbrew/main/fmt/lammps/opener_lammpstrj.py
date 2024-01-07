@@ -1,5 +1,4 @@
-from ..opener import Opener
-from ..writer import Writer
+from mdbrew.main.interface import OpenerInterface
 
 
 def skip_line(file, num):
@@ -7,11 +6,12 @@ def skip_line(file, num):
         file.readline()
 
 
-class lmpsOpener(Opener):
+class lammpstrjOpener(OpenerInterface):
+    fmt: str = "lammpstrj"
+
     def __init__(self, path: str, *args, **kwrgs) -> None:
         super().__init__(path, *args, **kwrgs)
         self.atom_keyword = "type"
-        super().gen_db()
 
     def _make_one_frame_data(self, file):
         skip_line(file=file, num=3)

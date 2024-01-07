@@ -1,8 +1,9 @@
 import numpy as np
 from tqdm import trange, tqdm
-from ..main.brewery import Brewery
-from ..spatial.spacer import *
-from ..tool.colorfont import color
+from typing import Type
+from mdbrew.main.brewery import Brewery
+from mdbrew.tool.colorfont import color
+from mdbrew.tool.space import calculate_diff_position, calculate_distance, check_dimension
 
 
 # Calculate and Plot the RDF
@@ -105,8 +106,8 @@ class BreweryRDF(InterfaceRDF):
         resolution: int = 1000,
         dtype: str = "float64",
     ):
-        self.a: Brewery = a.reorder()
-        self.b: Brewery = b.reorder()
+        self.a: Type[Brewery] = a.reorder()
+        self.b: Type[Brewery] = b.reorder()
         self.a_number = a.atom_num
         self.b_number = b.atom_num
         self._is_external_box = box is None

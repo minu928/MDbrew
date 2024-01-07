@@ -1,24 +1,10 @@
-from ..opener import Opener
-from ..writer import Writer
+from mdbrew.main.interface import WriterInterface
 
 
-class xyzOpener(Opener):
-    def __init__(self, path: str, *args, **kwrgs) -> None:
-        super().__init__(path, *args, **kwrgs)
-        self.column = ["atom", "x", "y", "z"]
-        super().gen_db()
+class xyzWriter(WriterInterface):
+    fmt = "xyz"
 
-    def _make_one_frame_data(self, file):
-        first_loop_line = file.readline()
-        atom_num = int(first_loop_line.split()[0])
-        second_line = file.readline()
-        self.total_line_num = atom_num + 2
-        return [file.readline().split() for _ in range(atom_num)]
-
-
-class xyzWriter(Writer):
     def __init__(self, path: str, brewery, **kwrgs) -> None:
-        self._fmt = "xyz"
         super().__init__(path, brewery, **kwrgs)
         self.__atoms = self._brewery.brew(self._brewery.opener.atom_keyword, dtype=str, verbose=False)
 

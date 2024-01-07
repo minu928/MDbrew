@@ -1,4 +1,6 @@
-from . import filetype
+from . import fmt
 from .brewery import Brewery
+from .interface import get_opener, get_writer
 
-__all__ = ["filetype", "Brewery"]
+
+__all__ = ["fmt", "Brewery", "get_opener", "get_writer"]

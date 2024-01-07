@@ -1,10 +1,9 @@
 import os
 import numpy as np
 import pandas as pd
-from .opener import opener_programs
-from .writer import writer_programs
-from ..tool.colorfont import color
-from ..tool.decorator import color_print_verbose, color_tqdm
+from mdbrew.main.interface import get_opener, get_writer
+from mdbrew.tool.colorfont import color
+from mdbrew.tool.decorator import color_print_verbose, color_tqdm
 
 
 def _check_path(path, **kwrgs):
@@ -13,22 +12,19 @@ def _check_path(path, **kwrgs):
     return path
 
 
-class Brewery(object):
-    __print_option__ = {
-        "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
-        "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
-        "b_coords": f" #BREW  {color.font_yellow}Coords     {color.reset}",
-        "b_atominfo": f" #BREW  {color.font_yellow}Atom Info  {color.reset}",
-    }
+__print_option__ = {
+    "brewery": f" #OPEN  {color.font_yellow}Brewery {color.reset}",
+    "b_brewing": f" #BREW  {color.font_yellow}Some...  {color.reset}",
+    "b_coords": f" #BREW  {color.font_yellow}Coords     {color.reset}",
+    "b_atominfo": f" #BREW  {color.font_yellow}Atom Info  {color.reset}",
+}
 
+
+class Brewery(object):
     def __init__(self, trj_file: str, fmt: str = "auto", *args, **kwrgs):
         self._what = kwrgs.pop("what", None)
         self._path = _check_path(path=trj_file, **kwrgs)
-        self.fmt = self._check_fmt(fmt=fmt)
-        self.opener = self._init_opener(**kwrgs)
-        self._set_atom_info(verbose=kwrgs.pop("verbose", True))
-        self._data = None
-        self._coords = None
+        self.opener = self._match_fmt_with_opener(fmt=fmt, **kwrgs)
         self._kwrgs = kwrgs
 
     def __str__(self) -> str:
@@ -47,8 +43,26 @@ class Brewery(object):
         return f"\t    @CopyRight by  {color.font_blue}minu928@snu.ac.kr{color.reset}\n"
 
     @property
+    def atom_info(self):
+        if not hasattr(self, "_atom_info"):
+            self._set_atom_info()
+        return self._atom_info
+
+    @property
+    def atom_kind(self):
+        if not hasattr(self, "_atom_kind"):
+            self._set_atom_info()
+        return self._atom_kind
+
+    @property
+    def atom_num(self):
+        if not hasattr(self, "_atom_num"):
+            self._set_atom_info()
+        return self._atom_num
+
+    @property
     def box_size(self):
-        return self.opener.box_size
+        return np.array(self.opener.box_size)
 
     @box_size.setter
     def box_size(self, box_size):
@@ -64,48 +78,47 @@ class Brewery(object):
 
     @property
     def coords(self):
-        return self.brew(cols=["x", "y", "z"], verbose=False)
+        return self.brew(cols=["x", "y", "z"], dtype=float, verbose=False)
+
+    @property
+    def velocities(self):
+        return self.brew(cols=["vx", "vy", "vz"], dtype=float, verbose=False)
+
+    @property
+    def forces(self):
+        return self.brew(cols=["fx", "fy", "fz"], dtype=float, verbose=False)
 
     @property
     def data(self):
-        return self.opener.data
+        if not hasattr(self, "_data"):
+            self.update_data()
+        return self._data
 
     @property
     def frame(self):
         return self.opener.frame
 
-    def move_on_next_frame(self):
+    @property
+    def fmt(self):
+        return self.opener.fmt
+
+    def update_data(self):
+        self._data = pd.DataFrame(data=self.opener.data, columns=self.columns)
+        if self._what is not None:
+            self._data.query(self._what, inplace=True)
+        assert len(self._data), "Data is empty"
+
+    def next_frame(self):
         self.opener.next_frame()
+        self.update_data()
 
-    @color_print_verbose(name=__print_option__["brewery"])
-    def _set_atom_info(self, verbose: bool = True):
-        atom_brew_data = self.brew(cols=self.opener.atom_keyword, dtype=str, verbose=False)
-        self.atom_info = np.unique(atom_brew_data, return_counts=True)
-        self.atom_kind = self.atom_info[0]
-        self.atom_num = np.sum(self.atom_info[1])
-
-    def _init_opener(self, **kwrgs):
-        trj_opener = opener_programs[self.fmt]
-        if trj_opener.is_require_gro:
-            gro_file = kwrgs.pop("gro_file", None)
-            assert gro_file is not None, f"{self.fmt} format require gro file, plz input with gro_file='some_gro'"
-            return trj_opener(path=self._path, gro=gro_file)
-        else:
-            return trj_opener(path=self._path)
-
-    def _check_fmt(self, fmt: str):
-        fmt_list = list(opener_programs.keys())
-        if fmt == "auto":
-            file_name = self._path.split("/")[-1]
-            fmt = file_name.split(".")[-1]
-            fmt = "lmps" if "lammps" in file_name else fmt
-        assert fmt in fmt_list, f"fmt should be in {fmt_list}"
-        return fmt
+    def move_frame(self, num: int):
+        self.opener.move_frame(num=int(num))
+        self.update_data()
 
     @color_print_verbose(name=__print_option__["b_brewing"])
-    def brew(self, cols=None, what: str = None, dtype: str = "float64", verbose: bool = False):
-        data = pd.DataFrame(data=self.data, columns=self.columns)
-        data = data.query(self._what) if self._what is not None else data
+    def brew(self, cols=None, what: str = None, dtype: str = str, verbose: bool = False):
+        data = self.data
         data = data.query(what) if what is not None else data
         data = data.loc[:, cols] if cols is not None else data
         return data.to_numpy(dtype=dtype)
@@ -121,23 +134,36 @@ class Brewery(object):
 
     @color_tqdm(name="FRAME")
     def frange(self, start: int = 0, end: int = None, step: int = 1, verbose: bool = False):
-        self.move_frame(num=start)
         assert end is None or start < end, "start should be lower than end"
-        while True:
-            try:
-                if self.frame == end:
-                    break
-                if not (self.frame - start) % step:
+        self.opener.move_frame(num=int(start))
+        try:
+            while self.frame != end:
+                if (self.frame - start) % step == 0:
                     yield self.frame
-                self.move_on_next_frame()
-            except:
-                break
-
-    def move_frame(self, num):
-        self.opener.skip_frame(num=num)
+                self.next_frame()
+        except StopIteration:
+            pass
+        finally:
+            self.move_frame(0)  # Reset the database
 
     def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, **kwrgs):
         fmt = fmt.lower()
-        assert fmt in writer_programs.keys(), f"Supporting fmt is {writer_programs.keys()}"
-        _writer = writer_programs[fmt](save_path, self, **kwrgs)
+        _writer = get_writer(fmt=fmt)(save_path, brewery=self, **kwrgs)
         _writer.write(start=start, end=end, step=step)
+
+    @color_print_verbose(name=__print_option__["brewery"])
+    def _set_atom_info(self, verbose: bool = True):
+        atom_brew_data = self.brew(cols=self.opener.atom_keyword, dtype=str, verbose=False)
+        self._atom_info = np.unique(atom_brew_data, return_counts=True)
+        self._atom_kind = self.atom_info[0]
+        self._atom_num = np.sum(self.atom_info[1])
+
+    def _match_fmt_with_opener(self, fmt, **kwrgs):
+        if fmt == "auto":
+            fmt = self._path.split(os.path.sep)[-1].split(".")[-1].lower()
+        trj_opener = get_opener(fmt=fmt)
+        if trj_opener.is_require_gro:
+            gro_file = kwrgs.pop("gro", None)
+            assert gro_file is not None, f"{fmt} require gro file, plz input with 'gro=path_of_gro'"
+            return trj_opener(path=self._path, gro=gro_file)
+        return trj_opener(path=self._path)

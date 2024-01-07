@@ -3,14 +3,14 @@
 <img src="https://img.shields.io/badge/Python-383b40?style=round-square&logo=Python&logoColor=#f5f5f5"/> <img src="https://img.shields.io/badge/Jupyter-383b40?style=round-square&logo=Jupyter&logoColor=#f5f5f5"/>
 
 mdbrew is a package for postprocessing of molecular dynamics simulation  
-Supported Format : [".xyz", "vasp_trj", "pdb", "gro", "trr", "gro]
+Supported Format : [".xyz", "XDATCAR", ".pdb", ".gro", ".trr", ".gro]
 
-- VERSION : (2.4.2)
+- VERSION : (2.5.0)
 
 ## How to install
 
 ```bash
-pip install MDbrew
+pip install mdbrew
 ```
 
 ## Example Code For Brewery
@@ -59,6 +59,7 @@ box_size = mb.box_size
 order_1 = mb.order(what="type == 1")
 order_2 = mb.order(what="type == 2")
 rdf = mdb.RDF(order_1, order_2, box_size).run(start=0, end=None, step=1)
+rdf_radii = rdf.radii
 rdf_result = rdf.result
 rdf_cn = rdf.cn
 ```
@@ -72,9 +73,8 @@ mb= mdb.Brewery(path=file_path, fmt="xyz")
 box_size = mb.box_size
 order_1 = mb.order(what="type == 1")
 order_2 = mb.order(what="type == 2")
-rdf = mdb.MSD(order_1, fft=True, do_unwrap=True).run(start=0, end=None, step=1)
-rdf_result = rdf.result
-rdf_cn = rdf.cn
+msd = mdb.MSD(order_1, fft=True, do_unwrap=True).run(start=0, end=None, step=1)
+msd_result = rdf.result
 ```
 
 ### Example - write

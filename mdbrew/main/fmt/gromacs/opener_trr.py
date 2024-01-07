@@ -1,7 +1,7 @@
 import struct
 import numpy as np
-from ..opener import Opener
-from .gro import GRO_COLUMNS, _read_gro_file
+from mdbrew.main.interface import OpenerInterface
+from .opener_gro import GRO_COLUMNS, _read_gro_file
 
 GRO_IDX = 3
 
@@ -42,16 +42,16 @@ def check_double(columns_info):
     return size == DOUBLE_SIZE
 
 
-class trrOpener(Opener):
+class trrOpener(OpenerInterface):
     is_require_gro = True
     read_mode = "rb"
+    fmt: str = "trr"
 
     def __init__(self, path: str, *args, **kwrgs) -> None:
         super().__init__(path, *args, **kwrgs)
         self._arrow = ">"
         self._dim = DIM
         self._gro_data = _read_gro_file(gro=kwrgs.pop("gro"), idx=GRO_IDX)
-        super().gen_db()
 
     # Abstract data
     def _make_one_frame_data(self, file):
