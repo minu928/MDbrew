@@ -92,7 +92,15 @@ class Brewery(object):
     def data(self):
         if not hasattr(self, "_data"):
             self.update_data()
+        self._data["id"] = self._data["id"].astype(int)
+        self._data["x"] = self._data["x"].astype(float)
+        self._data["y"] = self._data["y"].astype(float)
+        self._data["z"] = self._data["z"].astype(float)
         return self._data
+
+    @data.setter
+    def data(self, data):
+        self._data = data
 
     @property
     def frame(self):
