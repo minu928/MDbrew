@@ -21,12 +21,14 @@ __print_option__ = {
 
 
 class Brewery(object):
-    def __init__(self, trj_file: str, fmt: str = "auto", *args, **kwrgs):
+    def __init__(self, trj_file: str, fmt: str = "auto", auto_load: bool = True, *args, **kwrgs):
         self._what = kwrgs.pop("what", None)
         self._verbose = kwrgs.pop("verbose", False)
         self._path = _check_path(path=trj_file, **kwrgs)
         self.opener = self._match_fmt_with_opener(fmt=fmt, **kwrgs)
         self._kwrgs = kwrgs
+        if auto_load:
+            self.update_data()
 
     def __str__(self) -> str:
         LINE_WIDTH = 60
