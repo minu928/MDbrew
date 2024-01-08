@@ -92,10 +92,6 @@ class Brewery(object):
     def data(self):
         if not hasattr(self, "_data"):
             self.update_data()
-        self._data["id"] = self._data["id"].astype(int)
-        self._data["x"] = self._data["x"].astype(float)
-        self._data["y"] = self._data["y"].astype(float)
-        self._data["z"] = self._data["z"].astype(float)
         return self._data
 
     @data.setter
@@ -112,6 +108,10 @@ class Brewery(object):
 
     def update_data(self):
         self._data = pd.DataFrame(data=self.opener.data, columns=self.columns)
+        self._data["id"] = self._data["id"].astype(int)
+        self._data["x"] = self._data["x"].astype(float)
+        self._data["y"] = self._data["y"].astype(float)
+        self._data["z"] = self._data["z"].astype(float)
         if self._what is not None:
             self._data.query(self._what, inplace=True)
         assert len(self._data), "Data is empty"
