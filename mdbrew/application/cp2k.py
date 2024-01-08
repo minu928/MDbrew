@@ -3,9 +3,9 @@ import os
 import numpy as np
 from tqdm import tqdm
 from scipy import constants
-from ..main.brewery import Brewery
-from ..tool.colorfont import color
-from ..tool.decorator import color_print
+from mdbrew.main.brewery import Brewery
+from mdbrew.tool.colorfont import color
+from mdbrew.tool.decorator import color_print
 
 
 class BrewCP2k(object):

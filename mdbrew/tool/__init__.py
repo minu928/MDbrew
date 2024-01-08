@@ -1,4 +1,3 @@
-from . import space
-
-
-__all__ = ["space"]
+from .space import *
+from . import plot
+from . import colorfont

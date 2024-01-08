@@ -5,7 +5,7 @@
 mdbrew is a package for postprocessing of molecular dynamics simulation  
 Supported Format : [".xyz", "XDATCAR", ".pdb", ".gro", ".trr", ".gro]
 
-- VERSION : (2.5.0)
+- VERSION : (2.5.2)
 
 ## How to install
 
@@ -24,4 +24,5 @@ mb= mdb.Brewery(path=file_path, fmt="xyz")
 ```
 
 ## Further Information
+
 [MANUAL_PAGES](https://minu928.github.io/MDBREW/)

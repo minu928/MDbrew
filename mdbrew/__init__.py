@@ -1,7 +1,6 @@
 from mdbrew.analysis import *
 from mdbrew.main.brewery import Brewery
-from mdbrew.tool import plot
-from mdbrew.tool.space import *
+from mdbrew.tool import *
 from .__version__ import __version__
 
 

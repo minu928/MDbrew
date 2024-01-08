@@ -1,6 +1,6 @@
 import numpy as np
-from tqdm import trange, tqdm
 from typing import Type
+from tqdm import trange, tqdm
 from mdbrew.main.brewery import Brewery
 from mdbrew.tool.colorfont import color
 from mdbrew.tool.space import calculate_diff_position, calculate_distance, check_dimension
@@ -10,20 +10,20 @@ from mdbrew.tool.space import calculate_diff_position, calculate_distance, check
 class RDF(object):
     def __init__(
         self,
-        a,
-        b,
+        a_coords,
+        b_coords,
         box=None,
         r_max: float = None,
         resolution: int = 1000,
-        dtype: str = "float64",
+        dtype: type = float,
     ):
-        if type(a) == Brewery:
-            self.instance_rdf = BreweryRDF(a=a, b=b, box=box, r_max=r_max, resolution=resolution, dtype=dtype)
+        if isinstance(a_coords, Brewery) and isinstance(b_coords, Brewery):
+            self.instance_rdf = BreweryRDF(a=a_coords, b=b_coords, box=box, r_max=r_max, resolution=resolution, dtype=dtype)
         else:
-            self.instance_rdf = NormalRDF(a=a, b=b, box=box, r_max=r_max, resolution=resolution, dtype=dtype)
+            self.instance_rdf = NormalRDF(a=a_coords, b=b_coords, box=box, r_max=r_max, resolution=resolution, dtype=dtype)
 
     def run(self, start=0, end=None, step=1):
-        self.instance_rdf._main_run(start=start, end=end, step=step)
+        self.instance_rdf.run(start=start, end=end, step=step)
         return self
 
     @property
@@ -61,13 +61,13 @@ class InterfaceRDF(object):
         box=None,
         r_max: float = None,
         resolution: int = 1000,
-        dtype: str = "float64",
+        dtype: str = float,
     ):
         self.r_max = np.max(self.box) * 0.5 if r_max is None else r_max
         self.resolution = resolution
         self._dtype = dtype
 
-    def _main_run(self, start=0, end=None, step=1):
+    def run(self, start=0, end=None, step=1):
         pass
 
     def _unit_run(self, a_unit, b_unit, box_unit):
@@ -99,23 +99,23 @@ class InterfaceRDF(object):
 class BreweryRDF(InterfaceRDF):
     def __init__(
         self,
-        a,
-        b,
+        a: Type[Brewery],
+        b: Type[Brewery],
         box=None,
         r_max: float = None,
         resolution: int = 1000,
-        dtype: str = "float64",
+        dtype: type = float,
     ):
-        self.a: Type[Brewery] = a.reorder()
-        self.b: Type[Brewery] = b.reorder()
+        self.a = a.reorder()
+        self.b = b.reorder()
         self.a_number = a.atom_num
         self.b_number = b.atom_num
-        self._is_external_box = box is None
+        self.is_box_input = box is not None
         self.box = a.box_size if box is None else box
         assert len(self.box), "plz set box"
         super().__init__(self.a, self.b, self.box, r_max, resolution, dtype)
 
-    def _main_run(self, start=0, end=None, step=1):
+    def run(self, start=0, end=None, step=1):
         self.frame_num = 0
         self.gr = np.zeros(self.resolution)
         self.hist_data = np.zeros(self.resolution)
@@ -130,15 +130,14 @@ class BreweryRDF(InterfaceRDF):
         kwrgs = {"start": start, "end": end, "step": step}
         if self.a is self.b:
             return self.a.frange(**kwrgs)
-        else:
-            return zip(self.a.frange(**kwrgs), self.b.frange(**kwrgs))
+        return zip(self.a.frange(**kwrgs), self.b.frange(**kwrgs))
 
     def _make_box(self, box, idx):
-        if self._is_external_box:
+        if not self.is_box_input:
             return np.array(self.a.box_size)
-        else:
-            box = np.array([box])
-            return box if box.shape[0] == 1 else box[0][idx]
+        box = np.array(box)
+        assert idx[0] == idx[1], "Reset Error"  # idx = (0, 0), (1, 1), ...
+        return box if box.ndim == 1 else box[idx[0]]
 
 
 class NormalRDF(InterfaceRDF):
@@ -149,7 +148,7 @@ class NormalRDF(InterfaceRDF):
         box=None,
         r_max: float = None,
         resolution: int = 1000,
-        dtype: str = "float64",
+        dtype: type = float,
     ):
         self.a = check_dimension(a, dim=3, dtype=dtype)
         self.b = check_dimension(b, dim=3, dtype=dtype)
@@ -158,7 +157,7 @@ class NormalRDF(InterfaceRDF):
         self.box = self._make_box(box=box)
         super().__init__(a, b, box, r_max, resolution, dtype)
 
-    def _main_run(self, start=0, end=None, step=1):
+    def run(self, start=0, end=None, step=1):
         self.frame_num = 0
         self.gr = np.zeros(self.resolution)
         self.hist_data = np.zeros(self.resolution)
@@ -173,7 +172,7 @@ class NormalRDF(InterfaceRDF):
         frame_num = len(self.a)
         box_frame = len(box)
         if frame_num != box_frame:
-            if box_frame == 1:
-                return np.tile(box, (frame_num, 1))
-            else:
+            if box_frame != 1:
                 raise ValueError(f"Check your box shape, total frame: {frame_num} != box frame: {box_frame}")
+            return np.tile(box, (frame_num, 1))
+        return box
