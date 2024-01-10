@@ -6,9 +6,24 @@ from mdbrew.tool.decorator import color_tqdm
 from mdbrew.tool.path import check_path
 
 
-class Brewery:
-    data_types = {"id": int, "x": float, "y": float, "z": float}
+DEFAULT_DATA_TYPES = {
+    "x": float,
+    "y": float,
+    "z": float,
+    "fx": float,
+    "fy": float,
+    "fz": float,
+    "vx": float,
+    "vy": float,
+    "vz": float,
+    "id": int,
+    "atom": str,
+    "element": str,
+    "resid": str,
+}
 
+
+class Brewery:
     def __init__(self, trj_file: str, fmt: str = "auto", auto_load: bool = True, *args, **kwrgs):
         self._what = kwrgs.pop("what", None)
         self._path = check_path(path=trj_file, **kwrgs)
@@ -49,6 +64,10 @@ class Brewery:
         if not hasattr(self, "_atom_num"):
             self.update_atom_info()
         return self._atom_num
+
+    @property
+    def atoms(self):
+        return self.brew(cols=self.opener.atom_keyword, dtype=str)
 
     @property
     def box_size(self):
@@ -95,6 +114,12 @@ class Brewery:
     @property
     def fmt(self):
         return self.opener.fmt
+
+    @property
+    def data_types(self):
+        if not hasattr(self, "_data_types"):
+            self._data_types = {col: DEFAULT_DATA_TYPES[col] for col in self.columns}
+        return self._data_types
 
     def update_data(self):
         self._data = pd.DataFrame(data=self.opener.data, columns=self.columns).astype(self.data_types)
@@ -145,9 +170,9 @@ class Brewery:
     def reset(self):
         self.move_frame(0)
 
-    def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, **kwrgs):
+    def write(self, fmt: str, save_path: str, start: int = 0, end: int = None, step: int = 1, scaling: float = 1.0, **kwrgs):
         fmt = fmt.lower()
-        _writer = get_writer(fmt=fmt)(save_path, brewery=self, **kwrgs)
+        _writer = get_writer(fmt=fmt)(save_path, brewery=self, scaling=scaling, **kwrgs)
         _writer.write(start=start, end=end, step=step)
 
     def _match_fmt_with_opener(self, fmt, **kwrgs):

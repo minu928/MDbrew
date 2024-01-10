@@ -6,6 +6,7 @@ class OpenerInterface(metaclass=ABCMeta):
     skip_head = 0
     read_mode = "r"
     is_require_gro = False
+    is_require_atomdict = False
     total_line_num = 0
 
     def __init__(self, path: str, *args, **kwrgs) -> None:

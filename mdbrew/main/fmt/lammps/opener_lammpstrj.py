@@ -8,6 +8,7 @@ def skip_line(file, num):
 
 class lammpstrjOpener(OpenerInterface):
     fmt: str = "lammpstrj"
+    is_require_atomdict = True
 
     def __init__(self, path: str, *args, **kwrgs) -> None:
         super().__init__(path, *args, **kwrgs)

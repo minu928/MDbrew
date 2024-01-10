@@ -5,9 +5,6 @@ from mdbrew.main.interface import WriterInterface
 class POSCARWriter(WriterInterface):
     fmt: str = "POSCAR"
 
-    def __init__(self, path: str, brewery, **kwrgs) -> None:
-        super().__init__(path, brewery, **kwrgs)
-
     def _write_one_frame_data(self, file, idx):
         atom_list = self._brewery.atom_kind
         atom_list = [self._atom_dict[int(float(kind))] for kind in atom_list] if self._required_atom_dict else atom_list
@@ -23,7 +20,7 @@ class POSCARWriter(WriterInterface):
             file.write(f"{i:6d}")
         file.write("\n")
         file.write("Cartesian\n")
-        xyz_arr = self._sort_xyz()
+        xyz_arr = self._sort_xyz() * self._scaling
         for xyz in xyz_arr:
             file.write(f"{xyz[0]:24.16f}{xyz[1]:24.16f}{xyz[2]:24.16f}\n")
 
