@@ -20,6 +20,7 @@ DEFAULT_DATA_TYPES = {
     "atom": str,
     "element": str,
     "resid": str,
+    "type":str,
 }
 
 
@@ -118,7 +119,7 @@ class Brewery:
     @property
     def data_types(self):
         if not hasattr(self, "_data_types"):
-            self._data_types = {col: DEFAULT_DATA_TYPES[col] for col in self.columns}
+            self._data_types = {col: DEFAULT_DATA_TYPES.get(col, str) for col in self.columns}
         return self._data_types
 
     def update_data(self):
