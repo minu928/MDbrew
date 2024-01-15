@@ -20,7 +20,7 @@ DEFAULT_DATA_TYPES = {
     "atom": str,
     "element": str,
     "resid": str,
-    "type":str,
+    "type": str,
 }
 
 
@@ -157,7 +157,7 @@ class Brewery:
     @color_tqdm(name="FRAME")
     def frange(self, start: int = 0, end: int = None, step: int = 1, verbose: bool = False):
         assert end is None or start < end, "start should be lower than end"
-        self.opener.move_frame(num=int(start))
+        self.move_frame(num=int(start))
         try:
             while self.frame != end:
                 if (self.frame - start) % step == 0:
