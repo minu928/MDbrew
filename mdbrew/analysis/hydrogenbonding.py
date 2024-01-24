@@ -35,7 +35,7 @@ def search_relation(
             hydrogenbonded_O_indexes = near_O_indexes[angle < HOO_angle]
             hydrogenbonded_H_indexes = near_H_indexes[ith]
             if hydrogenbonded_O_indexes.size:
-                assert np.any(hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] == 0), f"One Donor OH to Two O"
+                assert np.any(hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] == ""), f"One Donor OH to Two O"
                 hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] = hydrogenbonded_H_indexes
     return hydrogenbonding_relation
 
