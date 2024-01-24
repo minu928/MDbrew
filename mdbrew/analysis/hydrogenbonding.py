@@ -18,7 +18,7 @@ def search_relation(
     donor_O_coords = O_coords if donor_indexes is None else O_coords[donor_indexes]
     O_ckdtree = PeriodicCKDTree(O_coords, bounds=box)
     H_ckdtree = PeriodicCKDTree(H_coords, bounds=box)
-    hydrogenbonding_relation = np.zeros([len(donor_O_coords), len(O_coords)])
+    hydrogenbonding_relation = np.empty([len(donor_O_coords), len(O_coords)], dtype=str)
     for ith_donor_O, (near_O_indexes, near_H_indexes) in enumerate(
         zip(O_ckdtree.query_ball_point(donor_O_coords, r=OO_distance), H_ckdtree.query_ball_point(donor_O_coords, r=rcut_OH))
     ):
@@ -35,13 +35,13 @@ def search_relation(
             hydrogenbonded_O_indexes = near_O_indexes[angle < HOO_angle]
             hydrogenbonded_H_indexes = near_H_indexes[ith]
             if hydrogenbonded_O_indexes.size:
-                assert np.any(hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] == 0.0), f"One Donor OH to Two O"
+                assert np.any(hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] == 0), f"One Donor OH to Two O"
                 hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] = hydrogenbonded_H_indexes
     return hydrogenbonding_relation
 
 
 def get_HB_index_dict(hydrogen_bonding_relation):
-    donnor_indexes, acceptor_indexes = np.where(hydrogen_bonding_relation != 0.0)
+    donnor_indexes, acceptor_indexes = np.where(hydrogen_bonding_relation != "")
     return {"donor": donnor_indexes, "acceptor": acceptor_indexes}
 
 
