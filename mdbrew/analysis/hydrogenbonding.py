@@ -2,7 +2,10 @@ import numpy as np
 from mdbrew.tool.space import PeriodicCKDTree, apply_pbc, calculate_angle_between_vectors
 
 
-def find_hydrogen_bonding(
+__all__ = ["search_relation", "get_HB_index_dict", "count_HB"]
+
+
+def search_relation(
     O_coords: np.ndarray,
     H_coords: np.ndarray,
     box: np.ndarray,
@@ -13,21 +16,28 @@ def find_hydrogen_bonding(
     rcut_OH: float = 1.25,
 ):
     donor_O_coords = O_coords if donor_indexes is None else O_coords[donor_indexes]
-    near_O_indexes_from_O = PeriodicCKDTree(O_coords, bounds=box).query_ball_point(donor_O_coords, r=OO_distance)
-    near_H_indexes_from_O = PeriodicCKDTree(H_coords, bounds=box).query_ball_point(donor_O_coords, r=rcut_OH)
-    hydrogen_bonding_relation = np.zeros([len(donor_O_coords), len(O_coords)])
-    for ith_from_O, (near_O_indexes, near_H_indexes) in enumerate(zip(near_O_indexes_from_O, near_H_indexes_from_O)):
-        ith_from_O_coord = donor_O_coords[ith_from_O]
-        for near_H in near_H_indexes:
-            OH_vec1 = apply_pbc(H_coords[near_H] - ith_from_O_coord, box=box)
-            for near_O in near_O_indexes:
-                OH_vec2 = apply_pbc(O_coords[near_O] - ith_from_O_coord, box=box)
-                if OH_vec2.all():
-                    angle = calculate_angle_between_vectors(OH_vec1, OH_vec2)
-                    if angle < HOO_angle:
-                        assert hydrogen_bonding_relation[ith_from_O, near_O] == 0.0, f"One Donor OH contribute Two O.."
-                        hydrogen_bonding_relation[ith_from_O, near_O] = near_H
-    return hydrogen_bonding_relation
+    O_ckdtree = PeriodicCKDTree(O_coords, bounds=box)
+    H_ckdtree = PeriodicCKDTree(H_coords, bounds=box)
+    hydrogenbonding_relation = np.zeros([len(donor_O_coords), len(O_coords)])
+    for ith_donor_O, (near_O_indexes, near_H_indexes) in enumerate(
+        zip(O_ckdtree.query_ball_point(donor_O_coords, r=OO_distance), H_ckdtree.query_ball_point(donor_O_coords, r=rcut_OH))
+    ):
+        ith_donor_O_coords = donor_O_coords[ith_donor_O]
+        OO_vec_arr = apply_pbc(O_coords[near_O_indexes] - ith_donor_O_coords, box=box)
+        OH_vec_arr = apply_pbc(H_coords[near_H_indexes] - ith_donor_O_coords, box=box)
+        # Delete Self Index
+        is_not_self_index = np.all(OO_vec_arr != 0.0, axis=1)
+        near_O_indexes = np.array(near_O_indexes)[is_not_self_index]
+        OO_vec_arr = OO_vec_arr[is_not_self_index]
+        # Loop the each H
+        for ith, OH_vec in enumerate(OH_vec_arr):
+            angle = calculate_angle_between_vectors(v1=OH_vec, v2=OO_vec_arr)
+            hydrogenbonded_O_indexes = near_O_indexes[angle < HOO_angle]
+            hydrogenbonded_H_indexes = near_H_indexes[ith]
+            if hydrogenbonded_O_indexes.size:
+                assert np.any(hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] == 0.0), f"One Donor OH to Two O"
+                hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] = hydrogenbonded_H_indexes
+    return hydrogenbonding_relation
 
 
 def get_HB_index_dict(hydrogen_bonding_relation):
