@@ -13,12 +13,15 @@ def search_relation(
     donor_indexes=None,
     HOO_angle: float = 30.0,
     OO_distance: float = 3.5,
-    rcut_OH: float = 1.25,
+    rcut_OH: float = 1.20,
+    dtype: str = "U16",
+    return_acceptor: bool = False,
 ):
     donor_O_coords = O_coords if donor_indexes is None else O_coords[donor_indexes]
     O_ckdtree = PeriodicCKDTree(O_coords, bounds=box)
     H_ckdtree = PeriodicCKDTree(H_coords, bounds=box)
-    hydrogenbonding_relation = np.empty([len(donor_O_coords), len(O_coords)], dtype=str)
+    hydrogenbonding_relation = np.empty([len(donor_O_coords), len(O_coords)], dtype=dtype)
+
     for ith_donor_O, (near_O_indexes, near_H_indexes) in enumerate(
         zip(O_ckdtree.query_ball_point(donor_O_coords, r=OO_distance), H_ckdtree.query_ball_point(donor_O_coords, r=rcut_OH))
     ):
@@ -37,6 +40,22 @@ def search_relation(
             if hydrogenbonded_O_indexes.size:
                 assert np.any(hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] == ""), f"One Donor OH to Two O"
                 hydrogenbonding_relation[ith_donor_O, hydrogenbonded_O_indexes] = hydrogenbonded_H_indexes
+    if return_acceptor and donor_indexes is not None:
+        acceptor_relation = np.empty([len(donor_O_coords), len(O_coords)], dtype=dtype)
+        near_O_indexes_list = O_ckdtree.query_ball_point(donor_O_coords, r=OO_distance)
+        for ith_donor_O, near_O_indexes in enumerate(near_O_indexes_list):
+            for ith_near_O, H_indices in zip(near_O_indexes, H_ckdtree.query_ball_point(O_coords[near_O_indexes], r=rcut_OH)):
+                ith_near_O_coords = O_coords[ith_near_O]
+                OO_vec = apply_pbc(donor_O_coords[ith_donor_O] - ith_near_O_coords, box=box)
+                if np.all(OO_vec == 0):
+                    continue
+                OH_vec = apply_pbc(H_coords[H_indices] - ith_near_O_coords, box=box)
+                angle = calculate_angle_between_vectors(OH_vec, OO_vec)
+                hydrogenbonded_H_indices = np.array(H_indices)[angle < HOO_angle]
+                if size := hydrogenbonded_H_indices.size:
+                    assert size == 1, f"One Oxygen Gives Two H in One Oxygen"
+                    acceptor_relation[ith_donor_O, ith_near_O] = hydrogenbonded_H_indices[0]
+        return {"donor": hydrogenbonding_relation, "acceptor": acceptor_relation}
     return hydrogenbonding_relation
 
 

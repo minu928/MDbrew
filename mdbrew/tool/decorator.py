@@ -2,6 +2,7 @@ from time import time
 from tqdm import tqdm
 from ..tool.colorfont import color
 
+
 __all__ = ["check_tab", "color_print", "color_print_verbose"]
 
 
