@@ -17,6 +17,7 @@ DEFAULT_DATA_TYPES = {
     "vy": float,
     "vz": float,
     "id": int,
+    "idx": int,
     "atom": str,
     "element": str,
     "resid": str,
@@ -155,7 +156,7 @@ class Brewery:
         return Brewery(trj_file=self._path, fmt=self.fmt, what=self._what, **self._kwrgs)
 
     @color_tqdm(name="FRAME")
-    def frange(self, start: int = 0, end: int = None, step: int = 1, verbose: bool = False):
+    def frange(self, start: int = 0, end: int = None, step: int = 1, *, verbose: bool = False, total: int = None):
         assert end is None or start < end, "start should be lower than end"
         self.move_frame(num=int(start))
         try:

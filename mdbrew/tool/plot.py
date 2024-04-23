@@ -1,16 +1,16 @@
 import matplotlib.pyplot as plt
 
 
-def set_format():
+def set_format(font: str = "sans serif"):
     plt.rc("text")  # , usetex=True)
-    plt.rcParams["font.family"] = "Serif"
+    plt.rcParams["font.family"] = font
     plt.rcParams["mathtext.fontset"] = "custom"
-    plt.rcParams["mathtext.it"] = "Serif"
-    plt.rcParams["mathtext.rm"] = "Serif"
-    plt.rcParams["mathtext.tt"] = "Serif"
-    plt.rcParams["mathtext.bf"] = "Serif"
-    plt.rcParams["mathtext.cal"] = "Serif"
-    plt.rcParams["mathtext.sf"] = "Serif"
+    plt.rcParams["mathtext.it"] = font
+    plt.rcParams["mathtext.rm"] = font
+    plt.rcParams["mathtext.tt"] = font
+    plt.rcParams["mathtext.bf"] = font
+    plt.rcParams["mathtext.cal"] = font
+    plt.rcParams["mathtext.sf"] = font
 
     plt.rcParams["lines.linewidth"] = 2.0
     plt.rcParams["errorbar.capsize"] = 4

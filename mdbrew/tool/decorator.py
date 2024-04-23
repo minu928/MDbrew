@@ -2,6 +2,7 @@ from time import time
 from tqdm import tqdm
 from ..tool.colorfont import color
 
+
 __all__ = ["check_tab", "color_print", "color_print_verbose"]
 
 
@@ -55,11 +56,11 @@ def color_print_verbose(name):
 def color_tqdm(name):
     def deco(func):
         def inner(*args, **kwrgs):
-            verbose = kwrgs.pop("verbose", False)
-            if verbose:
-                return tqdm(func(verbose=verbose, *args, **kwrgs), desc=f"[ {color.font_magenta}{name}{color.reset} ]")
-            else:
-                return func(verbose=verbose, *args, **kwrgs)
+            if kwrgs.get("verbose", False):
+                total = kwrgs.get("total", None)
+                desc = f"[ {color.font_magenta}{name}{color.reset} ]"
+                return tqdm(func(*args, **kwrgs), desc=desc, total=total)
+            return func(*args, **kwrgs)
 
         return inner
 

@@ -63,8 +63,7 @@ class OpenerInterface(metaclass=ABCMeta):
 
     def _skip_the_line(self, file):
         if self.read_mode == "r":
-            for _ in range(self.skip_head):
-                file.readline()
+            [next(file) for _ in range(self.skip_head)]
         elif self.read_mode == "rb":
             file.read(self.skip_head)
         else:
