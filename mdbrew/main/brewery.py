@@ -17,6 +17,7 @@ DEFAULT_DATA_TYPES = {
     "vy": float,
     "vz": float,
     "id": int,
+    "idx": int,
     "atom": str,
     "element": str,
     "resid": str,
