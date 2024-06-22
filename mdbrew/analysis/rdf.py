@@ -41,7 +41,7 @@ class RDF(object):
     @property
     def radii(self):
         if self.instance_rdf.radii is None:
-            self.instance_rdf.radii = np.linspace(0, self.instance_rdf.r_max, self.instance_rdf.resolution)
+            self.instance_rdf.radii = np.linspace(0, self.instance_rdf.r_max, self.instance_rdf.resolution + 1)
         return self.instance_rdf.radii
 
 
@@ -161,7 +161,7 @@ class NormalRDF(InterfaceRDF):
         self.frame_num = 0
         self.gr = np.zeros(self.resolution)
         self.hist_data = np.zeros(self.resolution)
-        self.frame_num = self.a.shape[0] if end is None else end - start + 1
+        # self.frame_num = self.a.shape[0] if end is None else end - start + 1
         for frame in trange(start=start, stop=end, step=step, **self.kwrgs_trange):
             a_unit = self.a[frame, ...]
             b_unit = self.b[frame, ...]
