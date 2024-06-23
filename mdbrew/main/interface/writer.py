@@ -1,5 +1,5 @@
 from typing import Dict, Type, TextIO
-from abc import abstractmethod, abstractproperty, ABCMeta
+from abc import abstractmethod, ABCMeta
 from tqdm import tqdm
 from mdbrew.tool.colorfont import color
 
@@ -26,7 +26,8 @@ class WriterInterface(metaclass=ABCMeta):
             for i in tqdm(frange, desc=self._print_option):
                 self._write_one_frame_data(file=f, idx=i)
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def fmt(self) -> str:
         pass
 

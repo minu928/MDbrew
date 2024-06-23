@@ -54,7 +54,10 @@ class OpenerInterface(metaclass=ABCMeta):
                 try:
                     self.frame += 1
                     yield self._make_one_frame_data(file=file)
-                except:
+                except StopIteration:
+                    break
+                except Exception as e:
+                    print(f"Unexpected error: {e}")
                     break
 
     @abstractmethod
